@@ -477,7 +477,7 @@ function _salesforce_webforms_fetch($url, $useCache = TRUE) {
     salesforce_webforms_set_sf_language(salesforce_webforms_language_code());
   }
 
-  $sf = salesforce_webform_get_api();
+  $sf = salesforce_webforms_get_api();
   $data = $sf->apiCall($url);
 
   // Switch back to English if needed
