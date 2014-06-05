@@ -178,7 +178,7 @@ function salesforce_webforms_get_sfapi() {
  * Gets the fields for a given object.
  */
 function salesforce_webforms_get_object_fields($obj, $useCache = TRUE) {
-  $sf = salesforce_webforms_get_api();
+  $sf = salesforce_webforms_get_sfapi();
   $sobject = $sf->objectDescribe($obj, !$useCache);
   $return = array();
 
@@ -477,7 +477,7 @@ function _salesforce_webforms_fetch($url, $useCache = TRUE) {
     salesforce_webforms_set_sf_language(salesforce_webforms_language_code());
   }
 
-  $sf = salesforce_webforms_get_api();
+  $sf = salesforce_webforms_get_sfapi();
   $data = $sf->apiCall($url);
 
   // Switch back to English if needed
@@ -531,7 +531,7 @@ function salesforce_webforms_queue_obj($objlist) {
  * Updates an existing Salesforce object.
  */
 function salesforce_webforms_update_object($object, $id, $fields) {
-  $sf = salesforce_webforms_get_api();
+  $sf = salesforce_webforms_get_sfapi();
   $res = $sf->objectUpdate($object, 'id', $id, $fields);
 
   return $res;
@@ -541,7 +541,7 @@ function salesforce_webforms_update_object($object, $id, $fields) {
  * Creates a new Salesforce object.
  */
 function salesforce_webforms_create_object($object, $fields) {
-  $sf = salesforce_webforms_get_api();
+  $sf = salesforce_webforms_get_sfapi();
   $res = $sf->objectCreate($object, $fields);
 
   return $res;
