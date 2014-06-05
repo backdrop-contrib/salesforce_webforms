@@ -509,7 +509,7 @@ function _salesforce_webforms_alpha_options(&$array) {
  * Utility function to compare two full option arrays by the label
  */
 function _salesforce_webforms_alpha_cmp($a, $b) {
-  return strnatcmp($a->label, $b->label);
+  return strnatcmp($a['label'], $b['label']);
 }
 
 /**
