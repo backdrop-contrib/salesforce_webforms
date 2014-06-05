@@ -1,0 +1,184 @@
+<?php
+
+/**
+ * @file
+ * salesforce_webforms installation file
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function salesforce_webforms_schema() {
+  $schema['salesforce_webforms_map'] = array(
+    'description' => 'Stores Salesforce object mappings',
+    'fields' => array(
+      'mapid' => array(
+        'type' => 'serial',
+        'description' => 'Unique identifier for a mapping',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'mapname' => array(
+        'type' => 'varchar',
+        'description' => 'Machine name of the mapping',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => 32,
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'The webform {node}.nid',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'sf_object' => array(
+        'type' => 'varchar',
+        'description' => 'The API name of the Salesforce reference object',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => 64,
+      ),
+      'displayorder' => array(
+        'type' => 'int',
+        'description' => 'The order of the map rules',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+    ),
+    'primary key' => array('mapid'),
+    'indexes' => array(
+      'nid' => array('nid'),
+    ),
+  );
+
+  $schema['salesforce_webforms_field'] = array(
+    'description' => 'Stores Salesforce field mappings',
+    'fields' => array(
+      'fieldmapid' => array(
+        'type' => 'serial',
+        'description' => 'Unique identifier for a mapping',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'mapid' => array(
+        'type' => 'int',
+        'description' => 'The parent object map ID',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'sf_fieldname' => array(
+        'type' => 'varchar',
+        'description' => 'The API name of the Salesforce field',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => 64,
+      ),
+      'source_data' => array(
+        'type' => 'text',
+        'description' => 'The source data',
+        'not null' => TRUE,
+      ),
+      'is_keyfield' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'description' => 'Is this field used to look up an existing record to update?',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'displayorder' => array(
+        'type' => 'int',
+        'description' => 'The order of the map rules',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+    ),
+    'primary key' => array('fieldmapid'),
+    'indexes' => array(
+      'mapid' => array('mapid'),
+    ),
+  );
+
+  $schema['salesforce_webforms_key'] = array(
+    'description' => 'Stores Salesforce mapped object IDs',
+    'fields' => array(
+      'keymapid' => array(
+        'type' => 'serial',
+        'description' => 'Unique identifier for a mapping',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'sid' => array(
+        'type' => int,
+        'description' => 'The submission ID',
+        'not null' => TRUE,
+      ),
+      'mapname' => array(
+        'type' => 'varchar',
+        'description' => 'The name of the mapping',
+        'default' => '',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'sfid' => array(
+        'type' => 'varchar',
+        'description' => 'The Salesforce ID string',
+        'default' => '',
+        'length' => 64,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('keymapid'),
+    'indexes' => array(
+      'sid' => array('sid'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Add the key storage table.
+ */
+function salesforce_webforms_update_7000() {
+  // Add the key storage table
+  $schema = array(
+    'description' => 'Stores Salesforce mapped object IDs',
+    'fields' => array(
+      'keymapid' => array(
+        'type' => 'serial',
+        'description' => 'Unique identifier for a mapping',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'sid' => array(
+        'type' => int,
+        'description' => 'The submission ID',
+        'not null' => TRUE,
+      ),
+      'mapname' => array(
+        'type' => 'varchar',
+        'description' => 'The name of the mapping',
+        'default' => '',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'sfid' => array(
+        'type' => 'varchar',
+        'description' => 'The Salesforce ID string',
+        'default' => '',
+        'length' => 64,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('keymapid'),
+    'indexes' => array(
+      'sid' => array('sid'),
+    ),
+  );
+
+  db_create_table('salesforce_webforms_key', $schema);
+  return "Add the key storage table";
+}
