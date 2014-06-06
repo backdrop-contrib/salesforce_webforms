@@ -60,16 +60,17 @@ function _webform_edit_sf_picklist($component) {
   foreach (array_keys($objlist) as $obj) {
     $fields = salesforce_webforms_get_object_fields($obj);
     $picklists[$obj] = array();
-    foreach($fields as $fieldname => $details) {
+    foreach ($fields as $fieldname => $details) {
       // Is this a picklist?
-      if($details['type'] == 'picklist') {
+      if ($details['type'] == 'picklist') {
         $picklists[$obj][$obj . "." . $fieldname] = $details['label'];
       }
     }
 
-    // Throw away the option if no picklists
-    if(count($picklists[$obj]) == 0)
+    // Throw away the option if no picklists.
+    if (count($picklists[$obj]) == 0) {
       unset($picklists[$obj]);
+    }
   }
 
   $form['extra']['list'] = array(
@@ -88,7 +89,7 @@ function _webform_edit_sf_picklist($component) {
     '#description' => t('List options which should be removed from the list provided by Salesforce, one per line. This does not impact the data stored in Salesforce. This option simply allows for a filtering of picklist items displayed on this form.'),
     '#required' => FALSE,
   );
-          
+
   $form['value'] = array(
     '#type' => 'textfield',
     '#title' => t('Default value'),
@@ -130,7 +131,8 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
     '#weight' => $component['weight'],
     '#description' => $component['extra']['description'],
     '#theme_wrappers' => array('webform_element'),
-    '#pre_render' => array(), // Needed to disable double-wrapping of radios and checkboxes.
+    // Needed to disable double-wrapping of radios and checkboxes.
+    '#pre_render' => array(),
     '#translatable' => array('title', 'description', 'options'),
     '#element_validate' => array('salesforce_webforms_validate_picklist'),
     '#prefix' => '<div class="sf-picklist-wrapper" id="' . salesforce_webforms_map_fieldid($component['form_key']) . '">',
@@ -143,12 +145,13 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
 
   $optionmap = array(-1);
   $i = 0;
-  foreach($full as $opt) {
+  foreach ($full as $opt) {
     $optionmap[] = $opt['position'];
   }
 
-  // Add default options if using a select list with no default. This trigger's
-  // Drupal 7's adding of the option for us. See @form_process_select().
+  // Add default options if using a select list with no default.
+  // This trigger's Drupal 7's adding of the option for us.
+  // See @form_process_select().
   $element['#empty_value'] = '';
 
   // Set the component options.
@@ -166,21 +169,22 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
     $element['#default_value'] = $default_value;
   }
 
-  // Set display as a select list:
+  // Set display as a select list.
   $element['#type'] = 'select';
 
   $myid = salesforce_webforms_map_fieldid($component['form_key']);
-  $sfObj = array("webform-client-form-" . $component['nid'] => array(
-    $myid => array(
-      'fieldname' => $fieldname,
-      'control' =>  $control,
-      'full' => $full,
-      'options' => $options,
-      'optionmap' => $optionmap,
-    )
-  ));
-    
-  drupal_add_js(array('salesforce_webforms' => array('salesforceMap' => $sfObj)), 'setting');
+  $sfobj = array(
+    "webform-client-form-" . $component['nid'] => array(
+      $myid => array(
+        'fieldname' => $fieldname,
+        'control' => $control,
+        'full' => $full,
+        'options' => $options,
+        'optionmap' => $optionmap,
+      ),
+    ));
+
+  drupal_add_js(array('salesforce_webforms' => array('salesforceMap' => $sfobj)), 'setting');
   return $element;
 }
 
@@ -199,7 +203,6 @@ function _webform_display_sf_picklist($component, $value, $format = 'html') {
   return array(
     '#title' => $component['name'],
     '#weight' => $component['weight'],
-    // '#multiple' => $component['extra']['multiple'],
     '#theme' => 'webform_display_sf_picklist',
     '#theme_wrappers' => $format == 'html' ? array('webform_element') : array('webform_element_text'),
     '#format' => $format,
@@ -237,8 +240,8 @@ function _webform_submit_sf_picklist($component, $value) {
 function theme_webform_display_sf_picklist($variables) {
   $element = $variables['element'];
 
-  // Flatten the list of options so we can get values easily. These options
-  // may be translated by hook_webform_display_component_alter().
+  // Flatten the list of options so we can get values easily.
+  // These options may be translated by hook_webform_display_component_alter().
   $options = array();
   foreach ($element['#options'] as $key => $value) {
     if (is_array($value)) {
@@ -384,14 +387,14 @@ function _webform_csv_data_sf_picklist($component, $export_options, $value) {
 /**
  * Implements _webform_options_component().
  *
- * This function is confusingly an alias of _webform_sf_picklist_options(). However
+ * This function is an alias of _webform_sf_picklist_options(). However
  * this version is intended to be accessed publicly via
  * webform_component_invoke(), since it is a Webform "hook", rather than an
  * internal, private function. To get the list of select list options for
  * a component, use:
  *
  * @code
- * $options = webform_component_invoke($component['type'], 'options', $component);
+ * $options = webform_component_invoke($component['type'],'options',$component);
  * @endcode
  */
 function _webform_options_sf_picklist($component) {
@@ -404,57 +407,57 @@ function _webform_options_sf_picklist($component) {
  */
 function _webform_sf_picklist_options($component) {
   $options = array();
-  $control = null;
+  $control = NULL;
 
-  $picklistKey = $component['extra']['list'];
+  $picklist_key = $component['extra']['list'];
   $exclusions = $component['extra']['exclude'];
-  $exclusionRows = array_filter(explode("\n", trim($exclusions)));
+  $exclusion_rows = array_filter(explode("\n", trim($exclusions)));
   $exlude = array();
-  foreach($exclusionRows as $row) {
+  foreach ($exclusion_rows as $row) {
     $row = trim($row);
     $exclude[$row] = $row;
   }
 
-  // Break the key up into the object and field
-  list($obj, $field) = explode(".", $picklistKey);
+  // Break the key up into the object and field.
+  list($obj, $field) = explode(".", $picklist_key);
 
-  // Load that object
+  // Load that object.
   $info = salesforce_webforms_get_object_fields($obj);
   $fdata = $info[$field];
 
-  if($info[$field]['controllerName'])
+  if ($info[$field]['controllerName']) {
     $control = $obj . "." . $info[$field]['controllerName'];
+  }
 
   $picklist = $info[$field]['picklistValues'];
-  
+
   $position = 1;
-  foreach($picklist as $pick) {
-    if($control) {
+  foreach ($picklist as $pick) {
+    if ($control) {
       $pick['map'] = _salesforce_webforms_valid_map($pick['validFor']);
     }
 
     $pick['position'] = $position++;
   }
 
-  // See if any sorting needs to be done would go here
+  // See if any sorting needs to be done would go here.
   if ($component['extra']['optrand']) {
     _salesforce_webforms_shuffle_options($picklist);
   }
   if ($component['extra']['optalpha']) {
     _salesforce_webforms_alpha_options($picklist);
-    // natsort($options);
   }
 
-  // Build the option list, and throw away any ignored values
+  // Build the option list, and throw away any ignored values.
   $newlist = array();
-  foreach($picklist as $pick) {
-    if($pick['active'] && !isset($exclude[$pick['value']])) {
+  foreach ($picklist as $pick) {
+    if ($pick['active'] && !isset($exclude[$pick['value']])) {
       $options[$pick['value']] = $pick['label'];
       $newlist[] = $pick;
     }
   }
 
-  return array($options, $control, $newlist, $picklistKey);
+  return array($options, $control, $newlist, $picklist_key);
 }
 
 /**
@@ -466,7 +469,7 @@ function _salesforce_webforms_valid_map($valid) {
   $bytes = unpack("c*", $bitmap);
 
   $map = array();
-  for($i = 0; $i < $len * 8; $i++) {
+  for ($i = 0; $i < $len * 8; $i++) {
     $map[$i] = _salesforce_webforms_checkbit($i, $bitmap) ? 1 : 0;
   }
 
@@ -478,17 +481,17 @@ function _salesforce_webforms_valid_map($valid) {
  */
 function _salesforce_webforms_checkbit($idx, $bitmap) {
   $bytes = unpack("c*", $bitmap);
-  $byte = $bytes[($idx>>3)+1];
+  $byte = $bytes[($idx>>3) + 1];
 
-  return (($byte & (0x80 >> ($idx%8))) != 0);
+  return (($byte & (0x80 >> ($idx % 8))) != 0);
 }
 
 /**
  * Utility function to shuffle an array while preserving key-value pairs.
  */
 function _salesforce_webforms_shuffle_options(&$array) {
-  // First shuffle the array keys, then use them as the basis for ordering
-  // the options.
+  // First shuffle the array keys.
+  // Then use them as the basis for ordering the options.
   $aux = array();
   $keys = array_keys($array);
   shuffle($keys);
@@ -506,7 +509,7 @@ function _salesforce_webforms_alpha_options(&$array) {
 }
 
 /**
- * Utility function to compare two full option arrays by the label
+ * Utility function to compare two full option arrays by the label.
  */
 function _salesforce_webforms_alpha_cmp($a, $b) {
   return strnatcmp($a['label'], $b['label']);
@@ -517,22 +520,19 @@ function _salesforce_webforms_alpha_cmp($a, $b) {
  */
 function salesforce_webforms_validate_picklist(&$el, &$state, $form) {
   $form_key = $el['#webform_component']['form_key'];
-  if(!isset($state['input']['submitted'][$form_key])) {
-    // We are disabled - flag as OK to be empty
-    // $el['#webform_validated'] = TRUE;
-    // $el['#needs_validation'] = FALSE;
-    // $state['completed_form']['submitted'][$form_key]['#required'] = 0;
+  if (!isset($state['input']['submitted'][$form_key])) {
+    // We are disabled - flag as OK to be empty.
     $errors = form_get_errors();
-    $msgs = drupal_get_messages('error'); // clear out error log
-    form_clear_error(); // Clear out error log
 
-    // Add back in the errors, except for this one
+    // Clear out error log.
+    $msgs = drupal_get_messages('error');
+    form_clear_error();
+
+    // Add back in the errors, except for this one.
     foreach ($errors as $field => $msg) {
-      if($field != "submitted][$form_key") {
+      if ($field != "submitted][$form_key") {
         form_set_error($field, $msg);
       }
     }
-    
   }
 }
-

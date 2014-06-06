@@ -112,7 +112,7 @@ function salesforce_webforms_schema() {
         'not null' => TRUE,
       ),
       'sid' => array(
-        'type' => int,
+        'type' => 'int',
         'description' => 'The submission ID',
         'not null' => TRUE,
       ),
@@ -143,7 +143,7 @@ function salesforce_webforms_schema() {
  * Add the key storage table.
  */
 function salesforce_webforms_update_7000() {
-  // Add the key storage table
+  // Add the key storage table.
   $schema = array(
     'description' => 'Stores Salesforce mapped object IDs',
     'fields' => array(
@@ -154,7 +154,7 @@ function salesforce_webforms_update_7000() {
         'not null' => TRUE,
       ),
       'sid' => array(
-        'type' => int,
+        'type' => 'int',
         'description' => 'The submission ID',
         'not null' => TRUE,
       ),

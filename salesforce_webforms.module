@@ -79,7 +79,7 @@ function salesforce_webforms_menu() {
 }
 
 /**
- * Loads object map from menu parameter
+ * Loads object map from menu parameter.
  */
 function salesforce_webforms_map_load($mapid) {
   return salesforce_webforms_get_map($mapid);
@@ -105,14 +105,14 @@ function salesforce_webforms_theme() {
 }
 
 /**
- * Theme the 'add map' list
+ * Theme the 'add map' list.
  */
 function theme_salesforce_webforms_manage_add_map($variables) {
   $nid = $variables['nid'];
   $output = '';
   $objects = salesforce_webforms_get_objects();
 
-  if($objects) {
+  if ($objects) {
     $output = '<h3>' . t('Add an object mapping') . '</h3>';
     $output .= '<dl>';
     foreach ($objects as $object_name => $object_info) {
@@ -120,9 +120,9 @@ function theme_salesforce_webforms_manage_add_map($variables) {
       $url = 'node/' . $nid . '/webform/salesforce/add/' . $object_name;
       $item = '<dt>' . l($object_info['label'], $url, array('query' => drupal_get_destination())) . '</dt>';
       $item .= '<dd>';
-      if($object_info['fields']) {
+      if ($object_info['fields']) {
         $item .= "<ul>";
-        foreach($object_info['fields'] as $field) {
+        foreach ($object_info['fields'] as $field) {
           $item .= '<li>' . $field['label'] . '</li>';
         }
         $item .= '</ul>';
@@ -135,12 +135,15 @@ function theme_salesforce_webforms_manage_add_map($variables) {
   return $output;
 }
 
-function salesforce_webforms_get_objects($useCache = TRUE) {
-  $sobjects = _salesforce_webforms_fetch("sobjects", $useCache);
+/**
+ * Returns all defined Salesforce objects.
+ */
+function salesforce_webforms_get_objects($use_cache = TRUE) {
+  $sobjects = _salesforce_webforms_fetch("sobjects", $use_cache);
   $return = array();
 
   $i = 0;
-  foreach($sobjects['sobjects'] as $name => $data) {
+  foreach ($sobjects['sobjects'] as $name => $data) {
     $return[$data['name']] = $data;
   }
   return $return;
@@ -152,7 +155,7 @@ function salesforce_webforms_get_objects($useCache = TRUE) {
 function salesforce_webforms_get_objects_selection() {
   $selections = array();
   $objs = salesforce_webforms_get_objects();
-  if($objs) {
+  if ($objs) {
     foreach ($objs as $obj => $info) {
       $selections[$info['name']] = $info['label'];
     }
@@ -166,7 +169,7 @@ function salesforce_webforms_get_objects_selection() {
 function salesforce_webforms_get_sfapi() {
   $sf = &drupal_static(__FUNCTION__);
 
-  if(!isset($sf)) {
+  if (!isset($sf)) {
     $sf = salesforce_get_api();
     $sf->isAuthorized();
   }
@@ -177,13 +180,13 @@ function salesforce_webforms_get_sfapi() {
 /**
  * Gets the fields for a given object.
  */
-function salesforce_webforms_get_object_fields($obj, $useCache = TRUE) {
+function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
   $sf = salesforce_webforms_get_sfapi();
-  $sobject = $sf->objectDescribe($obj, !$useCache);
+  $sobject = $sf->objectDescribe($obj, !$use_cache);
   $return = array();
 
   $i = 0;
-  foreach($sobject['fields'] as $field) {
+  foreach ($sobject['fields'] as $field) {
     $return[$field['name']] = $field;
   }
   return $return;
@@ -199,9 +202,9 @@ function salesforce_webforms_webform_component_info() {
     'label' => t('Salesforce picklist'),
     'description' => t('Select list driven by a Salesforce picklist'),
     'features' => array(
-      // Includes an analysis callback
+      // Includes an analysis callback.
       'analysis' => TRUE,
-      // Include in CSV
+      // Include in CSV.
       'csv' => TRUE,
       // Allows default values?
       'default_value' => FALSE,
@@ -233,7 +236,7 @@ function salesforce_webforms_webform_component_info() {
       'views_range' => FALSE,
     ),
 
-    // Conditional comparison type
+    // Conditional comparison type.
     'conditional_type' => 'select',
 
     'file' => 'salesforce_webforms.picklist.inc',
@@ -246,25 +249,27 @@ function salesforce_webforms_webform_component_info() {
  * Saves a mapping.
  */
 function salesforce_webforms_map_save($values) {
-  // Save map data
+  // Save map data.
   $values['sf_object'] = $values['object'];
 
   if ($values['action'] == 'add') {
     drupal_write_record('salesforce_webforms_map', $values);
-  } else if ($values['action'] == 'edit') {
+  }
+  elseif ($values['action'] == 'edit') {
     drupal_write_record('salesforce_webforms_map', $values, 'mapid');
-  } else {
-    // Invalid operation. Return
+  }
+  else {
+    // Invalid operation. Return.
     return;
   }
   $mapid = $values['mapid'];
   if ($mapid) {
-    // Delete the old version of the fields, if any
+    // Delete the old version of the fields, if any.
     db_delete('salesforce_webforms_field')
       ->condition('mapid', $mapid)
       ->execute();
 
-    if(array_filter($values['map_fields'])) {
+    if (array_filter($values['map_fields'])) {
       salesforce_webforms_save_fields($mapid, $values['map_fields']);
     }
   }
@@ -276,11 +281,12 @@ function salesforce_webforms_map_save($values) {
 function salesforce_webforms_save_fields($mapid, $fields) {
   $i = 1;
   foreach ($fields as $fname => $values) {
-    // Only process if we are given source data
-    if($values['picklist'])
+    // Only process if we are given source data.
+    if ($values['picklist']) {
       $values['target'] = $values['picklist'];
+    }
 
-    if($values['target']) {
+    if ($values['target']) {
       db_insert('salesforce_webforms_field')
         ->fields(
           array(
@@ -299,58 +305,58 @@ function salesforce_webforms_save_fields($mapid, $fields) {
 /**
  * Implements hook_webform_submission_insert().
  */
-function salesforce_webforms_webform_submission_insert($node, $sub, $update=FALSE) {
-  // See if we have any maps for this node
+function salesforce_webforms_webform_submission_insert($node, $sub, $update = FALSE) {
+  // See if we have any maps for this node.
   $maps = salesforce_webforms_get_node_maps($node->nid);
   if (!$maps || count($maps) == 0) {
     return;
   }
   else {
-    if($update) {
-      // Get any existing keys
+    if ($update) {
+      // Get any existing keys.
       $existing_keys = salesforce_webforms_get_submission_keys($sub->sid);
     }
     foreach ($maps as $map) {
-      // Fields to use as keys
+      // Fields to use as keys.
       $keyfields = array();
       $fields = array();
 
-      // Get the data and parse out the tokens
+      // Get the data and parse out the tokens.
       $object = $map['sf_object'];
       $mapname = $map['mapname'];
 
-      foreach($map['fields'] as $field) {
+      foreach ($map['fields'] as $field) {
         $target = $field['sf_fieldname'];
         $source = $field['source_data'];
         $key = $field['keyfield'];
 
         $filtered_source = _webform_filter_values($source, $node, $sub);
-        if($key) {
-          // We have a key field - try update first
+        if ($key) {
+          // We have a key field - try update first.
           $keyfields[$target] = $filtered_source;
         }
 
         $fields[$target] = $filtered_source;
       }
-      
-      // See if we are always creating new, or trying to update existing
+
+      // See if we are always creating new, or trying to update existing.
       $target_id = $existing_keys[$mapname];
-      if(!$target_id && count($keyfields) > 0) {
-        // Try to find the ID
+      if (!$target_id && count($keyfields) > 0) {
+        // Try to find the ID.
         $sql = "SELECT Id FROM $object WHERE ";
         $union = "";
-        foreach($keyfields as $field => $val) {
+        foreach ($keyfields as $field => $val) {
           $sql .= "$union$field = '$val'";
           $union = " AND ";
         }
         $res = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
-        if(count($res['records']) > 0) {
+        if (count($res['records']) > 0) {
           $target_id = $res['records'][0]['Id'];
         }
       }
 
-      if($target_id) {
-        // Do an update
+      if ($target_id) {
+        // Do an update.
         $res = salesforce_webforms_update_object($object, $target_id, $fields);
       }
       else {
@@ -386,10 +392,11 @@ function salesforce_webforms_webform_submission_delete($node, $sub) {
 function salesforce_webforms_webform_submission_actions($node, $sub) {
   $actions = array();
 
-  // See if we have any mappings
+  // See if we have any mappings.
   $map = salesforce_webforms_get_node_maps($node->nid);
-  if(!$map)
+  if (!$map) {
     return $actions;
+  }
 
   $actions['sf'] = array(
     'title' => t('Resend to Salesforce'),
@@ -419,17 +426,17 @@ function salesforce_webforms_tokens($type, $tokens, array $data = array(), $opti
 
   $sanitize = !empty($options['sanitize']);
 
-  if($type == 'submission' && !empty($data['webform-submission'])) {
+  if ($type == 'submission' && !empty($data['webform-submission'])) {
     $sub = $data['webform-submission'];
     $node = $data['node'] ? $data['node'] : node_load($submission->nid);
     $nid = $node->nid;
 
     if ($sf_tokens = token_find_with_prefix($tokens, 'salesforce')) {
-      // We need map data. Load it up
+      // We need map data. Load it up.
       $maps = salesforce_webforms_get_node_maps($nid);
       $keys = salesforce_webforms_get_submission_keys($sub->sid);
       foreach ($sf_tokens as $name => $original) {
-         $replacements[$original] = $keys[$name];
+        $replacements[$original] = $keys[$name];
       }
     }
   }
@@ -441,52 +448,52 @@ function salesforce_webforms_tokens($type, $tokens, array $data = array(), $opti
  * Implements hook_form_alter().
  */
 function salesforce_webforms_form_alter(&$form, &$state, $fid) {
-  // See if this is a webform with our components
-  $needsUpdate = FALSE;
-  if(isset($state['webform']['component_tree']['children'])) {
-    foreach($state['webform']['component_tree']['children'] as $component) {
-      if($component['type'] == 'sf_picklist') {
-        $needsUpdate = TRUE;
+  // See if this is a webform with our components.
+  $needs_update = FALSE;
+  if (isset($state['webform']['component_tree']['children'])) {
+    foreach ($state['webform']['component_tree']['children'] as $component) {
+      if ($component['type'] == 'sf_picklist') {
+        $needs_update = TRUE;
       }
     }
   }
 
-  if($needsUpdate) {
+  if ($needs_update) {
     $form['#attached']['js'][] = drupal_get_path('module', 'salesforce_webforms') . '/js/salesforce.js';
   }
 }
 
 /**
- * Loads data from Salesforce, optionally thorugh a cache
+ * Loads data from Salesforce, optionally thorugh a cache.
  */
-function _salesforce_webforms_fetch($url, $useCache = TRUE) {
+function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   // Do we need to switch languages for the connection?
   $lang = salesforce_webforms_language_prefix();
 
   $cachename = "salesforce_webforms_" . $lang . md5($url);
-  if($useCache) {
+  if ($use_cache) {
     $cached = cache_get($cachename);
-    if($cached && $cached->expire >= time() && !empty($cached->data)) {
+    if ($cached && $cached->expire >= time() && !empty($cached->data)) {
       return $cached->data;
     }
   }
 
-  // Not in cache, or we're ignore the cache data
+  // Not in cache, or we're ignore the cache data.
   // Do we need to switch languages()?
-  if($lang) {
+  if ($lang) {
     salesforce_webforms_set_sf_language(salesforce_webforms_language_code());
   }
 
   $sf = salesforce_webforms_get_sfapi();
   $data = $sf->apiCall($url);
 
-  // Switch back to English if needed
-  if($lang) {
+  // Switch back to English if needed.
+  if ($lang) {
     salesforce_webforms_set_sf_language("en_US");
   }
 
-  // Update the cache with the data
-  cache_set($cachename, $data, "cache", time()+60*60*12);
+  // Update the cache with the data.
+  cache_set($cachename, $data, "cache", time() + 60 * 60 * 12);
 
   return $data;
 }
@@ -495,7 +502,8 @@ function _salesforce_webforms_fetch($url, $useCache = TRUE) {
  * Implements hook_cron().
  */
 function salesforce_webforms_cron() {
-  // The list of possible picklists is big, so refresh the cache on a regular basis
+  // The list of possible picklists is big
+  // Refresh the cache on a regular basis.
   watchdog("salesforce_webforms", "Initiate cache refresh");
   $objlist = salesforce_webforms_get_objects(FALSE);
   $queue = DrupalQueue::get('salesforce_webforms');
@@ -518,8 +526,9 @@ function salesforce_webforms_cron_queue_info() {
  * Refreshes the cache data for info on a given object or list of objects.
  */
 function salesforce_webforms_queue_obj($objlist) {
-  if(!is_array($objlist))
+  if (!is_array($objlist)) {
     $objlist = array($objlist);
+  }
 
   foreach ($objlist as $obj) {
     watchdog("salesforce_webforms", "Cache refresh of %obj", array('%obj' => $obj));
@@ -550,15 +559,17 @@ function salesforce_webforms_create_object($object, $fields) {
 /**
  * Get the path prefix for the specified language, or the current context.
  */
-function salesforce_webforms_language_prefix($lang = null) {
-  if(isset($lang)) {
+function salesforce_webforms_language_prefix($lang = NULL) {
+  if (isset($lang)) {
     $list = language_list('language');
     $prefix = $list[$lang]->prefix;
   }
-  else
+  else {
     $prefix = $GLOBALS['language']->prefix;
-  if($prefix != "")
+  }
+  if ($prefix != "") {
     $prefix .= "_";
+  }
   return $prefix;
 }
 
@@ -569,10 +580,10 @@ function salesforce_webforms_language_prefix($lang = null) {
  * to specify the language to return for picklists. To get around
  * that, we temporarily set the active language of the user
  * authenticated to SalesForce to that language. We then set it back
- * when we're done
+ * when we're done.
  *
- * @param $lang
- *   The language code to make active
+ * @param string $lang
+ *   The language code to make active.
  */
 function salesforce_webforms_set_sf_langauge($lang) {
   $id = variable_get("fema_faq_sf_user_id", "");
@@ -585,10 +596,13 @@ function salesforce_webforms_set_sf_langauge($lang) {
 /**
  * Gets the Salesforce language code for the given Drupal language code.
  */
-function salesforce_webforms_langauge_code($language = null) {
-  if(!isset($language)) $language = $GLOBALS['language']->language;
-  if($language == 'en') $language = 'en_US';
+function salesforce_webforms_langauge_code($language = NULL) {
+  if (!isset($language)) {
+    $language = $GLOBALS['language']->language;
+  }
+  if ($language == 'en') {
+    $language = 'en_US';
+  }
 
   return $language;
 }
-

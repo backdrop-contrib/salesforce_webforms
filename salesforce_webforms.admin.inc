@@ -6,7 +6,9 @@
  */
 
 /**
- * Menu Callback function to show an overview of the existing mappings, and the option to add a new one
+ * Menu Callback function to show an overview of the existing mappings.
+ *
+ * Also gives the option to add a new one.
  */
 function salesforce_webforms_manage($node) {
   $maps = salesforce_webforms_get_webform_maps($node);
@@ -17,10 +19,10 @@ function salesforce_webforms_manage($node) {
 }
 
 /**
- * Get the list of maps associated with the webform
+ * Get the list of maps associated with the webform.
  */
 function salesforce_webforms_get_webform_maps($node) {
-  if(in_array($node->type, webform_variable_get('webform_node_types'))) {
+  if (in_array($node->type, webform_variable_get('webform_node_types'))) {
     $webform_nid = $node->nid;
     $maps = salesforce_webforms_get_node_maps($node->nid);
   }
@@ -28,7 +30,7 @@ function salesforce_webforms_get_webform_maps($node) {
 }
 
 /**
- * Themable function to list the maps assigned to a webform
+ * Themable function to list the maps assigned to a webform.
  */
 function theme_salesforce_webforms_manage_overview($variables) {
   $maps = $variables['maps'];
@@ -37,11 +39,11 @@ function theme_salesforce_webforms_manage_overview($variables) {
   $header = array(t('Map name'), t('Object'), t('Fields'), array(
     'data' => t('Operations'),
     'colspan' => 2,
-  ));
+    ));
 
   $objects = salesforce_webforms_get_objects_selection();
-  if(!empty($maps)) {
-    foreach($maps as $map) {
+  if (!empty($maps)) {
+    foreach ($maps as $map) {
       $field_info = salesforce_webforms_map_fields_basic($map['sf_object'], $map['fields']);
       $row = array();
       $row[] = array(
@@ -73,15 +75,14 @@ function theme_salesforce_webforms_manage_overview($variables) {
 }
 
 /**
- * Form callback to build the form to allow resubmission of webform data
- * to Salesforce.
+ * Form callback to allow resubmission of webform data to Salesforce.
  */
 function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
   $form = array();
 
   $sid = $sub->sid;
 
-  $form["markup"] = array('#markup' => "<h1>" . t('Resubmit webform submission ') . "$sid</h1>");
+  $form["markup"] = array('#markup' => "<h1>" . t('Resubmit webform submission !sid', array('!sid' => $sid)) . "</h1>");
   $form["sid"] = array(
     '#type' => 'hidden',
     '#value' => $sid,
@@ -90,7 +91,7 @@ function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
   $form["update"] = array(
     '#type' => 'checkboxes',
     '#options' => array(
-      '1' => ""
+      '1' => "",
     ),
     '#title' => t('Update previously created Salesforce objects?'),
   );
@@ -120,10 +121,9 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
 }
 
 /**
- * Form callback for generating form to manage mappings between webform
- * and Salesforce.
+ * Form callback to manage mappings between webform and Salesforce.
  */
-function salesforce_webforms_manage_map($form, $form_state, $node, $action = 'add', $obj, $map = NULL) {
+function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj, $map = NULL) {
   $form = array();
   $obj_info = salesforce_webforms_get_object_fields($obj);
 
@@ -144,7 +144,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action = 'ad
     '#value' => $action,
   );
 
-  if($action == 'edit' && $map) {
+  if ($action == 'edit' && $map) {
     $form['map']['mapid'] = array(
       '#type' => 'hidden',
       '#value' => $map['mapid'],
@@ -176,10 +176,11 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action = 'ad
     '#tree' => TRUE,
   );
 
-  foreach($obj_info as $fname => $fdata) {
-    // Skip if not writable
-    if($fdata['createable'] == FALSE || $fdata['updateable'] == FALSE)
+  foreach ($obj_info as $fname => $fdata) {
+    // Skip if not writable.
+    if ($fdata['createable'] == FALSE || $fdata['updateable'] == FALSE) {
       continue;
+    }
 
     $form['map']['map_fields'][$fname] = array(
       '#type' => 'fieldset',
@@ -194,7 +195,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action = 'ad
       '#required' => FALSE,
     );
 
-    if($fdata['type'] == 'textarea')  {
+    if ($fdata['type'] == 'textarea') {
       $tmp['#type'] = 'textarea';
     }
     else {
@@ -203,47 +204,49 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action = 'ad
     }
     $form['map']['map_fields'][$fname]['target'] = $tmp;
 
-    // Special handling extra select field for some types
-    if($fdata['type'] == 'picklist') {
+    // Special handling extra select field for some types.
+    if ($fdata['type'] == 'picklist') {
       $form['map']['map_fields'][$fname]['picklist'] = array(
         '#type' => 'select',
         '#title' => t('Or select a predefined value'),
         '#options' => salesforce_webforms_picklist_select($fdata['picklistValues']),
       );
     }
-    else if ($fdata['type'] == 'boolean') {
+    elseif ($fdata['type'] == 'boolean') {
       $form['map']['map_fields'][$fname]['picklist'] = array(
         '#type' => 'select',
         '#title' => t('Or select a predefined value'),
         '#options' => array('' => '', 'false' => 'FALSE', 'true' => 'TRUE'),
       );
     }
-    else if ($fdata['type'] == 'reference') {
+    elseif ($fdata['type'] == 'reference') {
       $options = array('' => '');
-      // Get a list of all records of the appropriate type(s)
-      foreach($fdata['referenceTo'] as $ref) {
-        // Get the object details to see if it supports the IsDeleted attribute
-        $refDetails = salesforce_webforms_get_object_fields($ref);
+      // Get a list of all records of the appropriate type(s).
+      foreach ($fdata['referenceTo'] as $ref) {
+        // Get the object details to see if it supports the IsDeleted attribute.
+        $ref_details = salesforce_webforms_get_object_fields($ref);
         $sql = "SELECT id,name";
-        if(isset($refDetails['DeveloperName'])) {
+        if (isset($ref_details['DeveloperName'])) {
           $sql .= ",developername";
         }
         $sql .= " from $ref";
-        if(isset($refDetails['IsDeleted']))
+        if (isset($ref_details['IsDeleted'])) {
           $sql .= " WHERE IsDeleted=FALSE";
+        }
         $targets = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
         foreach ($targets['records'] as $row) {
           $options[$row['Id']] = $ref . ": " . $row['Name'];
-          if(isset($row['DeveloperName'])) {
+          if (isset($row['DeveloperName'])) {
             $options[$row['Id']] .= " (" . $row['DeveloperName'] . ")";
           }
         }
       }
-      $form['map']['map_fields'][$fname]['picklist'] = array(
-        '#type' => 'select',
-        '#title' => t('Or select a predefined value'),
-        '#options' => $options,
-      );
+      $form['map']['map_fields'][$fname]['picklist']
+        = array(
+          '#type' => 'select',
+          '#title' => t('Or select a predefined value'),
+          '#options' => $options,
+        );
     }
 
     $form['map']['map_fields'][$fname]['keyfield'] = array(
@@ -253,12 +256,12 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action = 'ad
     );
   }
 
-  // Set default values if available
-  if($map) {
-    foreach($map['fields'] as $field) {
+  // Set default values if available.
+  if ($map) {
+    foreach ($map['fields'] as $field) {
       $form['map']['map_fields'][$field['sf_fieldname']]['#collapsed'] = FALSE;
       $form['map']['map_fields'][$field['sf_fieldname']]['target']['#default_value'] = $field['source_data'];
-      if($form['map']['map_fields'][$field['sf_fieldname']]['picklist']) {
+      if ($form['map']['map_fields'][$field['sf_fieldname']]['picklist']) {
         $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#default_value'] = array($field['source_data']);
       }
       $form['map']['map_fields'][$field['sf_fieldname']]['keyfield']['#default_value'] = $field['keyfield'] ? array('1') : array();
@@ -288,9 +291,10 @@ function salesforce_webforms_manage_map_submit($form, &$form_state) {
 function salesforce_webforms_picklist_select($picklist) {
   $options = array('' => '');
 
-  foreach($picklist as $pick) {
-    if($pick['active'])
+  foreach ($picklist as $pick) {
+    if ($pick['active']) {
       $options[$pick['value']] = $pick['label'];
+    }
   }
 
   return $options;
@@ -316,18 +320,18 @@ function salesforce_webforms_picklists($obj) {
   $data = array();
   $fields = salesforce_webforms_get_object_fields($obj);
 
-  foreach($fields as $field) {
+  foreach ($fields as $field) {
     // Is this a picklist?
-    if($field['type'] == 'picklist') {
+    if ($field['type'] == 'picklist') {
       $data[$field['name']] = array(
         'label' => $field['label'],
         'picklist' => $field['picklistValues'],
       );
-      if($field['dependentPicklist'] == 1) {
+      if ($field['dependentPicklist'] == 1) {
         $data['control'] = $field['controllerName'];
       }
     }
   }
 
-  return JSON_encode($data);
+  return json_encode($data);
 }
