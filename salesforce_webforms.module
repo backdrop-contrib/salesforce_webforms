@@ -485,7 +485,12 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   }
 
   $sf = salesforce_webforms_get_sfapi();
-  $data = $sf->apiCall($url);
+  try {
+    $data = $sf->apiCall($url);
+  }
+  catch (Exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+  }
 
   // Switch back to English if needed.
   if ($lang) {

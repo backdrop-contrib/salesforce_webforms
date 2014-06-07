@@ -70,7 +70,7 @@ function salesforce_webforms_delete_mapping($mapid) {
  */
 function salesforce_webforms_map_fields_basic($obj, $fields) {
   $ret = array();
-  $desc = salesforce_webforms_get_object_info($obj);
+  $desc = salesforce_webforms_get_object_fields($obj);
   if ($fields) {
     foreach ($fields as $details) {
       $fname = $details['sf_fieldname'];

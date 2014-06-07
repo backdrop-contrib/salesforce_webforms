@@ -225,7 +225,14 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
       foreach ($fdata['referenceTo'] as $ref) {
         // Get the object details to see if it supports the IsDeleted attribute.
         $ref_details = salesforce_webforms_get_object_fields($ref);
-        $sql = "SELECT id,name";
+        $sql = "SELECT id";
+        if (isset($ref_details['Name'])) {
+          $sql .= ",name";
+        }
+        // Special handling for Cases
+        if (isset($ref_details['CaseNumber'])) {
+          $sql .= ",CaseNumber";
+        }
         if (isset($ref_details['DeveloperName'])) {
           $sql .= ",developername";
         }
@@ -235,7 +242,13 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
         }
         $targets = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
         foreach ($targets['records'] as $row) {
-          $options[$row['Id']] = $ref . ": " . $row['Name'];
+          $options[$row['Id']] = $ref . ": ";
+          if (isset($row['Name'])) {
+            $options[$row['Id']] .= $row['Name'];
+          }
+          elseif (isset($row['CaseNumber'])) {
+            $options[$row['Id']] .= $row['CaseNumber'];
+          }
           if (isset($row['DeveloperName'])) {
             $options[$row['Id']] .= " (" . $row['DeveloperName'] . ")";
           }
