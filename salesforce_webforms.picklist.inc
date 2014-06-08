@@ -432,7 +432,7 @@ function _webform_sf_picklist_options($component) {
   $picklist = $info[$field]['picklistValues'];
 
   $position = 1;
-  foreach ($picklist as $pick) {
+  foreach ($picklist as &$pick) {
     if ($control) {
       $pick['map'] = _salesforce_webforms_valid_map($pick['validFor']);
     }
@@ -450,7 +450,7 @@ function _webform_sf_picklist_options($component) {
 
   // Build the option list, and throw away any ignored values.
   $newlist = array();
-  foreach ($picklist as $pick) {
+  foreach ($picklist as &$pick) {
     if ($pick['active'] && !isset($exclude[$pick['value']])) {
       $options[$pick['value']] = $pick['label'];
       $newlist[] = $pick;
