@@ -9,6 +9,12 @@
  * Menu Callback function to show an overview of the existing mappings.
  *
  * Also gives the option to add a new one.
+ *
+ * @param object $node
+ *   The node which owns the webform.
+ *
+ * @return string
+ *   The rendered HTML of the map table.
  */
 function salesforce_webforms_manage($node) {
   $maps = salesforce_webforms_get_webform_maps($node);
@@ -20,6 +26,12 @@ function salesforce_webforms_manage($node) {
 
 /**
  * Get the list of maps associated with the webform.
+ *
+ * @param object $node
+ *   The node which owns the webform.
+ *
+ * @return array
+ *   An array of map arrays.
  */
 function salesforce_webforms_get_webform_maps($node) {
   if (in_array($node->type, webform_variable_get('webform_node_types'))) {
@@ -30,7 +42,14 @@ function salesforce_webforms_get_webform_maps($node) {
 }
 
 /**
- * Themable function to list the maps assigned to a webform.
+ * Returns HTML for a list of object mappings.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - maps: The list of mappings for this form.
+ *   - node: The node which owns this form.
+ *
+ * @ingroup themeable
  */
 function theme_salesforce_webforms_manage_overview($variables) {
   $maps = $variables['maps'];
@@ -75,7 +94,18 @@ function theme_salesforce_webforms_manage_overview($variables) {
 }
 
 /**
- * Form callback to allow resubmission of webform data to Salesforce.
+ * Form constructor for the resubmission form.
+ *
+ * Allows resubmission of webform data to Salesforce.
+ *
+ * @param object $node
+ *   The node which owns this form.
+ * @param object $sub
+ *   The submission object.
+ *
+ * @see salesforce_webforms_resubmit_submit()
+ *
+ * @ingroup forms
  */
 function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
   $form = array();
@@ -108,7 +138,9 @@ function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
 }
 
 /**
- * Submit handler for salesforce_webforms_resubmit form.
+ * Form submission handler for salesforce_webforms_resubmit form.
+ *
+ * @see salesforce_webforms_resubmit()
  */
 function salesforce_webforms_resubmit_submit($form, $form_state) {
   $sub = $form_state['submission'];
@@ -121,7 +153,25 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
 }
 
 /**
- * Form callback to manage mappings between webform and Salesforce.
+ * Form constructor for the manage maps form.
+ *
+ * Allows the form administrator to manage mappings between webform and
+ * Salesforce.
+ *
+ * @param object $node
+ *   The node which owns the form.
+ * @param string $action
+ *   The action to perform. One of:
+ *   - add
+ *   - edit
+ * @param string $obj
+ *   The name of the Salesforce object being mapped.
+ * @param array $map
+ *   The current contents of the mapping.
+ *
+ * @see salesforce_webforms_manage_map_submit()
+ *
+ * @ingroup forms
  */
 function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj, $map = NULL) {
   $form = array();
@@ -291,7 +341,9 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
 }
 
 /**
- * Submit handler for salesforce_webforms_manage_map form.
+ * Form submission handler for salesforce_webforms_manage_map().
+ *
+ * @see salesforce_webforms_manage_map()
  */
 function salesforce_webforms_manage_map_submit($form, &$form_state) {
   $values = $form_state['values'];
@@ -300,6 +352,12 @@ function salesforce_webforms_manage_map_submit($form, &$form_state) {
 
 /**
  * Helper function to convert a Saleforce picklist into an options array.
+ *
+ * @param array $picklist
+ *   An array of data from Salesforce defining the picklist.
+ *
+ * @return array
+ *   An array suitable for use as an 'options' element in a form.
  */
 function salesforce_webforms_picklist_select($picklist) {
   $options = array('' => '');
@@ -314,7 +372,13 @@ function salesforce_webforms_picklist_select($picklist) {
 }
 
 /**
- * Get all webform components on a node as an array keyed by cid.
+ * Gets all webform components on a node as an array keyed by cid.
+ *
+ * @param object $node
+ *   The node which owns the form.
+ *
+ * @return array
+ *   An associative array mapping the component ID to the name.
  */
 function salesforce_webforms_get_webform_components($node) {
   $ret = array();
@@ -328,6 +392,12 @@ function salesforce_webforms_get_webform_components($node) {
 
 /**
  * Gets all of the picklists available for the named object.
+ *
+ * @param string $obj
+ *   The Salesforce name of the object to be queried.
+ *
+ * @return array
+ *   An associative array of all valid picklists.
  */
 function salesforce_webforms_picklists($obj) {
   $data = array();
