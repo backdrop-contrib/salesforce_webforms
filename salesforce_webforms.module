@@ -80,6 +80,12 @@ function salesforce_webforms_menu() {
 
 /**
  * Loads object map from menu parameter.
+ *
+ * @param int $mapid
+ *   The ID of the map to load.
+ *
+ * @return array
+ *   The map data.
  */
 function salesforce_webforms_map_load($mapid) {
   return salesforce_webforms_get_map($mapid);
@@ -105,7 +111,13 @@ function salesforce_webforms_theme() {
 }
 
 /**
- * Theme the 'add map' list.
+ * Returns HTML for an 'add map' list.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - nid: The node ID
+ *
+ * @ingroup themeable
  */
 function theme_salesforce_webforms_manage_add_map($variables) {
   $nid = $variables['nid'];
@@ -137,6 +149,14 @@ function theme_salesforce_webforms_manage_add_map($variables) {
 
 /**
  * Returns all defined Salesforce objects.
+ *
+ * @param bool $use_cache
+ *   Determines if the cached data is acceptable (TRUE) or if the cache
+ *   should be bypassed and updated (FALSE).
+ *
+ * @return array
+ *   An associative array of Salesforce objects, keyed by the internal
+ *   Salesforce name of the object.
  */
 function salesforce_webforms_get_objects($use_cache = TRUE) {
   $sobjects = _salesforce_webforms_fetch("sobjects", $use_cache);
@@ -151,6 +171,9 @@ function salesforce_webforms_get_objects($use_cache = TRUE) {
 
 /**
  * Gets the list of Saelforce objects as an array of options.
+ *
+ * @return array
+ *   An associative array appropriate for use as an 'options' element.
  */
 function salesforce_webforms_get_objects_selection() {
   $selections = array();
@@ -165,6 +188,9 @@ function salesforce_webforms_get_objects_selection() {
 
 /**
  * Gets the Salesforce suite object and verified connectivity.
+ *
+ * @return object
+ *   The Salesforce object used for communicating with Salesforce.
  */
 function salesforce_webforms_get_sfapi() {
   $sf = &drupal_static(__FUNCTION__);
@@ -179,6 +205,16 @@ function salesforce_webforms_get_sfapi() {
 
 /**
  * Gets the fields for a given object.
+ *
+ * @param string $obj
+ *   The internal Salesforce name of the object.
+ * @param bool $use_cache
+ *   Determines if the cache should be used (TRUE) or bypassed and
+ *   updated (FALSE).
+ *
+ * @return array
+ *   An associative array of fields, keyed by the field name. The data of
+ *   each field is an array of attributes as defined by Salesforce.
  */
 function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
   $sf = salesforce_webforms_get_sfapi();
@@ -247,6 +283,15 @@ function salesforce_webforms_webform_component_info() {
 
 /**
  * Saves a mapping.
+ *
+ * @param array $values
+ *   An associative array containing:
+ *   - object: String identifying the Salesforce object.
+ *   - action: One of:
+ *     - add.
+ *     - edit.
+ *   - map_id: Int ID of the map to be operated upon.
+ *   - map_fields: Associative array of fields and values.
  */
 function salesforce_webforms_map_save($values) {
   // Save map data.
@@ -277,6 +322,14 @@ function salesforce_webforms_map_save($values) {
 
 /**
  * Save the individual field mappings of a map.
+ *
+ * @param int $mapid
+ *   The ID of the map being saved.
+ * @param array $fields
+ *   An associative array of fields and values, keyed by field name, containing:
+ *   - target: String identifying target value.
+ *   - key_field: Boolean indicating if this is a key field.
+ *   - picklist: (optional) String to override target.
  */
 function salesforce_webforms_save_fields($mapid, $fields) {
   $i = 1;
@@ -465,6 +518,15 @@ function salesforce_webforms_form_alter(&$form, &$state, $fid) {
 
 /**
  * Loads data from Salesforce, optionally thorugh a cache.
+ *
+ * @param string $url
+ *   The Salesforce URL used to fetch the data.
+ * @param bool $use_cache
+ *   A flag indicating whether to use the cached data (TRUE) or bypass and
+ *   update the cache (FALSE).
+ *
+ * @return array
+ *   The Salesforce response data.
  */
 function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   // Do we need to switch languages for the connection?
@@ -529,6 +591,9 @@ function salesforce_webforms_cron_queue_info() {
 
 /**
  * Refreshes the cache data for info on a given object or list of objects.
+ *
+ * @param string|string[] $objlist
+ *   An object name, or an array of names, to be refreshed.
  */
 function salesforce_webforms_queue_obj($objlist) {
   if (!is_array($objlist)) {
@@ -543,6 +608,16 @@ function salesforce_webforms_queue_obj($objlist) {
 
 /**
  * Updates an existing Salesforce object.
+ *
+ * @param string $object
+ *   The Salesforce internal name of the object type to be updated.
+ * @param string $id
+ *   The Salesforce ID of the object to be updated.
+ * @param string[] $fields
+ *   The fields and corresponding values to be stored.
+ *
+ * @return array
+ *   The Salesforce response as an array.
  */
 function salesforce_webforms_update_object($object, $id, $fields) {
   $sf = salesforce_webforms_get_sfapi();
@@ -553,6 +628,14 @@ function salesforce_webforms_update_object($object, $id, $fields) {
 
 /**
  * Creates a new Salesforce object.
+ *
+ * @param string $object
+ *   The Salesforce internal name of the object type to be creatd.
+ * @param string[] $fields
+ *   The fields and corresponding values to be stored.
+ *
+ * @return array
+ *   The Salesforce response as an array.
  */
 function salesforce_webforms_create_object($object, $fields) {
   $sf = salesforce_webforms_get_sfapi();
@@ -563,6 +646,16 @@ function salesforce_webforms_create_object($object, $fields) {
 
 /**
  * Get the path prefix for the specified language, or the current context.
+ *
+ * Used to ensure that cached objects are associated with the correct
+ * language.
+ *
+ * @param string $lang
+ *   The language to look up. If not specified, then the language of the
+ *   currently loaded page will be used.
+ *
+ * @return string
+ *   The prefix code to use for the specified or current language.
  */
 function salesforce_webforms_language_prefix($lang = NULL) {
   if (isset($lang)) {
@@ -600,6 +693,16 @@ function salesforce_webforms_set_sf_langauge($lang) {
 
 /**
  * Gets the Salesforce language code for the given Drupal language code.
+ *
+ * In most instances, these two values are the same. However, for English,
+ * Drupal uses 'en' while Salesforce expects 'en_US'.
+ *
+ * @param string $language
+ *   The language to query. If not specified, the language of the current
+ *   page is used.
+ *
+ * @return string
+ *   The Salesforce language code corresponding to the Drupal language code.
  */
 function salesforce_webforms_langauge_code($language = NULL) {
   if (!isset($language)) {
