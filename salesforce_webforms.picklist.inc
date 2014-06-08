@@ -235,7 +235,13 @@ function _webform_submit_sf_picklist($component, $value) {
 }
 
 /**
- * Format the text output for this component.
+ * Returns HTML for a picklist.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: The element to render.
+ *
+ * @ingroup themeable
  */
 function theme_webform_display_sf_picklist($variables) {
   $element = $variables['element'];
@@ -404,6 +410,18 @@ function _webform_options_sf_picklist($component) {
 
 /**
  * Generate a list of options for a select list.
+ *
+ * @param array $component
+ *   A webform component array.
+ *
+ * @return array
+ *   Returns an array of 4 elements:
+ *   - Array of options suitable for use in an 'options' element.
+ *   - String name of a field which controls the validity of values within
+ *     this field, if this is a dependent picklist.
+ *   - The full list of values, possibly sorted, with extra control data to
+ *     allow for control between dependent fields.
+ *   - String name of this field.
  */
 function _webform_sf_picklist_options($component) {
   $options = array();
@@ -462,6 +480,12 @@ function _webform_sf_picklist_options($component) {
 
 /**
  * Determines the list of parent items for which this item is valid.
+ *
+ * @param string $valid
+ *   The encoded value from Salesforce's 'validFor' attribute.
+ *
+ * @return int[]
+ *   The array of positions in the parent field where this value is allowed.
  */
 function _salesforce_webforms_valid_map($valid) {
   $bitmap = base64_decode($valid);
@@ -510,13 +534,17 @@ function _salesforce_webforms_alpha_options(&$array) {
 
 /**
  * Utility function to compare two full option arrays by the label.
+ *
+ * Callback for usort().
  */
 function _salesforce_webforms_alpha_cmp($a, $b) {
   return strnatcmp($a['label'], $b['label']);
 }
 
 /**
- * Validates a picklist.
+ * Element validation handler for picklists in _webforms_render_sf_picklist().
+ *
+ * @see _webform_render_sf_picklist()
  */
 function salesforce_webforms_validate_picklist(&$el, &$state, $form) {
   $form_key = $el['#webform_component']['form_key'];
