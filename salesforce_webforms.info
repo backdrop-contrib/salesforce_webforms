@@ -1,10 +1,8 @@
 name = Salesforce Webforms
 core = 7.x
 description = Integrate Salesforce with Webforms to allow reading from and writing to Salesforce objects via webforms
-version = 7.x.0.1alpha
 package = Salesforce
 dependencies[] = salesforce
-dependencies[] = webform
 files[] = salesforce_webforms.admin.inc
 files[] = salesforce_webforms.module
 files[] = salesforce_webforms.maps.inc
