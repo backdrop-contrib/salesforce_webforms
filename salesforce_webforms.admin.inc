@@ -229,7 +229,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
         if (isset($ref_details['Name'])) {
           $sql .= ",name";
         }
-        // Special handling for Cases
+        // Special handling for Cases.
         if (isset($ref_details['CaseNumber'])) {
           $sql .= ",CaseNumber";
         }
