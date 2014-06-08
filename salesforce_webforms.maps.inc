@@ -74,7 +74,7 @@ function salesforce_webforms_map_fields_basic($obj, $fields) {
   if ($fields) {
     foreach ($fields as $details) {
       $fname = $details['sf_fieldname'];
-      $ret[$fname] = $desc[$fname];
+      $ret[$fname] = $desc[$fname]['label'];
     }
   }
 
