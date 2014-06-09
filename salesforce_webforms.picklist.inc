@@ -123,8 +123,6 @@ function _webform_edit_sf_picklist($component) {
  * Implements _webform_render_component().
  */
 function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) {
-  $node = isset($component['nid']) ? node_load($component['nid']) : NULL;
-
   $element = array(
     '#title' => $component['name'],
     '#title_display' => $component['extra']['title_display'] ? $component['extra']['title_display'] : 'before',
@@ -145,7 +143,7 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
   list($options, $control, $full, $fieldname) = _webform_sf_picklist_options($component);
 
   $optionmap = array(-1);
-  $i = 0;
+  // $i = 0;
   foreach ($full as $opt) {
     $optionmap[] = $opt['position'];
   }
@@ -219,14 +217,8 @@ function _webform_display_sf_picklist($component, $value, $format = 'html') {
 
 /**
  * Implements _webform_submit_component().
- *
- * Handle select or other... modifications and convert FAPI 0/1 values into
- * something saveable.
  */
 function _webform_submit_sf_picklist($component, $value) {
-  // Build a list of all valid keys expected to be submitted.
-  list($options, $control, $full) = _webform_sf_picklist_options($component, TRUE);
-
   $return = NULL;
   if (is_string($value)) {
     $return = $value;
@@ -244,7 +236,7 @@ function _webform_submit_sf_picklist($component, $value) {
  *
  * @ingroup themeable
  */
-function theme_webform_display_sf_picklist($variables) {
+function theme_webform_display_sf_picklist(array $variables) {
   $element = $variables['element'];
 
   // Flatten the list of options so we can get values easily.
@@ -313,7 +305,6 @@ function _webform_analysis_sf_picklist($component, $sids = array(), $single = FA
 
   $result = $query->execute();
   $rows = array();
-  $other = array();
   $normal_count = 0;
   foreach ($result as $data) {
     $display_option = isset($options[$data['data']]) ? $options[$data['data']] : $data['data'];
@@ -336,7 +327,7 @@ function _webform_analysis_sf_picklist($component, $sids = array(), $single = FA
  */
 function _webform_table_sf_picklist($component, $value) {
   // Convert submitted 'safe' values to un-edited, original form.
-  list($options, $control, $full) = _webform_sf_picklist_options($component, TRUE);
+  list($options) = _webform_sf_picklist_options($component, TRUE);
 
   $value = (array) $value;
   $items = array();
@@ -376,7 +367,7 @@ function _webform_csv_headers_sf_picklist($component, $export_options) {
  * Implements _webform_csv_data_component().
  */
 function _webform_csv_data_sf_picklist($component, $export_options, $value) {
-  list($options, $control, $full) = _webform_sf_picklist_options($component, TRUE, FALSE);
+  list($options) = _webform_sf_picklist_options($component, TRUE, FALSE);
   $return = array();
 
   $key = $value[0];
@@ -424,14 +415,14 @@ function _webform_options_sf_picklist($component) {
  *     allow for control between dependent fields.
  *   - String name of this field.
  */
-function _webform_sf_picklist_options($component) {
+function _webform_sf_picklist_options(array $component) {
   $options = array();
   $control = NULL;
 
   $picklist_key = $component['extra']['list'];
   $exclusions = $component['extra']['exclude'];
   $exclusion_rows = array_filter(explode("\n", trim($exclusions)));
-  $exlude = array();
+  $exclude = array();
   foreach ($exclusion_rows as $row) {
     $row = trim($row);
     $exclude[$row] = $row;
@@ -442,7 +433,6 @@ function _webform_sf_picklist_options($component) {
 
   // Load that object.
   $info = salesforce_webforms_get_object_fields($obj);
-  $fdata = $info[$field];
 
   if ($info[$field]['controllerName']) {
     $control = $obj . "." . $info[$field]['controllerName'];
@@ -491,7 +481,6 @@ function _webform_sf_picklist_options($component) {
 function _salesforce_webforms_valid_map($valid) {
   $bitmap = base64_decode($valid);
   $len = strlen($bitmap);
-  $bytes = unpack("c*", $bitmap);
 
   $map = array();
   for ($i = 0; $i < $len * 8; $i++) {
@@ -554,7 +543,7 @@ function salesforce_webforms_validate_picklist(&$el, &$state, $form) {
     $errors = form_get_errors();
 
     // Clear out error log.
-    $msgs = drupal_get_messages('error');
+    drupal_get_messages('error');
     form_clear_error();
 
     // Add back in the errors, except for this one.
