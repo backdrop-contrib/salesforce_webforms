@@ -477,8 +477,6 @@ function salesforce_webforms_tokens($type, $tokens, array $data = array(), $opti
 
   if ($type == 'submission' && !empty($data['webform-submission'])) {
     $sub = $data['webform-submission'];
-    $node = $data['node'] ? $data['node'] : node_load($sub->nid);
-    $nid = $node->nid;
 
     if ($sf_tokens = token_find_with_prefix($tokens, 'salesforce')) {
       // We need map data. Load it up.

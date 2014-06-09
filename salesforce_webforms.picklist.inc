@@ -123,8 +123,6 @@ function _webform_edit_sf_picklist($component) {
  * Implements _webform_render_component().
  */
 function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) {
-  // $node = isset($component['nid']) ? node_load($component['nid']) : NULL;
-
   $element = array(
     '#title' => $component['name'],
     '#title_display' => $component['extra']['title_display'] ? $component['extra']['title_display'] : 'before',
@@ -225,7 +223,7 @@ function _webform_display_sf_picklist($component, $value, $format = 'html') {
  */
 function _webform_submit_sf_picklist($component, $value) {
   // Build a list of all valid keys expected to be submitted.
-  list($options, $control, $full) = _webform_sf_picklist_options($component, TRUE);
+  list($options) = _webform_sf_picklist_options($component, TRUE);
 
   $return = NULL;
   if (is_string($value)) {
@@ -335,7 +333,7 @@ function _webform_analysis_sf_picklist($component, $sids = array(), $single = FA
  */
 function _webform_table_sf_picklist($component, $value) {
   // Convert submitted 'safe' values to un-edited, original form.
-  list($options, $control, $full) = _webform_sf_picklist_options($component, TRUE);
+  list($options) = _webform_sf_picklist_options($component, TRUE);
 
   $value = (array) $value;
   $items = array();
@@ -375,7 +373,7 @@ function _webform_csv_headers_sf_picklist($component, $export_options) {
  * Implements _webform_csv_data_component().
  */
 function _webform_csv_data_sf_picklist($component, $export_options, $value) {
-  list($options, $control, $full) = _webform_sf_picklist_options($component, TRUE, FALSE);
+  list($options) = _webform_sf_picklist_options($component, TRUE, FALSE);
   $return = array();
 
   $key = $value[0];
@@ -441,7 +439,6 @@ function _webform_sf_picklist_options(array $component) {
 
   // Load that object.
   $info = salesforce_webforms_get_object_fields($obj);
-  // $fdata = $info[$field];
 
   if ($info[$field]['controllerName']) {
     $control = $obj . "." . $info[$field]['controllerName'];

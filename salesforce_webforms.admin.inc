@@ -120,7 +120,7 @@ function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
   $form["update"] = array(
     '#type' => 'checkboxes',
     '#options' => array(
-      '1' => t(""),
+      '1' => '',
     ),
     '#title' => t('Update previously created Salesforce objects?'),
   );
@@ -264,10 +264,10 @@ function salesforce_webforms_manage_map($form, $form_state, stdObject $node, $ac
         '#type' => 'select',
         '#title' => t('Or select a predefined value'),
         '#options' => array(
-          '' => t(''),
+          '' => '',
           'false' => t('FALSE'),
           'true' => t('TRUE'),
-         ),
+        ),
       );
     }
     elseif ($fdata['type'] == 'reference') {
