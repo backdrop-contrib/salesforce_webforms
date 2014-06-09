@@ -217,7 +217,6 @@ function _webform_display_sf_picklist($component, $value, $format = 'html') {
 
 /**
  * Implements _webform_submit_component().
- *
  */
 function _webform_submit_sf_picklist($component, $value) {
   $return = NULL;
