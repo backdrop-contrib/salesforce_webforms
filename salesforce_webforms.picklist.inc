@@ -218,13 +218,8 @@ function _webform_display_sf_picklist($component, $value, $format = 'html') {
 /**
  * Implements _webform_submit_component().
  *
- * Handle select or other... modifications and convert FAPI 0/1 values into
- * something saveable.
  */
 function _webform_submit_sf_picklist($component, $value) {
-  // Build a list of all valid keys expected to be submitted.
-  list($options) = _webform_sf_picklist_options($component, TRUE);
-
   $return = NULL;
   if (is_string($value)) {
     $return = $value;
