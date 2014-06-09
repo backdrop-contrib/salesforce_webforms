@@ -200,12 +200,10 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
       '#value' => $map['mapid'],
     );
   }
-  else {
-    $form['map']['nid'] = array(
-      '#type' => 'hidden',
-      '#value' => $node->nid,
-    );
-  }
+  $form['map']['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => $node->nid,
+  );
 
   $form['map']['mapname'] = array(
     '#type' => 'textfield',
@@ -338,6 +336,47 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
   );
 
   return $form;
+}
+
+/**
+ * Form validation handler for salesforce_webforms_manage_map().
+ *
+ * @see salesforce_webforms_manage_map()
+ */
+function salesforce_webforms_manage_map_validate($form, &$form_state) {
+  // Make sure that the map name is unique and formatted properly.
+  $name = $form_state['values']['mapname'];
+  $mapid = $form_state['values']['mapid'];
+  $nid = $form_state['values']['nid'];
+
+  // First make sure that the name is valid.
+  if (!preg_match('/^[a-z0-9_]+$/i', $name)) {
+    form_set_error('name',
+      t('The map name %mapname is invalid. Please include only alphanumeric characters and underscores.',
+      array(
+        '%mapname' => $name,
+      ))
+    );
+
+    // No need to process further if the format is invalid.
+    return;
+  }
+
+  // Now make sure the key isn't duplicated.
+  $maps = salesforce_webforms_get_node_maps($nid);
+  foreach ($maps as $map) {
+    if ($map['mapname'] == $name && $map['mapid'] != $mapid) {
+      form_set_error('name',
+        t('The map name %mapname is already in use. Please use a unique name.',
+        array(
+          '%mapname' => $name,
+        ))
+      );
+
+      // No need to continue processing.
+      return;
+    }
+  }
 }
 
 /**
