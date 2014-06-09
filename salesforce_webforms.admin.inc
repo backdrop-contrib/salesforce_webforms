@@ -215,6 +215,13 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     '#weight' => 1,
   );
 
+  $form['map']['tokens'] = array(
+    '#markup' => theme('webform_token_help', array(
+      'groups' => array('node', 'submission'),
+      )
+    ),
+  );
+
   $form['map']['map_fields'] = array(
     '#type' => 'fieldset',
     '#title' => t('Fields'),
