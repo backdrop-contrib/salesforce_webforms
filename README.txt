@@ -1,16 +1,25 @@
 Salesforce Suite Webform Integration README
 
+ABOUT
+=============================
 This module is designed to allow an easy integration between the Salesforce
-Suite module and the Webform module.
+Suite module and the Webform module. Data can be written to Salesforce
+objects, and Salesforce picklist fields can be used on the forms presented
+to end-users.
 
-Installation:
+INSTALLATION AND CONFIGURATION
+==============================
 Install and Enable Webform module
-Install and Enable Salesforce Suite modue
+Install and Enable Salesforce Suite module
+Configure a remote application within Salesforce
 Authenticate Salesforce Suite by navigating to
 
 Admin -> Configuration -> Salesforce -> Authenticate
 
-Usage:
+and entering the Customer Access Token and Customer Secret Key
+
+USAGE
+==============================
 
   On the form presented to users:
     A new form control of type 'Salesforce Picklist' should be available.
@@ -58,7 +67,7 @@ Usage:
 
     These outgoing Salesforce connections, called mappings, are defined
     in a manner similar to creating an email message from webforms. Each
-    mspping is associated with a single Saleforce object, and must have a name
+    mapping is associated with a single Saleforce object, and must have a name
     which is used to store the ID of the Salesforce object created or updated.
     Within that object, each available field will be shown, and a valude can
     be provided. If no value is provided, then that field will be left
@@ -106,3 +115,11 @@ Usage:
     to resend the data to Salesforce. When sending the data, the administrator
     will have the option of updating the Salesforce objects created earlier,
     or to create new objects.
+
+TROUBLESHOOTING
+===========================================
+Error: refresh_token is blank
+  This error happens after the Salesforce session times out. The Salesforce
+  Suite module can automatically refresh the session, but only if the
+  application is granted the proper permission inside Salesforce. See the
+  Salesforce Suite documentation for details.

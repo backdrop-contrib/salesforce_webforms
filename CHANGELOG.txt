@@ -1,5 +1,6 @@
 Version 7.x-1.x, (development version)
 -----------------------
+Issue #2281999 by dbcollies: Updated README to reformat and fix minor errors.
 Issue #2282007 by dbcollies: Added token field to list available tokens.
 
 Version 7.x-1.0, 2014-07-08
