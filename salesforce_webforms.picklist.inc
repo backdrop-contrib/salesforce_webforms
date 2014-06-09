@@ -54,6 +54,7 @@ function _webform_edit_sf_picklist($component) {
     '#type' => 'textfield',
     '#default_value' => $component['name'],
     '#title' => t('Label'),
+    '#weight' => -10,
   );
 
   $objlist = salesforce_webforms_get_objects();
