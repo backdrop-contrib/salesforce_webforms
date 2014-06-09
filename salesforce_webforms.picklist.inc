@@ -123,7 +123,7 @@ function _webform_edit_sf_picklist($component) {
  * Implements _webform_render_component().
  */
 function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) {
-  $node = isset($component['nid']) ? node_load($component['nid']) : NULL;
+  // $node = isset($component['nid']) ? node_load($component['nid']) : NULL;
 
   $element = array(
     '#title' => $component['name'],
@@ -145,7 +145,7 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
   list($options, $control, $full, $fieldname) = _webform_sf_picklist_options($component);
 
   $optionmap = array(-1);
-  $i = 0;
+  // $i = 0;
   foreach ($full as $opt) {
     $optionmap[] = $opt['position'];
   }
@@ -313,7 +313,6 @@ function _webform_analysis_sf_picklist($component, $sids = array(), $single = FA
 
   $result = $query->execute();
   $rows = array();
-  $other = array();
   $normal_count = 0;
   foreach ($result as $data) {
     $display_option = isset($options[$data['data']]) ? $options[$data['data']] : $data['data'];
@@ -431,7 +430,7 @@ function _webform_sf_picklist_options(array $component) {
   $picklist_key = $component['extra']['list'];
   $exclusions = $component['extra']['exclude'];
   $exclusion_rows = array_filter(explode("\n", trim($exclusions)));
-  $exlude = array();
+  $exclude = array();
   foreach ($exclusion_rows as $row) {
     $row = trim($row);
     $exclude[$row] = $row;
@@ -442,7 +441,7 @@ function _webform_sf_picklist_options(array $component) {
 
   // Load that object.
   $info = salesforce_webforms_get_object_fields($obj);
-  $fdata = $info[$field];
+  // $fdata = $info[$field];
 
   if ($info[$field]['controllerName']) {
     $control = $obj . "." . $info[$field]['controllerName'];
@@ -491,7 +490,6 @@ function _webform_sf_picklist_options(array $component) {
 function _salesforce_webforms_valid_map($valid) {
   $bitmap = base64_decode($valid);
   $len = strlen($bitmap);
-  $bytes = unpack("c*", $bitmap);
 
   $map = array();
   for ($i = 0; $i < $len * 8; $i++) {
@@ -554,7 +552,7 @@ function salesforce_webforms_validate_picklist(&$el, &$state, $form) {
     $errors = form_get_errors();
 
     // Clear out error log.
-    $msgs = drupal_get_messages('error');
+    drupal_get_messages('error');
     form_clear_error();
 
     // Add back in the errors, except for this one.

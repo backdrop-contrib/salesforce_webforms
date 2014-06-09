@@ -11,7 +11,7 @@ include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'salesforce_webforms'
  * Implements hook_menu().
  */
 function salesforce_webforms_menu() {
-  $itmes = array();
+  $items = array();
 
   $items['node/%webform_menu/webform/salesforce'] = array(
     'title' => 'Salesforce',
@@ -162,8 +162,7 @@ function salesforce_webforms_get_objects($use_cache = TRUE) {
   $sobjects = _salesforce_webforms_fetch("sobjects", $use_cache);
   $return = array();
 
-  $i = 0;
-  foreach ($sobjects['sobjects'] as $name => $data) {
+  foreach ($sobjects['sobjects'] as $data) {
     $return[$data['name']] = $data;
   }
   return $return;
@@ -179,7 +178,7 @@ function salesforce_webforms_get_objects_selection() {
   $selections = array();
   $objs = salesforce_webforms_get_objects();
   if ($objs) {
-    foreach ($objs as $obj => $info) {
+    foreach ($objs as $info) {
       $selections[$info['name']] = $info['label'];
     }
   }
@@ -221,7 +220,6 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
   $sobject = $sf->objectDescribe($obj, !$use_cache);
   $return = array();
 
-  $i = 0;
   foreach ($sobject['fields'] as $field) {
     $return[$field['name']] = $field;
   }
@@ -477,16 +475,13 @@ function salesforce_webforms_token_info_alter(&$data) {
 function salesforce_webforms_tokens($type, $tokens, array $data = array(), $options = array()) {
   $replacements = array();
 
-  $sanitize = !empty($options['sanitize']);
-
   if ($type == 'submission' && !empty($data['webform-submission'])) {
     $sub = $data['webform-submission'];
-    $node = $data['node'] ? $data['node'] : node_load($submission->nid);
+    $node = $data['node'] ? $data['node'] : node_load($sub->nid);
     $nid = $node->nid;
 
     if ($sf_tokens = token_find_with_prefix($tokens, 'salesforce')) {
       // We need map data. Load it up.
-      $maps = salesforce_webforms_get_node_maps($nid);
       $keys = salesforce_webforms_get_submission_keys($sub->sid);
       foreach ($sf_tokens as $name => $original) {
         $replacements[$original] = $keys[$name];
@@ -688,7 +683,7 @@ function salesforce_webforms_set_sf_langauge($lang) {
   $fields = array(
     'LanguageLocaleKey' => $lang,
   );
-  $res = fema_faq_update_object("User", $id, $fields);
+  fema_faq_update_object("User", $id, $fields);
 }
 
 /**

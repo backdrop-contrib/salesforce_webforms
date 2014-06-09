@@ -67,7 +67,6 @@ function salesforce_webforms_get_node_maps($nid) {
  *     determine which object should be updated or not.
  */
 function salesforce_webforms_get_map_fields($mapid, $nid) {
-  $fids = array();
   $fields = array();
   $result = db_query("SELECT fieldmapid,sf_fieldname,source_data,is_keyfield FROM {salesforce_webforms_field} WHERE mapid = :mapid", array(':mapid' => $mapid));
   foreach ($result as $row) {
