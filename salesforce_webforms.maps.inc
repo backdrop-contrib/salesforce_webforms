@@ -2,7 +2,7 @@
 
 /**
  * @file
- * provides API and management functions for the salesforce webform maps
+ * Provides API and management functions for the salesforce webform maps.
  */
 
 /**
@@ -115,7 +115,7 @@ function salesforce_webforms_delete_mapping($mapid) {
  *   An associative array, where the keys are the Salesforce field names and
  *   the values are the Salesforce field labels.
  */
-function salesforce_webforms_map_fields_basic($obj, $fields) {
+function salesforce_webforms_map_fields_basic($obj, array $fields) {
   $ret = array();
   $desc = salesforce_webforms_get_object_fields($obj);
   if ($fields) {
@@ -132,7 +132,7 @@ function salesforce_webforms_map_fields_basic($obj, $fields) {
  * Gets the Salesforce keys assigned to a mapping.
  *
  * @param int $sid
- *   The webform submission ID
+ *   The webform submission ID.
  *
  * @return array
  *   An associative array where the keys are the name of the map, as the

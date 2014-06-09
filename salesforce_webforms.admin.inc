@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Manages Salesforce webform mapping UI
+ * Manages Salesforce webform mapping UI.
  */
 
 /**
@@ -51,7 +51,7 @@ function salesforce_webforms_get_webform_maps($node) {
  *
  * @ingroup themeable
  */
-function theme_salesforce_webforms_manage_overview($variables) {
+function theme_salesforce_webforms_manage_overview(array $variables) {
   $maps = $variables['maps'];
   $node = $variables['node'];
 
@@ -158,12 +158,12 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
  * Allows the form administrator to manage mappings between webform and
  * Salesforce.
  *
- * @param object $node
+ * @param stdObject $node
  *   The node which owns the form.
  * @param string $action
  *   The action to perform. One of:
- *   - add
- *   - edit
+ *   - add.
+ *   - edit.
  * @param string $obj
  *   The name of the Salesforce object being mapped.
  * @param array $map
@@ -173,7 +173,7 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
  *
  * @ingroup forms
  */
-function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj, $map = NULL) {
+function salesforce_webforms_manage_map(stdObject $form, $form_state, $node, $action, $obj, array $map = NULL) {
   $form = array();
   $obj_info = salesforce_webforms_get_object_fields($obj);
 
@@ -398,7 +398,7 @@ function salesforce_webforms_manage_map_submit($form, &$form_state) {
  * @return array
  *   An array suitable for use as an 'options' element in a form.
  */
-function salesforce_webforms_picklist_select($picklist) {
+function salesforce_webforms_picklist_select(array $picklist) {
   $options = array('' => '');
 
   foreach ($picklist as $pick) {

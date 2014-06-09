@@ -115,11 +115,11 @@ function salesforce_webforms_theme() {
  *
  * @param array $variables
  *   An associative array containing:
- *   - nid: The node ID
+ *   - nid: The node ID.
  *
  * @ingroup themeable
  */
-function theme_salesforce_webforms_manage_add_map($variables) {
+function theme_salesforce_webforms_manage_add_map(array $variables) {
   $nid = $variables['nid'];
   $output = '';
   $objects = salesforce_webforms_get_objects();
@@ -293,7 +293,7 @@ function salesforce_webforms_webform_component_info() {
  *   - map_id: Int ID of the map to be operated upon.
  *   - map_fields: Associative array of fields and values.
  */
-function salesforce_webforms_map_save($values) {
+function salesforce_webforms_map_save(array $values) {
   // Save map data.
   $values['sf_object'] = $values['object'];
 
@@ -331,7 +331,7 @@ function salesforce_webforms_map_save($values) {
  *   - key_field: Boolean indicating if this is a key field.
  *   - picklist: (optional) String to override target.
  */
-function salesforce_webforms_save_fields($mapid, $fields) {
+function salesforce_webforms_save_fields($mapid, array $fields) {
   $i = 1;
   foreach ($fields as $fname => $values) {
     // Only process if we are given source data.
@@ -613,13 +613,13 @@ function salesforce_webforms_queue_obj($objlist) {
  *   The Salesforce internal name of the object type to be updated.
  * @param string $id
  *   The Salesforce ID of the object to be updated.
- * @param string[] $fields
+ * @param array $fields
  *   The fields and corresponding values to be stored.
  *
  * @return array
  *   The Salesforce response as an array.
  */
-function salesforce_webforms_update_object($object, $id, $fields) {
+function salesforce_webforms_update_object($object, $id, array $fields) {
   $sf = salesforce_webforms_get_sfapi();
   $res = $sf->objectUpdate($object, 'id', $id, $fields);
 
@@ -631,13 +631,13 @@ function salesforce_webforms_update_object($object, $id, $fields) {
  *
  * @param string $object
  *   The Salesforce internal name of the object type to be creatd.
- * @param string[] $fields
+ * @param array $fields
  *   The fields and corresponding values to be stored.
  *
  * @return array
  *   The Salesforce response as an array.
  */
-function salesforce_webforms_create_object($object, $fields) {
+function salesforce_webforms_create_object($object, array $fields) {
   $sf = salesforce_webforms_get_sfapi();
   $res = $sf->objectCreate($object, $fields);
 

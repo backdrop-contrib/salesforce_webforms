@@ -244,7 +244,7 @@ function _webform_submit_sf_picklist($component, $value) {
  *
  * @ingroup themeable
  */
-function theme_webform_display_sf_picklist($variables) {
+function theme_webform_display_sf_picklist(array $variables) {
   $element = $variables['element'];
 
   // Flatten the list of options so we can get values easily.
@@ -424,7 +424,7 @@ function _webform_options_sf_picklist($component) {
  *     allow for control between dependent fields.
  *   - String name of this field.
  */
-function _webform_sf_picklist_options($component) {
+function _webform_sf_picklist_options(array $component) {
   $options = array();
   $control = NULL;
 

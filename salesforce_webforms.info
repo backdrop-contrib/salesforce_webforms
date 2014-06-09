@@ -4,7 +4,3 @@ description = Integrate Salesforce with Webforms to allow reading from and writi
 package = Salesforce
 dependencies[] = salesforce (>= 3.0)
 dependencies[] = webform (>3.x)
-files[] = salesforce_webforms.admin.inc
-files[] = salesforce_webforms.module
-files[] = salesforce_webforms.maps.inc
-files[] = salesforce_webforms.install
