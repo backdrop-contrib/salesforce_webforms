@@ -345,7 +345,7 @@ function salesforce_webforms_save_fields($mapid, $fields) {
           array(
             'mapid' => $mapid,
             'sf_fieldname' => $fname,
-            'source_data' => $values['target'],
+            'source_data' => filter_xss($values['target']),
             'is_keyfield' => $values['keyfield'][1],
             'displayorder' => $i++,
           )
