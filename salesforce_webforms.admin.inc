@@ -157,7 +157,7 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
  * Allows the form administrator to manage mappings between webform and
  * Salesforce.
  *
- * @param stdObject $node
+ * @param stdClass $node
  *   The node which owns the form.
  * @param string $action
  *   The action to perform. One of:
@@ -172,7 +172,7 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
  *
  * @ingroup forms
  */
-function salesforce_webforms_manage_map($form, $form_state, stdObject $node, $action, $obj, array $map = NULL) {
+function salesforce_webforms_manage_map($form, $form_state, stdClass $node, $action, $obj, array $map = NULL) {
   $form = array();
   $obj_info = salesforce_webforms_get_object_fields($obj);
 
@@ -208,10 +208,23 @@ function salesforce_webforms_manage_map($form, $form_state, stdObject $node, $ac
     '#type' => 'textfield',
     '#title' => t('Map name'),
     '#default_value' => (isset($map['mapname'])) ? $map['mapname'] : '',
+    '#description' => t("The name of this map. Must use only letters, numbers, and '_'. Used to identify this mapping in other maps."),
     '#required' => TRUE,
     '#size' => 60,
     '#maxlength' => 64,
     '#weight' => 1,
+  );
+
+  $form['map']['weight'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Weight'),
+    '#default_value' => (isset($map['displayorder'])) ? $map['displayorder'] : '',
+    '#required' => TRUE,
+    '#size' => 5,
+    '#maxlength' => 5,
+    '#weight' => 2,
+    '#description' => t('The order that maps are processed. Lower numbered maps will be processed first.'),
+    '#element_validate' => array('element_validate_integer'),
   );
 
   $form['map']['tokens'] = array(
@@ -219,6 +232,7 @@ function salesforce_webforms_manage_map($form, $form_state, stdObject $node, $ac
       'groups' => array('node', 'submission'),
       )
     ),
+    '#weight' => 3,
   );
 
   $form['map']['map_fields'] = array(
@@ -226,7 +240,7 @@ function salesforce_webforms_manage_map($form, $form_state, stdObject $node, $ac
     '#title' => t('Fields'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
-    '#weight' => 2,
+    '#weight' => 4,
     '#tree' => TRUE,
   );
 

@@ -19,7 +19,7 @@
  *   - sf_object: (string) The Salesforce object being mapped to.
  */
 function salesforce_webforms_get_map($mapid) {
-  $result = db_query("SELECT mapid, mapname, nid, sf_object FROM {salesforce_webforms_map} where mapid = :mapid", array(":mapid" => $mapid), array('fetch' => PDO::FETCH_ASSOC));
+  $result = db_query("SELECT mapid, mapname, nid, sf_object, displayorder FROM {salesforce_webforms_map} where mapid = :mapid", array(":mapid" => $mapid), array('fetch' => PDO::FETCH_ASSOC));
   $map = $result->fetchAssoc();
   $map['fields'] = salesforce_webforms_get_map_fields($mapid, $map['nid']);
   return $map;
