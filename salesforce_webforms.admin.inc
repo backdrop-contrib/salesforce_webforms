@@ -215,7 +215,7 @@ function salesforce_webforms_manage_map($form, $form_state, stdClass $node, $act
     '#weight' => 1,
   );
 
-  $form['map']['weight'] = array(
+  $form['map']['displayorder'] = array(
     '#type' => 'textfield',
     '#title' => t('Weight'),
     '#default_value' => (isset($map['displayorder'])) ? $map['displayorder'] : '',
