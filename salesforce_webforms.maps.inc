@@ -108,7 +108,7 @@ function salesforce_webforms_delete_mapping($mapid) {
  * @param string $obj
  *   The name of the Salesforce object to read.
  * @param array $fields
- *   An associative array of fields as returned from Salesforce.
+ *   An associative array of fields as defined in the map.
  *
  * @return array
  *   An associative array, where the keys are the Salesforce field names and
@@ -120,7 +120,8 @@ function salesforce_webforms_map_fields_basic($obj, array $fields) {
   if ($fields) {
     foreach ($fields as $details) {
       $fname = $details['sf_fieldname'];
-      $ret[$fname] = $desc[$fname]['label'];
+      $iskey = $details['keyfield'];
+      $ret[$fname] = ($iskey ? '*' : '') . $desc[$fname]['label'];
     }
   }
 

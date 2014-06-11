@@ -1,5 +1,6 @@
 Version 7.x-1.x, (development version)
 -----------------------
+Issue #2284315 by dbcollies: Added asterisk to field display
 Issue #2281999 by dbcollies: Updated README to reformat and fix minor errors.
 Issue #2282007 by dbcollies: Added token field to list available tokens.
 
