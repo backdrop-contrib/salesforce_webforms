@@ -172,7 +172,7 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
  *
  * @ingroup forms
  */
-function salesforce_webforms_manage_map($form, $form_state, stdClass $node, $action, $obj, array $map = NULL) {
+function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj, array $map = NULL) {
   $form = array();
   $obj_info = salesforce_webforms_get_object_fields($obj);
 
