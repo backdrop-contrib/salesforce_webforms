@@ -157,7 +157,7 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
  * Allows the form administrator to manage mappings between webform and
  * Salesforce.
  *
- * @param stdClass $node
+ * @param object $node
  *   The node which owns the form.
  * @param string $action
  *   The action to perform. One of:
