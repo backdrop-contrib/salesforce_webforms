@@ -20,7 +20,7 @@ function _webform_defaults_sf_picklist() {
     'extra' => array(
       'list' => '',
       'exclude' => '',
-      'optalpha' => 0,
+      'optsort' => 0,
       'title_display' => 0,
       'description' => '',
       'custom_keys' => FALSE,
@@ -101,19 +101,17 @@ function _webform_edit_sf_picklist($component) {
     '#weight' => 0,
   );
 
-  $form['display']['optrand'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Randomize options'),
-    '#default_value' => $component['extra']['optrand'],
-    '#description' => t('Randomizes the order of the options when they are displayed in the form.'),
-    '#parents' => array('extra', 'optrand'),
-  );
-  $form['display']['optalpha'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Alphabetize options'),
-    '#default_value' => $component['extra']['optalpha'],
-    '#description' => t('Alphabetizes the order of the options when they are displayed in the form.'),
-    '#parents' => array('extra', 'optalpha'),
+  $form['display']['sort'] = array(
+    '#type' => 'radios',
+    '#title' => t('Sort Order'),
+    '#default_value' => $component['extra']['sort'],
+    '#description' => t('Determines how options are sorted when they are displayed in the form.'),
+    '#parents' => array('extra', 'sort'),
+    '#options' => array(
+      '0' => t('The order defined in Salesforce'),
+      '1' => t('Sorted alphabetically'),
+      '2' => t('Random'),
+    ),
   );
 
   return $form;
@@ -449,12 +447,16 @@ function _webform_sf_picklist_options(array $component) {
     $pick['position'] = $position++;
   }
 
+  $sortorder = $component['extra']['sort'];
   // See if any sorting needs to be done would go here.
-  if ($component['extra']['optrand']) {
-    _salesforce_webforms_shuffle_options($picklist);
-  }
-  if ($component['extra']['optalpha']) {
-    _salesforce_webforms_alpha_options($picklist);
+  switch ($sortorder) {
+    case 1:
+      _salesforce_webforms_alpha_options($picklist);
+      break;
+
+    case 2:
+      _salesforce_webforms_shuffle_options($picklist);
+      break;
   }
 
   // Build the option list, and throw away any ignored values.

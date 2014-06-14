@@ -120,7 +120,7 @@ function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
   $form["update"] = array(
     '#type' => 'checkboxes',
     '#options' => array(
-      '1' => '',
+      '1' => t('Yes'),
     ),
     '#title' => t('Update previously created Salesforce objects?'),
   );
@@ -285,14 +285,14 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
         '#type' => 'select',
         '#title' => t('Or select a predefined value'),
         '#options' => array(
-          '' => '',
+          '' => t('- Select -'),
           'false' => t('FALSE'),
           'true' => t('TRUE'),
         ),
       );
     }
     elseif ($fdata['type'] == 'reference') {
-      $options = array('' => '');
+      $options = array('' => t('- Select -'));
       // Get a list of all records of the appropriate type(s).
       foreach ($fdata['referenceTo'] as $ref) {
         // Get the object details to see if it supports the IsDeleted attribute.
@@ -337,7 +337,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     $form['map']['map_fields'][$fname]['keyfield'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Key field?'),
-      '#options' => array('1' => ""),
+      '#options' => array('1' => t('Yes')),
     );
   }
 
@@ -423,7 +423,7 @@ function salesforce_webforms_manage_map_submit($form, &$form_state) {
  *   An array suitable for use as an 'options' element in a form.
  */
 function salesforce_webforms_picklist_select(array $picklist) {
-  $options = array('' => '');
+  $options = array('' => t('- Select -'));
 
   foreach ($picklist as $pick) {
     if ($pick['active']) {
