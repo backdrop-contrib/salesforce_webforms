@@ -357,6 +357,18 @@ function salesforce_webforms_save_fields($mapid, array $fields) {
  * Implements hook_webform_submission_insert().
  */
 function salesforce_webforms_webform_submission_insert($node, $sub, $update = FALSE) {
+  // Keep track of the current version of webform.
+  $webform_version = &drupal_static(__FUNCTION__);
+  if (!$webform_version) {
+    $info = system_get_info('module', 'webform');
+
+    $webform_version = 3;
+    if ($info['version']) {
+      $versions = explode('-', $info['version']);
+      $webform_version = $versions[1];
+    }
+  }
+
   // See if we have any maps for this node.
   $maps = salesforce_webforms_get_node_maps($node->nid);
   if (!$maps || count($maps) == 0) {
@@ -382,6 +394,18 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
         $key = $field['keyfield'];
 
         $filtered_source = _webform_filter_values($source, $node, $sub);
+
+        // See if we're running on webform 3.x. If so, replace tokens.
+        if ($webform_version < 4 && $filtered_source != '') {
+          $tokens = array(
+            'node' => $node,
+            'webform-submission' => $sub,
+          );
+
+          $new = token_replace($filtered_source, $tokens, array('clear' => TRUE));
+          $filtered_source = $new;
+        }
+
         if ($key) {
           // We have a key field - try update first.
           $keyfields[$target] = $filtered_source;
