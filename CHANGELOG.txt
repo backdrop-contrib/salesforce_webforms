@@ -1,8 +1,9 @@
 Version 7.x-1.x, (development version)
 -----------------------
-Issue #2287729 by dbcollies: Removed version requirement on Webform
-Modified picklist sort to be radio buttons instead of check boxes
-Issue #2284315 by dbcollies: Added asterisk to field display
+Issue #2287729 by dbcollies: Removed version requirement on Webform.
+                             Added version check for filtering source data.
+Modified picklist sort to be radio buttons instead of check boxes.
+Issue #2284315 by dbcollies: Added asterisk to field display.
 Issue #2281999 by dbcollies: Updated README to reformat and fix minor errors.
 Issue #2282007 by dbcollies: Added token field to list available tokens.
 
