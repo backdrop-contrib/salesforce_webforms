@@ -354,9 +354,9 @@ function salesforce_webforms_save_fields($mapid, array $fields) {
 }
 
 /**
- * Implements hook_webform_submission_insert().
+ * Gets the current webform version.
  */
-function salesforce_webforms_webform_submission_insert($node, $sub, $update = FALSE) {
+function salesforce_webforms_webform_version() {
   // Keep track of the current version of webform.
   $webform_version = &drupal_static(__FUNCTION__);
   if (!$webform_version) {
@@ -368,6 +368,16 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
       $webform_version = $versions[1];
     }
   }
+
+  return $webform_version;
+}
+
+/**
+ * Implements hook_webform_submission_insert().
+ */
+function salesforce_webforms_webform_submission_insert($node, $sub, $update = FALSE) {
+  // Get the version of Webform to know how to filter.
+  $webform_version = salesforce_webforms_webform_version();
 
   // See if we have any maps for this node.
   $maps = salesforce_webforms_get_node_maps($node->nid);
