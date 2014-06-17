@@ -17,7 +17,57 @@
  *   The rendered HTML of the map table.
  */
 function salesforce_webforms_manage($node) {
+  // Switch to using a form so we can do the draggable sorting.
+  $form = drupal_get_form('salesforce_webforms_maps_form', $node);
+
+  return array(
+    '#theme' => 'salesforce_webforms_manage',
+    '#node' => $node,
+    '#form' => $form,
+  );
+}
+
+/**
+ * Theme the output of the main map list.
+ */
+function theme_salesforce_webforms_manage($variables) {
+  return drupal_render($variables['form']);
+}
+
+function salesforce_webforms_maps_form($form, &$settings, $node) {
   $maps = salesforce_webforms_get_webform_maps($node);
+
+  $form = array(
+    '#tree' => TRUE,
+    '#node' => $node,
+    'maps' => array(),
+    'nid' => array(
+      '#type' => 'value',
+      '#value' => $node->nid,
+    ),
+  );
+
+  $objects = salesforce_webforms_get_objects_selection();
+
+  foreach ($maps as $map) {
+    $mapid = $map['mapid'];
+    $form['maps'][$mapid]['mapid'] = array(
+      '#type' => 'hidden',
+      '#value' => $mapid,
+    );
+    $form['maps'][$mapid]['weight'] = array(
+      '#type' => textfield,
+      '#size' => 4,
+      '#title' => t('Weight'),
+      '#default_value' => $map['displayorder'],
+    );
+  }
+}
+
+function salesforce_webforms_old_manage($node) {
+  $maps = salesforce_webforms_get_webform_maps($node);
+
+  // 
   $output = '';
   $output .= theme('salesforce_webforms_manage_overview', array('maps' => $maps, 'node' => $node));
   $output .= theme('salesforce_webforms_manage_add_map', array('nid' => $node->nid));
