@@ -365,7 +365,7 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
     $webform_version = 3;
     if ($info['version']) {
       $versions = explode('-', $info['version']);
-      $webform_version) = $versions[1];
+      $webform_version = $versions[1];
     }
   }
 
