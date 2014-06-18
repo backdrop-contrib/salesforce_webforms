@@ -348,6 +348,18 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
         );
     }
 
+    // Did we add a picklist?
+    if (isset($form['map']['map_fields'][$fname]['picklist'])) {
+      $form['map']['map_fields'][$fname]['target']['#states'] = array(
+        'enabled' => array(
+          ':input[name="map_fields[' . $fname . '][picklist]"]' => array('value' => ''),
+        ),
+        'disabled' => array(
+          ':input[name="map_fields[' . $fname . '][picklist]"]' => array('!value' => ''),
+        ),
+      );
+    }
+
     $form['map']['map_fields'][$fname]['keyfield'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Key field?'),
