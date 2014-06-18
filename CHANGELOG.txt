@@ -1,5 +1,6 @@
 Version 7.x-1.x, (development version)
 -----------------------
+Issue #2288323 by dbcollies: Disabled text box when select chosen in map form.
 Issue #2287729 by dbcollies: Removed version requirement on Webform.
                              Added version check for filtering source data.
                              Moved version check to a separate function.
