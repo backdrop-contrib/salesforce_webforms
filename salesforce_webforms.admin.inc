@@ -285,6 +285,20 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     '#weight' => 3,
   );
 
+  // Do we need to add extra info for old webform version?
+  if (salesforce_webforms_webform_version() < 4) {
+    $fieldset = array(
+      '#title' => t('Salesforce tokens'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#children' => '<div>' . '[submission:salesforce:?] - ' . t('The unique ID of the Salesforce object associated with a webform mapping. Replace the "?" with the name of the mapping') . '</div>',
+      '#attributes' => array('class' => array('collapsible', 'collapsed')),
+    );
+
+    $form['map']['tokens']['#markup'] .= theme('fieldset', array('element' => $fieldset));
+  }
+
   $form['map']['map_fields'] = array(
     '#type' => 'fieldset',
     '#title' => t('Fields'),
@@ -382,6 +396,18 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
           '#title' => t('Or select a predefined value'),
           '#options' => $options,
         );
+    }
+
+    // Did we add a picklist?
+    if (isset($form['map']['map_fields'][$fname]['picklist'])) {
+      $form['map']['map_fields'][$fname]['target']['#states'] = array(
+        'enabled' => array(
+          ':input[name="map_fields[' . $fname . '][picklist]"]' => array('value' => ''),
+        ),
+        'disabled' => array(
+          ':input[name="map_fields[' . $fname . '][picklist]"]' => array('!value' => ''),
+        ),
+      );
     }
 
     $form['map']['map_fields'][$fname]['keyfield'] = array(
