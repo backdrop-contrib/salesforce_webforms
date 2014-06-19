@@ -5,6 +5,7 @@ Issue #2287729 by dbcollies: Removed version requirement on Webform.
                              Added version check for filtering source data.
                              Moved version check to a separate function.
                              Added extra help for salesford object ID tokens.
+                             Updated README.txt to show 3.x syntax.
 Modified picklist sort to be radio buttons instead of check boxes.
 Issue #2284315 by dbcollies: Added asterisk to field display.
 Issue #2281999 by dbcollies: Updated README to reformat and fix minor errors.

@@ -87,6 +87,12 @@ USAGE
     To use a value provided by the user, the syntax would be
 
       [submission:values:KEY] or [submission:values:KEY:nolabel]
+      (Webform 4.x)
+
+    or
+
+      %value[key]
+      (Webform 3.x)
 
     where KEY is the name of the field in the webform, and :nolabel indicates
     that the field label should NOT be included in the data.
@@ -97,11 +103,18 @@ USAGE
     Salesforce, the value might be
 
       [submission:values:fname:nolabel] [submission:values:lname:nolabel]
+      (Webform 4.x)
+
+    or
+
+      %value[fname] %value[lname]
+      (Webform 3.x)
 
     To include the ID of an object created in an earlier mapping, the syntax
     would be
 
       [submission:salesforce:MAPNAME]
+      (All versions of webform)
 
     For instance, if a Contact mapping were created with the name 'newcontact'
     and you want that contact associated with a case that's also being
