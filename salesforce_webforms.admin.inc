@@ -60,6 +60,7 @@ function salesforce_webforms_maps_form($form, &$settings, $node) {
       ),
     );
 
+    $field_info = salesforce_webforms_map_fields_basic($map['sf_object'], $map['fields']);
     // Add each of the fields.
     foreach ($map['fields'] as $fid => $field) {
       $form['maps'][$mapid]['fields'][$fid] = array(
@@ -67,7 +68,7 @@ function salesforce_webforms_maps_form($form, &$settings, $node) {
         '#disabled' => TRUE,
         '#title' => t('Field Name'),
         '#title_display' => 'invisible',
-        '#value' => ($field['keyfield'] ? '*' : '') . $field['sf_fieldname'],
+        '#value' => $field_info[$field['sf_fieldname']],
       );
     }
 
@@ -165,7 +166,7 @@ function salesforce_webforms_maps_form_validate($form, &$settings) {
  *
  * @ingroup themeable
  */
-function theme_salesforce_webforms_maps_form($vars) {
+function theme_salesforce_webforms_maps_form(array $vars) {
   $form = $vars['form'];
 
   $header = array(
@@ -188,13 +189,11 @@ function theme_salesforce_webforms_maps_form($vars) {
     // Add the required class to the weight for draggable to work.
     $form['maps'][$mid]['weight']['#attributes']['class'] = array('salesforce-webforms-map-weight');
 
-    $field_info = salesforce_webforms_map_fields_basic($map['sf_object'], $map['fields']);
     $rows[] = array(
       'data' => array(
         drupal_render($form['maps'][$mid]['mapname']),
         drupal_render($form['maps'][$mid]['sf_object']),
         drupal_render($form['maps'][$mid]['fields']),
-        // theme('item_list', array('items' => $field_info)),
         drupal_render($form['maps'][$mid]['weight']),
         l(t('Edit'), 'node/' . $nid . '/webform/salesforce/edit/' . $map['sf_object'] . '/' . $map['mapid'], array('query' => drupal_get_destination())),
         l(t('Delete'), 'node/' . $nid . '/webform/salesforce/delete/' . $map['mapid'], array('query' => drupal_get_destination())),
@@ -270,7 +269,7 @@ function salesforce_webforms_maps_form_submit($form, &$state) {
  *
  * @ingroup forms
  */
-function salesforce_webforms_delete_rule($form, &$settings, $map) {
+function salesforce_webforms_delete_rule($form, &$settings, array $map) {
   $objects = salesforce_webforms_get_objects_selection();
   $form = array(
     'mapid' => array(
