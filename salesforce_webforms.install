@@ -44,7 +44,7 @@ function salesforce_webforms_schema() {
         'description' => 'The order of the map rules',
         'not null' => TRUE,
         'default' => 0,
-        'unsigned' => TRUE,
+        'unsigned' => FALSE,
       ),
     ),
     'primary key' => array('mapid'),
@@ -181,4 +181,22 @@ function salesforce_webforms_update_7000() {
 
   db_create_table('salesforce_webforms_key', $schema);
   return "Add the key storage table";
+}
+
+/**
+ * Change the displayorder column to be signed to use the 'weight' type.
+ */
+function salesforce_webforms_update_7001() {
+  db_change_field(
+    'salesforce_webforms_map',
+    'displayorder',
+    'displayorder',
+    array(
+      'type' => 'int',
+      'description' => 'The order of the map rules',
+      'not null' => TRUE,
+      'default' => 0,
+      'unsigned' => FALSE,
+    )
+  );
 }

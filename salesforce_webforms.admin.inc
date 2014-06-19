@@ -20,8 +20,15 @@ function salesforce_webforms_manage($node) {
   // Switch to using a form so we can do the draggable sorting.
   $form = drupal_get_form('salesforce_webforms_maps_form', $node);
 
+  $out1 = theme($form);
+  $out2 = drupal_render($form);
+
+  // dsm('theme');
+  // dsm($out1);
+  // dsm('drupal_render');
+  // dsm($out2);
   return array(
-    '#theme' => 'salesforce_webforms_manage',
+    '#theme' => 'theme_salesforce_webforms_manage',
     '#node' => $node,
     '#form' => $form,
   );
@@ -34,12 +41,76 @@ function theme_salesforce_webforms_manage($variables) {
   return drupal_render($variables['form']);
 }
 
+function theme_salesforce_webforms_maps_form($vars) {
+  $form = $vars['form'];
+
+  $header = array(
+    t('Map name'),
+    t('Object'),
+    t('Fields (* indicates key field)'),
+    t('Weight'),
+    array(
+      'data' => t('Operations'),
+      'colspan' => 2,
+  ));
+
+  $rows = array();
+
+  // $output = render($form['nid']);
+  $nid = $form['nid']['#value'];
+
+  foreach (element_children($form['maps']) as $mid) {
+    $map = $form['maps'][$mid]['#salesforce-webforms-extra'];
+
+    // Add the required class to the weight for draggable to work.
+    $form['maps'][$mid]['weight']['#attributes']['class'] = array('salesforce-webforms-map-weight');
+
+    $field_info = salesforce_webforms_map_fields_basic($map['sf_object'], $map['fields']);
+    $rows[] = array(
+      'data' => array(
+        drupal_render($form['maps'][$mid]['mapname']),
+        drupal_render($form['maps'][$mid]['sf_object']),
+        theme('item_list', array('items' => $field_info)),
+        drupal_render($form['maps'][$mid]['weight']),
+        l(t('Edit'), 'node/' . $nid . '/webform/salesforce/edit/' . $map['sf_object'] . '/' . $map['mapid'], array('query' => drupal_get_destination())),
+        l(t('Delete'), 'node/' . $nid . '/webform/salesforce/delete/' . $map['mapid'], array('query' => drupal_get_destination())),
+      ),
+      'class' => array('draggable'),
+    );
+  }
+
+  // Add the row for a new mapping.
+  $rows[] = array(
+    'data' => array(
+      drupal_render($form['new']['mapname']),
+      drupal_render($form['new']['sf_object']),
+      '',
+      drupal_render($form['new']['weight']),
+    ),
+    'class' => array('draggable'),
+  );
+
+  $table_id = "salesforce-webforms-maps-table";
+  $output = theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'attributes' => array('id' => $table_id),
+  ));
+
+  $output .= drupal_render_children($form);
+
+  drupal_add_tabledrag($table_id, 'order', 'sibling', 'salesforce-webforms-map-weight');
+
+  return $output;
+}
+
 function salesforce_webforms_maps_form($form, &$settings, $node) {
   $maps = salesforce_webforms_get_webform_maps($node);
 
   $form = array(
     '#tree' => TRUE,
     '#node' => $node,
+    '#theme' => 'salesforce_webforms_maps_form',
     'maps' => array(),
     'nid' => array(
       '#type' => 'value',
@@ -49,18 +120,89 @@ function salesforce_webforms_maps_form($form, &$settings, $node) {
 
   $objects = salesforce_webforms_get_objects_selection();
 
+  $maxweight = 0;
+
   foreach ($maps as $map) {
     $mapid = $map['mapid'];
-    $form['maps'][$mapid]['mapid'] = array(
-      '#type' => 'hidden',
-      '#value' => $mapid,
+    $form['maps'][$mapid] = array(
+      '#salesforce-webforms-extra' => $map,
+      'mapname' => array(
+        '#markup' => check_plain($map['mapname']),
+      ),
+      'sf_object' => array(
+        '#markup' => check_plain($objects[$map['sf_object']]),
+      ),
+      'weight' => array(
+        '#type' => 'weight',
+        '#title' => t('Weight'),
+        '#default_value' => $map['displayorder'],
+        '#delta' => 10,
+        '#title_display' => 'invisible',
+      ),
     );
-    $form['maps'][$mapid]['weight'] = array(
-      '#type' => textfield,
-      '#size' => 4,
+
+    if ($map['displayorder'] >= $maxweight) {
+      $maxweight = $map['displayorder'] + 1;
+    }
+  }
+
+  // Add the new map section
+  $form['new'] = array(
+    'mapname' => array(
+      '#type' => 'textfield',
+      '#title' => t('Map Name'),
+      '#title_display' => 'invisible',
+      '#validate' => array('salesforce_webform_mapname_validate'),
+      '#required' => FALSE,
+    ),
+    'sf_object' => array(
+      '#type' => 'select',
+      '#title' => t('Object'),
+      '#title_display' => 'invisible',
+      '#required' => FALSE,
+      '#options' => $objects,
+    ),
+    'weight' => array(
+      '#type' => 'weight',
       '#title' => t('Weight'),
-      '#default_value' => $map['displayorder'],
+      '#default_value' => $maxweight,
+      '#delta' => 10,
+      '#title_display' => 'invisible',
+    ),
+  );
+
+  // Add action section
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    ),
+  );
+  return $form;
+}
+
+function salesforce_webforms_maps_form_submit($form, &$state) {
+  foreach ($state['values']['maps'] as $id => $map) {
+    db_query(
+      'UPDATE {salesforce_webforms_map} SET displayorder = :w WHERE mapid = :id',
+      array(':w' => $map['weight'], ':id' => $id)
     );
+  }
+
+  // Now see if we have a new map to create
+  $new = $state['values']['new'];
+  if ($new['mapname'] != '' && $new['sf_object'] != '') {
+    // Yes. Create the object and then move to the edit form for it.
+    $newid = salesforce_webforms_map_save(array(
+      'action' => 'add',
+      'nid' => check_plain($state['values']['nid']),
+      'object' => check_plain($new['sf_object']),
+      'mapname' => check_plain($new['mapname']),
+    ));
+
+    dsm("node/" . $state['values']['nid'] . "/webform/salesforce/edit/" . $new['sf_object'] . "/$newid");
+    drupal_goto("node/" . $state['values']['nid'] . "/webform/salesforce/edit/" . $new['sf_object'] . "/$newid");
   }
 }
 
@@ -70,6 +212,7 @@ function salesforce_webforms_old_manage($node) {
   // 
   $output = '';
   $output .= theme('salesforce_webforms_manage_overview', array('maps' => $maps, 'node' => $node));
+  $output .= theme('salesforce_webforms_manage', array('maps' => $maps, 'node' => $node));
   $output .= theme('salesforce_webforms_manage_add_map', array('nid' => $node->nid));
   return $output;
 }
