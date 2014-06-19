@@ -296,6 +296,9 @@ function salesforce_webforms_webform_component_info() {
  *     - edit.
  *   - map_id: Int ID of the map to be operated upon.
  *   - map_fields: Associative array of fields and values.
+ *
+ * @return int
+ *   The created or updated map id.
  */
 function salesforce_webforms_map_save(array $values) {
   // Save map data.
@@ -322,6 +325,8 @@ function salesforce_webforms_map_save(array $values) {
       salesforce_webforms_save_fields($mapid, $values['map_fields']);
     }
   }
+
+  return $mapid;
 }
 
 /**
