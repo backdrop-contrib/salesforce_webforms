@@ -1,12 +1,15 @@
 
 /**
- * JavaScript behaviors for the front-end display of Salesforce-driven picklists.
+ * @file Behaviors for the front-end display of Salesforce-driven picklists.
  */
-
 (function ($) {
+  'use strict';
 
-// From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
-// Make sure we have the "keys" function on Object
+/**
+ * Defines the keys function if not provided by the browser.
+ *
+ * From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys.
+ */
 if (!Object.keys) {
   Object.keys = (function () {
     'use strict';
@@ -48,6 +51,13 @@ if (!Object.keys) {
   }());
 }
 
+/**
+ * Attaches the show/hide logic for dependent piclists in webforms.
+ *
+ * @property {function} attach
+ *   Adds handler to the forms to update all dependent picklists whenever
+ *   a controlling picklist changes values.
+ */
 Drupal.behaviors.salesforce_webforms = Drupal.behaviors.salesforce_webforms || {};
 
 Drupal.behaviors.salesforce_webforms.attach = function(context, settings) {
@@ -59,6 +69,9 @@ Drupal.behaviors.salesforce_webforms.attach = function(context, settings) {
 
 Drupal.salesforce_webforms = Drupal.salesforce_webforms || {};
 
+/**
+ * Attaches our handler to each form on the page.
+ */
 Drupal.salesforce_webforms.salesforce = function(context, settings) {
   // Add the bindings to each webform on the page.
   $.each(settings.salesforceMap, function(formId, settings) {
@@ -68,10 +81,9 @@ Drupal.salesforce_webforms.salesforce = function(context, settings) {
 
       $form.bind('change', { 'settings': settings }, Drupal.salesforce_webforms.salesforceCheck);
 
-      // See if we have any dependent fields
-      //$.each(settings, function(elementId) {
+      // See if we have any dependent fields.
       for(var elementId in settings) {
-        var children = new Array();
+        var children = [];
         var parent = null;
         var fieldname = settings[elementId].fieldname;
         var controlField = settings[elementId].control;
@@ -89,7 +101,8 @@ Drupal.salesforce_webforms.salesforce = function(context, settings) {
         settings[elementId].children = children;
       }
 
-      // Trigger all the elements that are driven by Salesforce picklists on this form which have children, but no parents
+      // Trigger all the elements that are driven by Salesforce picklists on
+      // this form which have children, but no parents.
       $.each(settings, function(elementId) {
         if(settings[elementId].parent == null && settings[elementId].children.length > 0) {
           $('#' + elementId).find('select').filter(':first').trigger('change');
@@ -105,116 +118,113 @@ Drupal.salesforce_webforms.salesforce = function(context, settings) {
  * This event is bound to the entire form, not individual fields.
  */
 Drupal.salesforce_webforms.salesforceCheck = function(e) {
-  var $trigger = $(e.target);
-  var triggerId = $trigger.attr('id');
-// alert("Trigger ID: " + triggerId);
   var $div = $(e.target).parents('.sf-picklist-wrapper:first');
-  // var $form = $trigger.closest('form');
-// alert("div: "+JSON.stringify($div));
   var formId = $div.attr('id');
-// alert("Form ID: " + formId);
   var settings = e.data.settings;
-// alert("Settings: " + JSON.stringify(settings));
-// alert("Settings["+formId+"]="+JSON.stringify(settings[formId]));
 
   for (var i = 0; i < settings[formId].children.length; i++) {
-    Drupal.salesforce_webforms.show_hide(triggerId, settings[formId].children[i], settings);
+    Drupal.salesforce_webforms.show_hide(settings[formId].children[i], settings);
   }
 };
 
-Drupal.salesforce_webforms.show_hide = function(tid, idx, settings){
-  // Get current value
+/**
+ * Filters the list of valid choices in a dependent picklist.
+ *
+ * If the number of valid choices is zero, then the entire control is hidden.
+ *
+ * @param {string} idx
+ *   The ID of the dependent item.
+ * @param {object} settings
+ *   The settings for this page.
+ */
+Drupal.salesforce_webforms.show_hide = function(idx, settings){
+  // Get current value.
   var $cmp = $('#' + idx);
   var $sel = $cmp.find("select");
 
   var curval = $sel.val();
-// alert("Saving old value "+curval);
 
-  var options = Drupal.salesforce_webforms.salesforceGetPickList(tid, idx, settings);
+  var options = Drupal.salesforce_webforms.salesforceGetPickList(idx, settings);
   var showComponent;
 
   if(Object.keys(options).length == 0) {
-    // Hide this component
+    // Hide this component.
     showComponent = false;
     curval = "";
   }
   else {
-    // Show this component
+    // Show this component.
     showComponent = true;
   }
   if (showComponent) {
     var $opt = $cmp.find('select');
-// alert("$opt: "+JSON.stringify($opt));
-// alert("Options: "+JSON.stringify(options));
-    // Get the first option to add back in
+
+    // Get the first option to add back in.
     var emptyOpt = $opt.find("option").first();
     $opt.find("option").remove();
     $opt.append(emptyOpt);
 
     $.each(options, function (key, lbl) {
-// alert("Adding option "+key);
-      // $opt.append(new Option(key, lbl));
       $opt.append($('<option>', { lbl : key })
           .text(lbl));
-                        // .attr("value",key)
-                        // .text(lbl));
     });
     $cmp.find('select').removeAttr('disabled').removeClass('salesforce-webform-disabled').end().show();
     $cmp.find('select').focus();
   }
   else {
-    // $cmp.find('input:not(:disabled)').attr('disabled', true).val('').addClass('salesforce-webform-disabled').end().hide();
     $cmp.find('select').attr('disabled', true).val(null).addClass('salesforce-webform-disabled').end().hide();
   }
 
-  // Select the old value if possible
+  // Select the old value if possible.
   $sel.val(curval);
 
-  // And process any children goes here
+  // And process any children of the newly updated field.
   var selid = $sel.attr('id');
   var children = settings[idx].children;
   for(var i = 0; i < children.length; i++) {
-    Drupal.salesforce_webforms.show_hide(selid, children[i], settings);
+    Drupal.salesforce_webforms.show_hide(children[i], settings);
   }
 }
 
-
-Drupal.salesforce_webforms.salesforceGetPickList = function(pid, element, map) {
+/**
+ * Gets the list of currently valid options for a given select list.
+ *
+ * @param {string} element
+ *   The ID of the dependent item.
+ * @param {object} map
+ *   The settings for this item.
+ *
+ * @return
+ *   The options array of currently valid choices.
+ */
+Drupal.salesforce_webforms.salesforceGetPickList = function(element, map) {
   var options = new Object();
   var controlFieldName = map[element].control;
 
-  // First, figure out what DOM ID houses this field
+  // First, figure out what DOM ID houses this field.
   var controlFieldId = null;
-  for(fieldId in map) {
+  for(var fieldId in map) {
     if(map[fieldId].fieldname == controlFieldName)
       controlFieldId = fieldId;
   }
 
   // Did we find a match?
   if(controlFieldId == null) {
-    // Nope
-// alert("Didn't find controlling field "+controlFieldName+" for "+element);
+    // Nope.
     return map[element].options;
   }
 
   var controlIndex = Drupal.salesforce_webforms.salesforceGetSelectedIndex(controlFieldId, map);
-// alert("Got control index "+controlIndex);
 
-  // And determine which of our options apply to that position
+  // And determine which of our options apply to that position.
   var optionmap = new Array();
   optionmap[0] = -1;
   controlIndex--;
   for (var i = 0; controlIndex >= 0 && i < map[element]['full'].length; i++) {
     if(map[element].full[i].map[controlIndex]) {
-      // options[options.length] = new Option(
-        // map[element]['full'][i]['label'],
-        // map[element]['full'][i]['value']
-// alert("Adding option "+map[element].full[i].value);
       options[map[element].full[i].value] = map[element].full[i].label;
-// alert("Resulting in "+JSON.stringify(options));
-      // Store the map
+      // Store the map.
       optionmap[optionmap.length] = map[element]['full'][i].position;
-      // map[element]['full'][i]['displayPosition'] = options.length;
     }
     else {
       map[element]['full'][i]['displayPosition'] = -1;
@@ -224,22 +234,32 @@ Drupal.salesforce_webforms.salesforceGetPickList = function(pid, element, map) {
   map[element].options = options;
   map[element].optionmap = optionmap;
 
-// alert("Returning options list "+JSON.stringify(options));
   return options;
 }
 
+/**
+ * Gets the current value of the identified control.
+ *
+ * @param {string} element
+ *   The ID of the dependent item.
+ * @param {object} map
+ *   The settings for this item.
+ *
+ * @return
+ *   The current value.
+ */
 Drupal.salesforce_webforms.salesforceGetSelectedIndex = function(el, map) {
-  // First, recusively make sure all parents are set to valid values
-  // Drupal.salesforce_webforms.show_hide(el, map);
-
-  // And now get the index
+  // Get the controlling container.
   var $elem = $('#' + el);
+
+  // Now find the select control within that container.
   var $find = $elem.find('select');
+
+  // Get the selected option.
   var idx = $find.attr('selectedIndex');
 
   // Now map that back to the original order
   var ret = idx == 0 ? -1 : map[el].optionmap[idx];
-// alert("Mapping "+el+" from "+idx+" to "+ret);
   return ret;
 }
 })(jQuery);
