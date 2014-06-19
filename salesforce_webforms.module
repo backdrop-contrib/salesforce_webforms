@@ -15,8 +15,6 @@ function salesforce_webforms_menu() {
 
   $items['node/%webform_menu/webform/salesforce'] = array(
     'title' => 'Salesforce',
-    // 'page callback' => 'salesforce_webforms_manage',
-    // 'page arguments' => array(1),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('salesforce_webforms_maps_form', 1),
     'access callback' => 'node_access',
