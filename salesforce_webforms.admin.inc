@@ -6,41 +6,165 @@
  */
 
 /**
- * Menu Callback function to show an overview of the existing mappings.
- *
- * Also gives the option to add a new one.
+ * Form constructor for the mapping list.
  *
  * @param object $node
- *   The node which owns the webform.
+ *   The node which owns this form.
  *
- * @return string
- *   The rendered HTML of the map table.
+ * @see salesforce_webforms_maps_form_validate()
+ * @see salesforce_webforms_maps_form_submit()
+ * @see theme_salesforce_webforms_maps_form()
+ *
+ * @ingroup forms
  */
-function salesforce_webforms_manage($node) {
-  // Switch to using a form so we can do the draggable sorting.
-  $form = drupal_get_form('salesforce_webforms_maps_form', $node);
+function salesforce_webforms_maps_form($form, &$settings, $node) {
+  $maps = salesforce_webforms_get_webform_maps($node);
 
-  $out1 = theme($form);
-  $out2 = drupal_render($form);
-
-  // dsm('theme');
-  // dsm($out1);
-  // dsm('drupal_render');
-  // dsm($out2);
-  return array(
-    '#theme' => 'theme_salesforce_webforms_manage',
+  $form = array(
+    '#tree' => TRUE,
     '#node' => $node,
-    '#form' => $form,
+    '#theme' => 'salesforce_webforms_maps_form',
+    'maps' => array(),
+    'nid' => array(
+      '#type' => 'value',
+      '#value' => $node->nid,
+    ),
   );
+
+  $objects = salesforce_webforms_get_objects_selection();
+
+  $maxweight = 0;
+
+  foreach ($maps as $map) {
+    $mapid = $map['mapid'];
+    $form['maps'][$mapid] = array(
+      '#salesforce-webforms-extra' => $map,
+      'mapname' => array(
+        '#markup' => check_plain($map['mapname']),
+      ),
+      'sf_object' => array(
+        '#markup' => check_plain($objects[$map['sf_object']]),
+      ),
+      'fields' => array(
+        '#type' => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#title' => t('Fields'),
+      ),
+      'weight' => array(
+        '#type' => 'weight',
+        '#title' => t('Weight'),
+        '#default_value' => $map['displayorder'],
+        '#delta' => 10,
+        '#title_display' => 'invisible',
+      ),
+    );
+
+    // Add each of the fields.
+    foreach ($map['fields'] as $fid => $field) {
+      $form['maps'][$mapid]['fields'][$fid] = array(
+        '#type' => 'textfield',
+        '#disabled' => TRUE,
+        '#title' => t('Field Name'),
+        '#title_display' => 'invisible',
+        '#value' => ($field['keyfield'] ? '*' : '') . $field['sf_fieldname'],
+      );
+    }
+
+    if ($map['displayorder'] >= $maxweight) {
+      $maxweight = $map['displayorder'] + 1;
+    }
+  }
+
+  // Add the new map section.
+  $form['new'] = array(
+    'mapname' => array(
+      '#type' => 'textfield',
+      '#title' => t('Map Name'),
+      '#title_display' => 'invisible',
+      '#required' => FALSE,
+    ),
+    'sf_object' => array(
+      '#type' => 'select',
+      '#title' => t('Object'),
+      '#title_display' => 'invisible',
+      '#required' => FALSE,
+      '#options' => $objects,
+    ),
+    'weight' => array(
+      '#type' => 'weight',
+      '#title' => t('Weight'),
+      '#default_value' => $maxweight,
+      '#delta' => 10,
+      '#title_display' => 'invisible',
+    ),
+  );
+
+  // Add action section.
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    ),
+  );
+  return $form;
 }
 
 /**
- * Theme the output of the main map list.
+ * Form validation handler for salesforce_webforms_maps_form().
+ *
+ * @see salesforce_webforms_maps_form()
  */
-function theme_salesforce_webforms_manage($variables) {
-  return drupal_render($variables['form']);
+function salesforce_webforms_maps_form_validate($form, &$settings) {
+  // Make sure that the new map name is unique and formatted properly.
+  $name = $settings['values']['new']['mapname'];
+  $nid = $settings['values']['nid'];
+
+  // If new name is not blank, then validate it.
+  if ($name != '') {
+    // First make sure that the name is valid.
+    if (!preg_match('/^[a-z0-9_]+$/i', $name)) {
+      form_set_error('name',
+        t('The map name %mapname is invalid. Please include only alphanumeric characters and underscores.',
+        array(
+          '%mapname' => $name,
+        ))
+      );
+
+      // No need to process further if the format is invalid.
+      return;
+    }
+
+    // Now make sure the key isn't duplicated.
+    $maps = salesforce_webforms_get_node_maps($nid);
+    foreach ($maps as $map) {
+      if ($map['mapname'] == $name) {
+        form_set_error('name',
+          t('The map name %mapname is already in use. Please use a unique name.',
+          array(
+            '%mapname' => $name,
+          ))
+        );
+
+        // No need to continue processing.
+        return;
+      }
+    }
+  }
 }
 
+/**
+ * Returns HTML for a salesforce_webforms_maps_form form.
+ *
+ * @param array $vars
+ *   An associative array containing:
+ *   - form: The form to be formatted.
+ *
+ * @see salesforce_webforms_maps_form()
+ *
+ * @ingroup themeable
+ */
 function theme_salesforce_webforms_maps_form($vars) {
   $form = $vars['form'];
 
@@ -52,11 +176,10 @@ function theme_salesforce_webforms_maps_form($vars) {
     array(
       'data' => t('Operations'),
       'colspan' => 2,
-  ));
+    ));
 
   $rows = array();
 
-  // $output = render($form['nid']);
   $nid = $form['nid']['#value'];
 
   foreach (element_children($form['maps']) as $mid) {
@@ -70,7 +193,8 @@ function theme_salesforce_webforms_maps_form($vars) {
       'data' => array(
         drupal_render($form['maps'][$mid]['mapname']),
         drupal_render($form['maps'][$mid]['sf_object']),
-        theme('item_list', array('items' => $field_info)),
+        drupal_render($form['maps'][$mid]['fields']),
+        // theme('item_list', array('items' => $field_info)),
         drupal_render($form['maps'][$mid]['weight']),
         l(t('Edit'), 'node/' . $nid . '/webform/salesforce/edit/' . $map['sf_object'] . '/' . $map['mapid'], array('query' => drupal_get_destination())),
         l(t('Delete'), 'node/' . $nid . '/webform/salesforce/delete/' . $map['mapid'], array('query' => drupal_get_destination())),
@@ -104,84 +228,11 @@ function theme_salesforce_webforms_maps_form($vars) {
   return $output;
 }
 
-function salesforce_webforms_maps_form($form, &$settings, $node) {
-  $maps = salesforce_webforms_get_webform_maps($node);
-
-  $form = array(
-    '#tree' => TRUE,
-    '#node' => $node,
-    '#theme' => 'salesforce_webforms_maps_form',
-    'maps' => array(),
-    'nid' => array(
-      '#type' => 'value',
-      '#value' => $node->nid,
-    ),
-  );
-
-  $objects = salesforce_webforms_get_objects_selection();
-
-  $maxweight = 0;
-
-  foreach ($maps as $map) {
-    $mapid = $map['mapid'];
-    $form['maps'][$mapid] = array(
-      '#salesforce-webforms-extra' => $map,
-      'mapname' => array(
-        '#markup' => check_plain($map['mapname']),
-      ),
-      'sf_object' => array(
-        '#markup' => check_plain($objects[$map['sf_object']]),
-      ),
-      'weight' => array(
-        '#type' => 'weight',
-        '#title' => t('Weight'),
-        '#default_value' => $map['displayorder'],
-        '#delta' => 10,
-        '#title_display' => 'invisible',
-      ),
-    );
-
-    if ($map['displayorder'] >= $maxweight) {
-      $maxweight = $map['displayorder'] + 1;
-    }
-  }
-
-  // Add the new map section
-  $form['new'] = array(
-    'mapname' => array(
-      '#type' => 'textfield',
-      '#title' => t('Map Name'),
-      '#title_display' => 'invisible',
-      '#validate' => array('salesforce_webform_mapname_validate'),
-      '#required' => FALSE,
-    ),
-    'sf_object' => array(
-      '#type' => 'select',
-      '#title' => t('Object'),
-      '#title_display' => 'invisible',
-      '#required' => FALSE,
-      '#options' => $objects,
-    ),
-    'weight' => array(
-      '#type' => 'weight',
-      '#title' => t('Weight'),
-      '#default_value' => $maxweight,
-      '#delta' => 10,
-      '#title_display' => 'invisible',
-    ),
-  );
-
-  // Add action section
-  $form['actions'] = array(
-    '#type' => 'actions',
-    'submit' => array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-    ),
-  );
-  return $form;
-}
-
+/**
+ * Form submission handler for salesforce_webforms_maps_form().
+ *
+ * @see salesforce_webforms_maps_form()
+ */
 function salesforce_webforms_maps_form_submit($form, &$state) {
   foreach ($state['values']['maps'] as $id => $map) {
     db_query(
@@ -190,31 +241,94 @@ function salesforce_webforms_maps_form_submit($form, &$state) {
     );
   }
 
-  // Now see if we have a new map to create
+  // Now see if we have a new map to create.
   $new = $state['values']['new'];
   if ($new['mapname'] != '' && $new['sf_object'] != '') {
     // Yes. Create the object and then move to the edit form for it.
+    $nid = check_plain($state['values']['nid']);
+    $obj = check_plain($new['sf_object']);
     $newid = salesforce_webforms_map_save(array(
       'action' => 'add',
-      'nid' => check_plain($state['values']['nid']),
-      'object' => check_plain($new['sf_object']),
+      'nid' => $nid,
+      'object' => $obj,
       'mapname' => check_plain($new['mapname']),
     ));
 
-    dsm("node/" . $state['values']['nid'] . "/webform/salesforce/edit/" . $new['sf_object'] . "/$newid");
-    drupal_goto("node/" . $state['values']['nid'] . "/webform/salesforce/edit/" . $new['sf_object'] . "/$newid");
+    drupal_goto("node/$nid/webform/salesforce/edit/$obj/$newid", array(
+      'query' => drupal_get_destination(),
+    ));
   }
 }
 
-function salesforce_webforms_old_manage($node) {
-  $maps = salesforce_webforms_get_webform_maps($node);
+/**
+ * Form constructor for the map delete form.
+ *
+ * @param array $map
+ *   The map to be deleted.
+ *
+ * @see salesforce_webforms_delete_rule_submit()
+ *
+ * @ingroup forms
+ */
+function salesforce_webforms_delete_rule($form, &$settings, $map) {
+  $objects = salesforce_webforms_get_objects_selection();
+  $form = array(
+    'mapid' => array(
+      '#type' => 'value',
+      '#value' => $map['mapid'],
+    ),
+    'header' => array(
+      '#markup' => '<h3>' . t('Are you sure you wish to delete this map?') . '</h3>',
+    ),
+    'map' => array(
+      '#type' => 'fieldset',
+      '#collapsed' => FALSE,
+      '#collapsible' => FALSE,
+      '#title' => t('Map Details'),
+      'name' => array(
+        '#type' => 'textfield',
+        '#title' => t('Map Name'),
+        '#value' => $map['mapname'],
+        '#disabled' => TRUE,
+      ),
+      'object' => array(
+        '#type' => 'textfield',
+        '#title' => t('Salesforce Object'),
+        '#value' => $objects[$map['sf_object']],
+        '#disabled' => TRUE,
+      ),
+    ),
+    'actions' => array(
+      '#type' => 'actions',
+      'submit' => array(
+        '#type' => 'submit',
+        '#value' => t('Yes'),
+      ),
+      'cancel' => array(
+        '#type' => 'submit',
+        '#value' => t('Cancel'),
+      ),
+    ),
+  );
 
-  // 
-  $output = '';
-  $output .= theme('salesforce_webforms_manage_overview', array('maps' => $maps, 'node' => $node));
-  $output .= theme('salesforce_webforms_manage', array('maps' => $maps, 'node' => $node));
-  $output .= theme('salesforce_webforms_manage_add_map', array('nid' => $node->nid));
-  return $output;
+  return $form;
+}
+
+/**
+ * Form submission handler for salesforce_webforms_delete_rule().
+ *
+ * @see salesforce_webforms_delete_rule()
+ */
+function salesforce_webforms_delete_rule_submit($form, &$settings) {
+  $button = $settings['triggering_element'];
+  if ($button['#value'] == t('Yes')) {
+    $mapid = check_plain($settings['values']['mapid']);
+    salesforce_webforms_delete_mapping($mapid);
+    drupal_set_message(t('Map :mapid has been deleted', array(':mapid' => $mapid)));
+  }
+  else {
+    drupal_set_message(t('Delete cancelled'));
+  }
 }
 
 /**
@@ -231,58 +345,6 @@ function salesforce_webforms_get_webform_maps($node) {
     $maps = salesforce_webforms_get_node_maps($node->nid);
   }
   return $maps;
-}
-
-/**
- * Returns HTML for a list of object mappings.
- *
- * @param array $variables
- *   An associative array containing:
- *   - maps: The list of mappings for this form.
- *   - node: The node which owns this form.
- *
- * @ingroup themeable
- */
-function theme_salesforce_webforms_manage_overview(array $variables) {
-  $maps = $variables['maps'];
-  $node = $variables['node'];
-
-  $header = array(t('Map name'), t('Object'), t('Fields (* indicates key field)'), array(
-    'data' => t('Operations'),
-    'colspan' => 2,
-    ));
-
-  $objects = salesforce_webforms_get_objects_selection();
-  if (!empty($maps)) {
-    foreach ($maps as $map) {
-      $field_info = salesforce_webforms_map_fields_basic($map['sf_object'], $map['fields']);
-      $row = array();
-      $row[] = array(
-        'data' => check_plain($map['mapname']),
-      );
-      $row[] = array(
-        'data' => $objects[$map['sf_object']],
-      );
-      $row[] = array(
-        'data' => theme('item_list', array('items' => $field_info)),
-      );
-      $row[] = array(
-        'data' => l(t('Edit'), 'node/' . $node->nid . '/webform/salesforce/edit/' . $map['sf_object'] . '/' . $map['mapid'], array('query' => drupal_get_destination())),
-      );
-      $row[] = array(
-        'data' => l(t('Delete'), 'node/' . $node->nid . '/webform/salesforce/delete/' . $map['mapid'], array('query' => drupal_get_destination())),
-      );
-      $rows[] = $row;
-    }
-  }
-  else {
-    $rows[][] = array(
-      'data' => t('No mappings available.'),
-      'colspan' => 5,
-    );
-  }
-
-  return theme('table', array('header' => $header, 'rows' => $rows));
 }
 
 /**
@@ -345,7 +407,7 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
 }
 
 /**
- * Form constructor for the manage maps form.
+ * Form constructor for the manage map form.
  *
  * Allows the form administrator to manage mappings between webform and
  * Salesforce.
@@ -361,6 +423,7 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
  * @param array $map
  *   The current contents of the mapping.
  *
+ * @see salesforce_webforms_manage_map_validate()
  * @see salesforce_webforms_manage_map_submit()
  *
  * @ingroup forms
@@ -406,18 +469,6 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     '#size' => 60,
     '#maxlength' => 64,
     '#weight' => 1,
-  );
-
-  $form['map']['displayorder'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Weight'),
-    '#default_value' => (isset($map['displayorder'])) ? $map['displayorder'] : '',
-    '#required' => TRUE,
-    '#size' => 5,
-    '#maxlength' => 5,
-    '#weight' => 2,
-    '#description' => t('The order that maps are processed. Lower numbered maps will be processed first.'),
-    '#element_validate' => array('element_validate_integer'),
   );
 
   $form['map']['tokens'] = array(
