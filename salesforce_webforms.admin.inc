@@ -276,9 +276,6 @@ function salesforce_webforms_delete_rule($form, &$settings, array $map) {
       '#type' => 'value',
       '#value' => $map['mapid'],
     ),
-    'header' => array(
-      '#markup' => '<h3>' . t('Are you sure you wish to delete this map?') . '</h3>',
-    ),
     'map' => array(
       '#type' => 'fieldset',
       '#collapsed' => FALSE,
@@ -297,20 +294,12 @@ function salesforce_webforms_delete_rule($form, &$settings, array $map) {
         '#disabled' => TRUE,
       ),
     ),
-    'actions' => array(
-      '#type' => 'actions',
-      'submit' => array(
-        '#type' => 'submit',
-        '#value' => t('Yes'),
-      ),
-      'cancel' => array(
-        '#type' => 'submit',
-        '#value' => t('Cancel'),
-      ),
-    ),
   );
 
-  return $form;
+  return confirm_form(
+    $form,
+    t('Are you sure you wish to delete this map?'),
+    drupal_get_destination());
 }
 
 /**
@@ -319,15 +308,9 @@ function salesforce_webforms_delete_rule($form, &$settings, array $map) {
  * @see salesforce_webforms_delete_rule()
  */
 function salesforce_webforms_delete_rule_submit($form, &$settings) {
-  $button = $settings['triggering_element'];
-  if ($button['#value'] == t('Yes')) {
-    $mapid = check_plain($settings['values']['mapid']);
-    salesforce_webforms_delete_mapping($mapid);
-    drupal_set_message(t('Map :mapid has been deleted', array(':mapid' => $mapid)));
-  }
-  else {
-    drupal_set_message(t('Delete cancelled'));
-  }
+  $mapid = check_plain($settings['values']['mapid']);
+  salesforce_webforms_delete_mapping($mapid);
+  drupal_set_message(t('Map :mapid has been deleted', array(':mapid' => $mapid)));
 }
 
 /**
