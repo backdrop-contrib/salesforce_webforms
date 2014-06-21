@@ -244,7 +244,7 @@ function salesforce_webforms_get_objects($use_cache = TRUE) {
 }
 
 /**
- * Gets the list of Saelforce objects as an array of options.
+ * Gets the list of Saleforce objects as an array of options.
  *
  * @return array
  *   An associative array appropriate for use as an 'options' element.
@@ -624,6 +624,41 @@ function salesforce_webforms_form_alter(&$form, &$state, $fid) {
 }
 
 /**
+ * Implements hook_webform_select_options_info().
+ */
+function salesforce_webform_select_options_info() {
+  $items = array();
+
+  $objects = salesforce_webforms_get_objects();
+  foreach ($objects as $name => $info) {
+    $items['salesforce_webforms_' . $name] = array(
+      'title' => t('Salesforce @object records', array('@object' => $info['label'])),
+      'options callback' => 'salesforce_webforms_object_select_list',
+      'options arguments' => $name,
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Callback to build the list of records of the given object.
+ *
+ * @param array $object
+ *   The object to query.
+ *
+ * @return array
+ *   Array suitable to be used as an options form element.
+ */
+function salesforce_webforms_object_select_list($object) {
+  $obj = $object['extra']['options_source'];
+  // Throw away the prefix we added.
+  $obj = substr($obj, strlen('salesforce_webforms_'));
+  $recs = salesforce_webforms_get_object_records($obj);
+  return $recs;
+}
+
+/**
  * Loads data from Salesforce, optionally thorugh a cache.
  *
  * @param string $url
@@ -820,4 +855,58 @@ function salesforce_webforms_langauge_code($language = NULL) {
   }
 
   return $language;
+}
+
+/**
+ * Builds an array of objects of the given type usable as an options array.
+ *
+ * @param string $object
+ *   The object to query.
+ *
+ * @return array
+ *   An associative array suitable for use as an #options element, where the
+ *   key is the Salesforce ID, and the value is built based on a best guess
+ *   as to an intelligent label for that object.
+ */
+function salesforce_webforms_get_object_records($object) {
+  $details = salesforce_webforms_get_object_fields($object);
+
+  // Start building up the query.
+  $sql = "SELECT id";
+
+  // Use a 'Name' field if one exists.
+  if (isset($details['Name'])) {
+    $sql .= ",name";
+  }
+
+  // Special handling for case objects.
+  if (isset($details['CaseNumber'])) {
+    $sql .= ',CaseNumber';
+  }
+
+  $sql .= " FROM $object";
+
+  // If the object supports the 'IsDeleted' flag then use it to filter.
+  if (isset($details['IsDeleted'])) {
+    $sql .= " WHERE IsDeleted=FALSE";
+  }
+
+  $records = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
+  $options = array();
+
+  foreach ($records['records'] as $row) {
+    $id = $row['Id'];
+
+    if (isset($row['Name'])) {
+      $options[$id] = $row['Name'];
+    }
+    elseif (isset($row['CaseNumber'])) {
+      $options[$id] = $row['CaseNumber'];
+    }
+    else {
+      $options[$id] = $id;
+    }
+  }
+
+  return $options;
 }
