@@ -116,7 +116,7 @@ will be created.', array(':object' => $arg[1])) . '</p>';
       break;
 
     case 'node/%/webform/salesforce/delete/%':
-      $msg = '<p>' . t('Delete the specfic mapping. This operation cannot
+      $msg = '<p>' . t('Delete the specific mapping. This operation cannot
 be undone.') . '</p>';
       break;
 
