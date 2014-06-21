@@ -535,36 +535,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
       $options = array('' => t('- Select -'));
       // Get a list of all records of the appropriate type(s).
       foreach ($fdata['referenceTo'] as $ref) {
-        // Get the object details to see if it supports the IsDeleted attribute.
-        $ref_details = salesforce_webforms_get_object_fields($ref);
-        $sql = "SELECT id";
-        if (isset($ref_details['Name'])) {
-          $sql .= ",name";
-        }
-        // Special handling for Cases.
-        if (isset($ref_details['CaseNumber'])) {
-          $sql .= ",CaseNumber";
-        }
-        if (isset($ref_details['DeveloperName'])) {
-          $sql .= ",developername";
-        }
-        $sql .= " from $ref";
-        if (isset($ref_details['IsDeleted'])) {
-          $sql .= " WHERE IsDeleted=FALSE";
-        }
-        $targets = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
-        foreach ($targets['records'] as $row) {
-          $options[$row['Id']] = $ref . ": ";
-          if (isset($row['Name'])) {
-            $options[$row['Id']] .= $row['Name'];
-          }
-          elseif (isset($row['CaseNumber'])) {
-            $options[$row['Id']] .= $row['CaseNumber'];
-          }
-          if (isset($row['DeveloperName'])) {
-            $options[$row['Id']] .= " (" . $row['DeveloperName'] . ")";
-          }
-        }
+        $options[$ref] = salesforce_webforms_get_object_records($ref);
       }
       $form['map']['map_fields'][$fname]['picklist']
         = array(
