@@ -286,14 +286,12 @@ function salesforce_webforms_get_sfapi() {
  *   Determines if the cache should be used (TRUE) or bypassed and
  *   updated (FALSE).
  *
- * @return array
+ * @return array|NULL
  *   An associative array of fields, keyed by the field name. The data of
  *   each field is an array of attributes as defined by Salesforce.
  */
 function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
   $sf = salesforce_webforms_get_sfapi();
-
-  $object = array();
 
   try {
     $sobject = $sf->objectDescribe($obj, !$use_cache);
@@ -308,6 +306,8 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
         '@code' => $e->getCode(),
       ),
       WATCHDOG_ERROR);
+
+    return NULL;
   }
 
   $return = array();
