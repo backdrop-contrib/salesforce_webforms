@@ -82,19 +82,11 @@ function salesforce_webforms_menu() {
  * Implements hook_help().
  */
 function salesforce_webforms_help($path, $arg) {
-  switch ($path) {
-    // Main help block for this module.
-    case 'admin/help#salesforce_webforms':
-      return '<p>' . t('Webforms can be used to easily build forms without
-relying on code. With this integration, those forms can interact with
-the Salesforce suite of tools. Multiple Salesforce objects can be created
-from a single Webform, and Salesforce picklists can be used to drive
-drop down select lists within the form presented to the site
-visitor.') . '</p>';
-      break;
+  $msg = "";
 
+  switch ($path) {
     case 'node/%/webform/salesforce':
-      return '<p>' . t('This form allows fields in the webform, as well
+      $msg = '<p>' . t('This form allows fields in the webform, as well
 as constant data, to be assigned to multiple fields within multiple
 Salesforce objects. To create a new mapping, choose a name, which must
 be unique among all maps for this form, and must contain only letters,
@@ -105,7 +97,7 @@ next page.') . '</p>';
 
     case 'node/%/webform/salesforce/add/%':
     case 'node/%/webform/salesforce/edit/%/%':
-      return '<p>' . t('This form allows for the editing of the mappings
+      $msg = '<p>' . t('This form allows for the editing of the mappings
 within a :object object. Each available field within the :object object
 will be shown. Clicking on the name of the field will expand it out to
 show the possible values. All fields have a text input area of some
@@ -124,12 +116,12 @@ will be created.', array(':object' => $arg[1])) . '</p>';
       break;
 
     case 'node/%/webform/salesforce/delete/%':
-      return '<p>' . t('Delete the specfic mapping. This operation cannot
+      $msg = '<p>' . t('Delete the specfic mapping. This operation cannot
 be undone.') . '</p>';
       break;
 
     case 'node/%/submission/%/sf':
-      return '<p>' . t('Allows for the resubmission of data to Salesforce
+      $msg = '<p>' . t('Allows for the resubmission of data to Salesforce
 from a previously completed form. This might be necessary if, for instance,
 the connection with Salesforce was down during the initial form
 submission, or if the data was edited and needed to be resent. When sending
@@ -139,7 +131,18 @@ do so. If told not to update the original objects, or if the original
 objects are no longer available, then new objects will be created, except
 that the key field lookup logic will still be used.') . '</p>';
       break;
+
+    case 'admin/help#salesforce_webforms':
+      $msg = '<p>' . t('Webforms can be used to easily build forms without
+relying on code. With this integration, those forms can interact with
+the Salesforce suite of tools. Multiple Salesforce objects can be created
+from a single Webform, and Salesforce picklists can be used to drive
+drop down select lists within the form presented to the site
+visitor.') . '</p>';
+      break;
   }
+
+  return $msg;
 }
 
 /**
