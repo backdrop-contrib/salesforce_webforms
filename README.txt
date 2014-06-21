@@ -53,6 +53,14 @@ USAGE
     In all cases, the value returned by the control will be the base language
     version.
 
+    In addition to picklists, predefined select lists are made available for
+    all objects within your Salesforce instance. To make use of one of these,
+    choose the "Select" control type. The list of predefined lists drop down
+    should include an entry for each Salesforce object.
+
+    Note that not all objects support listing in this fashion. While they
+    will show up as options, choosing them will result in an error.
+
   To send data to Salesforce:
     Data entered by the user, as well as hidden values and hard coded
     information can be sent to Salesforce to create and/or update
