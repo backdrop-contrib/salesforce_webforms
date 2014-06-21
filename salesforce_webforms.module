@@ -626,7 +626,7 @@ function salesforce_webforms_form_alter(&$form, &$state, $fid) {
 /**
  * Implements hook_webform_select_options_info().
  */
-function salesforce_webform_select_options_info() {
+function salesforce_webforms_webform_select_options_info() {
   $items = array();
 
   $objects = salesforce_webforms_get_objects();
@@ -650,7 +650,7 @@ function salesforce_webform_select_options_info() {
  * @return array
  *   Array suitable to be used as an options form element.
  */
-function salesforce_webforms_object_select_list($object) {
+function salesforce_webforms_object_select_list(array $object) {
   $obj = $object['extra']['options_source'];
   // Throw away the prefix we added.
   $obj = substr($obj, strlen('salesforce_webforms_'));
