@@ -112,7 +112,7 @@ existing :object to update, rather than always creating a new :object. If
 multiple fields are marked as key fields, then all fields must match
 for a(n) :object to be chosen for update. If one or more key fields is
 not able to match. or if no key fields are defined, then a new :object
-will be created.', array(':object' => $arg[1])) . '</p>';
+will be created.', array(':object' => $arg[2])) . '</p>';
       break;
 
     case 'node/%/webform/salesforce/delete/%':
