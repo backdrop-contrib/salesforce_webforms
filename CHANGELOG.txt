@@ -1,5 +1,7 @@
 Version 7.x-1.x, (development version)
 -----------------------
+Issue #2282001 by dbcollies: Wrap all calls to Salesforce in try/catch.
+                             Log all errors to watchdog.
 Issue #2282989 by dbcollies: Added support for prefefined select lists.
 Issue #2283782 by dbcollies: Changed map manage for to draggable.
                              Implemented map delete function.

@@ -302,10 +302,11 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
     drupal_set_message($e->getMessage(), 'error');
     watchdog(
       'salesforce_webforms',
-      t('Salesforce Exception @code: @msg', array(
+      'Salesforce Exception @code: @msg',
+      array(
         '@msg' => $e->getMessage(),
         '@code' => $e->getCode(),
-      )),
+      ),
       WATCHDOG_ERROR);
   }
 
@@ -713,10 +714,11 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
     drupal_set_message($e->getMessage(), 'error');
     watchdog(
       'salesforce_webforms',
-      t('Salesforce Exception @code: @msg', array(
+      'Salesforce Exception @code: @msg',
+      array(
         '@msg' => $e->getMessage(),
         '@code' => $e->getCode(),
-      )),
+      ),
       WATCHDOG_ERROR);
 
     // See if we can still get the data from the cache.
@@ -800,10 +802,11 @@ function salesforce_webforms_update_object($object, $id, array $fields) {
     drupal_set_message($e->getMessage(), 'error');
     watchdog(
       'salesforce_webforms',
-      t('Salesforce Exception @code: @msg', array(
+      'Salesforce Exception @code: @msg',
+      array(
         '@msg' => $e->getMessage(),
         '@code' => $e->getCode(),
-      )),
+      ),
       WATCHDOG_ERROR);
 
     return NULL;
@@ -832,10 +835,11 @@ function salesforce_webforms_create_object($object, array $fields) {
     drupal_set_message($e->getMessage(), 'error');
     watchdog(
       'salesforce_webforms',
-      t('Salesforce Exception @code: @msg', array(
+      'Salesforce Exception @code: @msg',
+      array(
         '@msg' => $e->getMessage(),
         '@code' => $e->getCode(),
-      )),
+      ),
       WATCHDOG_ERROR);
     return NULL;
   }
