@@ -97,6 +97,10 @@ next page.') . '</p>';
 
     case 'node/%/webform/salesforce/add/%':
     case 'node/%/webform/salesforce/edit/%/%':
+      // Get the info about this object.
+      $objects = salesforce_webforms_get_objects();
+      $obj = $objects[$arg[5]];
+
       $msg = '<p>' . t('This form allows for the editing of the mappings
 within a :object object. Each available field within the :object object
 will be shown. Clicking on the name of the field will expand it out to
@@ -112,7 +116,7 @@ existing :object to update, rather than always creating a new :object. If
 multiple fields are marked as key fields, then all fields must match
 for a(n) :object to be chosen for update. If one or more key fields is
 not able to match. or if no key fields are defined, then a new :object
-will be created.', array(':object' => $arg[2])) . '</p>';
+will be created.', array(':object' => $obj['label'])) . '</p>';
       break;
 
     case 'node/%/webform/salesforce/delete/%':
