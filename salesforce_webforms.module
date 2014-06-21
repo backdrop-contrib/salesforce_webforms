@@ -54,17 +54,6 @@ function salesforce_webforms_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  // This is not used yet, but in place for future use.
-  $items['node/%webform_menu/webform/salesforce/picklists/%'] = array(
-    'title' => 'Picklists for object',
-    'page callback' => 'salesforce_webforms_picklists',
-    'page arguments' => array(5),
-    'access callback' => 'node_access',
-    'access arguments' => array('update', 1),
-    'file' => 'salesforce_webforms.admin.inc',
-    'type' => MENU_CALLBACK,
-  );
-
   $items['node/%webform_menu/submission/%webform_menu_submission/sf'] = array(
     'title' => 'Resubmit to Salesforce',
     'page callback' => 'drupal_get_form',

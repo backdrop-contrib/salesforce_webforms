@@ -675,32 +675,3 @@ function salesforce_webforms_get_webform_components($node) {
 
   return $ret;
 }
-
-/**
- * Gets all of the picklists available for the named object.
- *
- * @param string $obj
- *   The Salesforce name of the object to be queried.
- *
- * @return array
- *   An associative array of all valid picklists.
- */
-function salesforce_webforms_picklists($obj) {
-  $data = array();
-  $fields = salesforce_webforms_get_object_fields($obj);
-
-  foreach ($fields as $field) {
-    // Is this a picklist?
-    if ($field['type'] == 'picklist') {
-      $data[$field['name']] = array(
-        'label' => $field['label'],
-        'picklist' => $field['picklistValues'],
-      );
-      if ($field['dependentPicklist'] == 1) {
-        $data['control'] = $field['controllerName'];
-      }
-    }
-  }
-
-  return json_encode($data);
-}
