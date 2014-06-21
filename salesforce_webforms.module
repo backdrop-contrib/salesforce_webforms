@@ -292,7 +292,23 @@ function salesforce_webforms_get_sfapi() {
  */
 function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
   $sf = salesforce_webforms_get_sfapi();
-  $sobject = $sf->objectDescribe($obj, !$use_cache);
+
+  $object = array();
+
+  try {
+    $sobject = $sf->objectDescribe($obj, !$use_cache);
+  }
+  catch (SalesforceException $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog(
+      'salesforce_webforms',
+      t('Salesforce Exception @code: @msg', array(
+        '@msg' => $e->getMessage(),
+        '@code' => $e->getCode(),
+      )),
+      WATCHDOG_ERROR);
+  }
+
   $return = array();
 
   foreach ($sobject['fields'] as $field) {
@@ -671,6 +687,7 @@ function salesforce_webforms_object_select_list(array $object) {
  *   The Salesforce response data.
  */
 function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
+  $data = NULL;
   // Do we need to switch languages for the connection?
   $lang = salesforce_webforms_language_prefix();
 
@@ -692,8 +709,21 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   try {
     $data = $sf->apiCall($url);
   }
-  catch (Exception $e) {
+  catch (SalesforceException $e) {
     drupal_set_message($e->getMessage(), 'error');
+    watchdog(
+      'salesforce_webforms',
+      t('Salesforce Exception @code: @msg', array(
+        '@msg' => $e->getMessage(),
+        '@code' => $e->getCode(),
+      )),
+      WATCHDOG_ERROR);
+
+    // See if we can still get the data from the cache.
+    $cached = cache_get($cachename);
+    if ($cached && $cached->expire >= time() && !empty($cached->data)) {
+      $data = $cached->data;
+    }
   }
 
   // Switch back to English if needed.
@@ -758,12 +788,26 @@ function salesforce_webforms_queue_obj($objlist) {
  * @param array $fields
  *   The fields and corresponding values to be stored.
  *
- * @return array
+ * @return array|NULL
  *   The Salesforce response as an array.
  */
 function salesforce_webforms_update_object($object, $id, array $fields) {
   $sf = salesforce_webforms_get_sfapi();
-  $res = $sf->objectUpdate($object, 'id', $id, $fields);
+  try {
+    $res = $sf->objectUpdate($object, 'id', $id, $fields);
+  }
+  catch (SalesforceException $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog(
+      'salesforce_webforms',
+      t('Salesforce Exception @code: @msg', array(
+        '@msg' => $e->getMessage(),
+        '@code' => $e->getCode(),
+      )),
+      WATCHDOG_ERROR);
+
+    return NULL;
+  }
 
   return $res;
 }
@@ -776,12 +820,25 @@ function salesforce_webforms_update_object($object, $id, array $fields) {
  * @param array $fields
  *   The fields and corresponding values to be stored.
  *
- * @return array
+ * @return array|NULL
  *   The Salesforce response as an array.
  */
 function salesforce_webforms_create_object($object, array $fields) {
   $sf = salesforce_webforms_get_sfapi();
-  $res = $sf->objectCreate($object, $fields);
+  try {
+    $res = $sf->objectCreate($object, $fields);
+  }
+  catch (SalesforceException $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog(
+      'salesforce_webforms',
+      t('Salesforce Exception @code: @msg', array(
+        '@msg' => $e->getMessage(),
+        '@code' => $e->getCode(),
+      )),
+      WATCHDOG_ERROR);
+    return NULL;
+  }
 
   return $res;
 }
