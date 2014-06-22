@@ -680,6 +680,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   $data = NULL;
   // Do we need to switch languages for the connection?
   $lang = salesforce_webforms_language_prefix();
+  $sf_lang = NULL;
 
   $cachename = "salesforce_webforms_" . $lang . md5($url);
   if ($use_cache) {
@@ -692,6 +693,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   // Not in cache, or we're ignore the cache data.
   // Do we need to switch languages()?
   if ($lang) {
+    $sf_lang = salesforce_webforms_get_sf_language();
     salesforce_webforms_set_sf_language(salesforce_webforms_language_code());
   }
 
@@ -719,7 +721,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
 
   // Switch back to English if needed.
   if ($lang) {
-    salesforce_webforms_set_sf_language("en_US");
+    salesforce_webforms_set_sf_language($sf_lang);
   }
 
   // Update the cache with the data.
@@ -784,8 +786,12 @@ function salesforce_webforms_queue_obj($objlist) {
  */
 function salesforce_webforms_update_object($object, $id, array $fields) {
   $sf = salesforce_webforms_get_sfapi();
+  if (!$sf->isAuthorized()) {
+    return NULL;
+  }
   try {
-    $res = $sf->objectUpdate($object, 'id', $id, $fields);
+    // $res = $sf->objectUpdate($object, 'id', $id, $fields);
+    $res = $sf->objectUpsert($object, 'id', $id, $fields);
   }
   catch (SalesforceException $e) {
     drupal_set_message($e->getMessage(), 'error');
@@ -875,12 +881,38 @@ function salesforce_webforms_language_prefix($lang = NULL) {
  * @param string $lang
  *   The language code to make active.
  */
-function salesforce_webforms_set_sf_langauge($lang) {
-  $id = variable_get("fema_faq_sf_user_id", "");
+function salesforce_webforms_set_sf_language($lang) {
+  $sf = salesforce_webforms_get_sfapi();
+  if (!$sf->isAuthorized()) {
+    return NULL;
+  }
+
+  $id_obj = $sf->getIdentity();
+  $id = $id_obj['user_id'];
   $fields = array(
     'LanguageLocaleKey' => $lang,
   );
-  fema_faq_update_object("User", $id, $fields);
+  salesforce_webforms_update_object("User", $id, $fields);
+}
+
+/**
+ * Gets the language attribute of the Salesforce API user.
+ *
+ * This is used so that we can reset it back if we change it to get data
+ * in a non-default language.
+ *
+ * @return string|NULL
+ *   The Salesforce language attribute or NULL on error.
+ */
+function salesforce_webforms_get_sf_language() {
+  $sf = salesforce_webforms_get_sfapi();
+  if (!$sf->isAuthorized()) {
+    return NULL;
+  }
+
+  $id_obj = $sf->getIdentity();
+
+  return $id_obj['language'];
 }
 
 /**
