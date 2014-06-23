@@ -128,15 +128,12 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
     '#weight' => $component['weight'],
     '#description' => $component['extra']['description'],
     '#theme_wrappers' => array('webform_element'),
-    // Needed to disable double-wrapping of radios and checkboxes.
-    '#pre_render' => array(),
     '#translatable' => array('title', 'description', 'options'),
     '#element_validate' => array('salesforce_webforms_validate_picklist'),
     '#prefix' => '<div class="sf-picklist-wrapper" id="' . salesforce_webforms_map_fieldid($component['form_key']) . '">',
     '#suffix' => '</div>',
   );
 
-  // Convert the user-entered options list into an array.
   $default_value = $component['value'];
   list($options, $control, $full, $fieldname) = _webform_sf_picklist_options($component);
 
