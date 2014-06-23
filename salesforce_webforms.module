@@ -510,6 +510,11 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
         $fields[$target] = $filtered_source;
       }
 
+      // Skip if we didn't define any fields.
+      if (count($fields) == 0) {
+        continue;
+      }
+
       // See if we are always creating new, or trying to update existing.
       $target_id = $existing_keys[$mapname];
       if (!$target_id && count($keyfields) > 0) {
