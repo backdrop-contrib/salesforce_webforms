@@ -139,10 +139,10 @@ Drupal.salesforce_webforms.salesforceCheck = function(e) {
  */
 Drupal.salesforce_webforms.show_hide = function(idx, settings){
   // Get current value.
-  var $cmp = $('#' + idx);
-  var $sel = $cmp.find("select");
+  var $component = $('#' + idx);
+  var $selectElement = $component.find("select");
 
-  var curval = $sel.val();
+  var curval = $selectElement.val();
 
   var options = Drupal.salesforce_webforms.salesforceGetPickList(idx, settings);
   var showComponent;
@@ -157,29 +157,28 @@ Drupal.salesforce_webforms.show_hide = function(idx, settings){
     showComponent = true;
   }
   if (showComponent) {
-    var $opt = $cmp.find('select');
+    var $options = $component.find('select');
 
     // Get the first option to add back in.
-    var emptyOpt = $opt.find("option").first();
-    $opt.find("option").remove();
-    $opt.append(emptyOpt);
+    var emptyOpt = $options.find("option").first();
+    $options.find("option").remove();
+    $options.append(emptyOpt);
 
     $.each(options, function (key, lbl) {
-      $opt.append($('<option>', { lbl : key })
+      $options.append($('<option>', { lbl : key })
           .text(lbl));
     });
-    $cmp.find('select').removeAttr('disabled').removeClass('salesforce-webform-disabled').end().show();
-    $cmp.find('select').focus();
+    $component.find('select').removeAttr('disabled').removeClass('salesforce-webform-disabled').end().show();
+    $component.find('select').focus();
   }
   else {
-    $cmp.find('select').attr('disabled', true).val(null).addClass('salesforce-webform-disabled').end().hide();
+    $component.find('select').attr('disabled', true).val(null).addClass('salesforce-webform-disabled').end().hide();
   }
 
   // Select the old value if possible.
-  $sel.val(curval);
+  $selectElement.val(curval);
 
   // And process any children of the newly updated field.
-  var selid = $sel.attr('id');
   var children = settings[idx].children;
   for(var i = 0; i < children.length; i++) {
     Drupal.salesforce_webforms.show_hide(children[i], settings);
