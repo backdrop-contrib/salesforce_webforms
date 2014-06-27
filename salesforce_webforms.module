@@ -587,6 +587,15 @@ function salesforce_webforms_webform_submission_actions($node, $sub) {
  * Implements hook_token_info_alter().
  */
 function salesforce_webforms_token_info_alter(&$data) {
+  // See if we have 'submission' as a valid type.
+  if (!isset($data['tokens']['submission'])) {
+    // Add a dummy placeholder in case we're on an older version of webform.
+    $data['types']['submission'] = array(
+      'name' => t('Webform submission data'),
+      'description' => t('Webform submission data.'),
+      'dynamic' => TRUE,
+    );
+  }
   $data['tokens']['submission']['salesforce'] = array(
     'name' => t('Salesforce ID'),
     'description' => t('The unique ID of the Salesforce object associated with a webform mapping. Replace the "?" with the name of the mapping'),
