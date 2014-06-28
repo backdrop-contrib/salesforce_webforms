@@ -313,7 +313,7 @@ function salesforce_webforms_delete_rule_submit($form, &$settings) {
   $mapid = $settings['values']['mapid'];
   salesforce_webforms_delete_mapping($mapid);
   drupal_set_message(t('Map :mapid has been deleted', array(
-    ':mapid' => check_plain($mapid),
+    ':mapid' => $mapid,
   )));
 }
 

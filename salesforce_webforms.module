@@ -689,7 +689,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
       'salesforce_webforms',
       'Salesforce Exception @code: @msg',
       array(
-        '@msg' => check_plain($e->getMessage()),
+        '@msg' => $e->getMessage(),
         '@code' => $e->getCode(),
       ),
       WATCHDOG_ERROR);
