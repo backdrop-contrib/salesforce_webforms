@@ -1,6 +1,6 @@
-
 /**
  * @file Behaviors for the front-end display of Salesforce-driven picklists.
+ *
  */
 (function ($) {
   'use strict';
@@ -203,8 +203,9 @@ Drupal.salesforce_webforms.salesforceGetPickList = function(element, map) {
   // First, figure out what DOM ID houses this field.
   var controlFieldId = null;
   for(var fieldId in map) {
-    if(map[fieldId].fieldname == controlFieldName)
+    if(map[fieldId].fieldname == controlFieldName) {
       controlFieldId = fieldId;
+    }
   }
 
   // Did we find a match?
@@ -257,7 +258,7 @@ Drupal.salesforce_webforms.salesforceGetSelectedIndex = function(el, map) {
   // Get the selected option.
   var idx = $find.attr('selectedIndex');
 
-  // Now map that back to the original order
+  // Now map that back to the original order.
   var ret = idx == 0 ? -1 : map[el].optionmap[idx];
   return ret;
 }

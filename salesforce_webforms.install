@@ -140,6 +140,15 @@ function salesforce_webforms_schema() {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function salesforce_webforms_uninstall() {
+  // Delete the variables we created. Schema should be deleted automatically.
+  variable_del('salesforce_webforms_cron_min');
+  variable_del('salesforce_webforms_cron_last');
+}
+
+/**
  * Add the key storage table.
  */
 function salesforce_webforms_update_7000() {

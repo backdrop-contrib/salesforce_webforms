@@ -140,11 +140,7 @@ function salesforce_webforms_map_fields_basic($obj, array $fields) {
  *   the given submission.
  */
 function salesforce_webforms_get_submission_keys($sid) {
-  $keys = array();
   $result = db_query("SELECT mapname,sfid FROM {salesforce_webforms_key} WHERE sid = :sid", array(':sid' => $sid));
-  foreach ($result as $row) {
-    $keys[$row->mapname] = $row->sfid;
-  }
-
+  $keys = $result->fetchAllKeyed();
   return $keys;
 }

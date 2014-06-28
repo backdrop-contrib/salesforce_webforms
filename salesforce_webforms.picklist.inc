@@ -178,7 +178,15 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
       ),
     ));
 
-  drupal_add_js(array('salesforce_webforms' => array('salesforceMap' => $sfobj)), 'setting');
+  $element['#attached']['js'][] = array(
+    'data' => array(
+      'salesforce_webforms' => array(
+        'salesforceMap' => $sfobj,
+      ),
+    ),
+    'type' => 'setting',
+  );
+
   return $element;
 }
 
@@ -330,8 +338,7 @@ function _webform_table_sf_picklist($component, $value) {
   foreach ($value as $option_value) {
     if ($option_value !== '') {
       if (isset($options[$option_value])) {
-        // $items[] = webform_filter_xss($options[$option_value]);
-        $items[] = $options[$option_value];
+        $items[] = check_plain($options[$option_value]);
       }
       else {
         $items[] = check_plain($option_value);

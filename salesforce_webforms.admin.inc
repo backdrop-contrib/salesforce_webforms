@@ -234,23 +234,25 @@ function theme_salesforce_webforms_maps_form(array $vars) {
  */
 function salesforce_webforms_maps_form_submit($form, &$state) {
   foreach ($state['values']['maps'] as $id => $map) {
-    db_query(
-      'UPDATE {salesforce_webforms_map} SET displayorder = :w WHERE mapid = :id',
-      array(':w' => $map['weight'], ':id' => $id)
-    );
+    db_update('salesforce_webforms_map')
+      ->fields(array(
+        'displayorder' => $map['weight'],
+      ))
+      ->condition('mapid', $id, '=')
+      ->execute();
   }
 
   // Now see if we have a new map to create.
   $new = $state['values']['new'];
   if ($new['mapname'] != '' && $new['sf_object'] != '') {
     // Yes. Create the object and then move to the edit form for it.
-    $nid = check_plain($state['values']['nid']);
-    $obj = check_plain($new['sf_object']);
+    $nid = $state['values']['nid'];
+    $obj = $new['sf_object'];
     $newid = salesforce_webforms_map_save(array(
       'action' => 'add',
       'nid' => $nid,
       'object' => $obj,
-      'mapname' => check_plain($new['mapname']),
+      'mapname' => $new['mapname'],
     ));
 
     drupal_goto("node/$nid/webform/salesforce/edit/$obj/$newid", array(
@@ -308,9 +310,11 @@ function salesforce_webforms_delete_rule($form, &$settings, array $map) {
  * @see salesforce_webforms_delete_rule()
  */
 function salesforce_webforms_delete_rule_submit($form, &$settings) {
-  $mapid = check_plain($settings['values']['mapid']);
+  $mapid = $settings['values']['mapid'];
   salesforce_webforms_delete_mapping($mapid);
-  drupal_set_message(t('Map :mapid has been deleted', array(':mapid' => $mapid)));
+  drupal_set_message(t('Map :mapid has been deleted', array(
+    ':mapid' => check_plain($mapid),
+  )));
 }
 
 /**
@@ -634,6 +638,32 @@ function salesforce_webforms_manage_map_validate($form, &$form_state) {
 function salesforce_webforms_manage_map_submit($form, &$form_state) {
   $values = $form_state['values'];
   salesforce_webforms_map_save($values);
+}
+
+/**
+ * Form constructor for the configuration form.
+ *
+ * Allows the site administrator to manage the frequency of cache refreshes.
+ *
+ * @see salesforce_webforms_config_submit()
+ *
+ * @ingroup forms
+ */
+function salesforce_webforms_config($form, $form_state) {
+  $form = array(
+    'salesforce_webforms_cron_min' => array(
+      '#type' => 'textfield',
+      '#title' => t('Minimum cache refresh time'),
+      '#description' => t('The minimum amount of time before cron will force a cache clear.'),
+      '#element_validate' => array('element_validate_integer'),
+      '#required' => TRUE,
+      '#size' => 5,
+      '#default_value' => variable_get('salesforce_webforms_cron_min', 60),
+      '#field_suffix' => t('Minutes'),
+    ),
+  );
+
+  return system_settings_form($form);
 }
 
 /**

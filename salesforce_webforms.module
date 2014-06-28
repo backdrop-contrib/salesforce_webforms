@@ -5,7 +5,7 @@
  * Allow webforms to integrate with Salesforce via th Salesforce Suite module.
  */
 
-include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'salesforce_webforms') . '/' . 'salesforce_webforms.maps.inc';
+include_once 'salesforce_webforms.maps.inc';
 
 /**
  * Implements hook_menu().
@@ -62,6 +62,16 @@ function salesforce_webforms_menu() {
     'access arguments' => array('update', 1),
     'file' => 'salesforce_webforms.admin.inc',
     'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/config/salesforce/webforms'] = array(
+    'title' => 'Configure Webforms integration',
+    'description' => 'Allows the administrator to configure site wide details related to the integration with webforms.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('salesforce_webforms_config'),
+    'access arguments' => 'administer salesforce',
+    'file' => 'salesforce_webforms.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
   );
 
   return $items;
@@ -156,11 +166,6 @@ function salesforce_webforms_map_load($mapid) {
  */
 function salesforce_webforms_theme() {
   return array(
-    'salesforce_webforms_manage_add_map' => array(
-      'variables' => array(
-        'nid' => NULL,
-      ),
-    ),
     'salesforce_webforms_manage_overview' => array(
       'variables' => array(
         'maps' => NULL,
@@ -172,43 +177,6 @@ function salesforce_webforms_theme() {
       'file' => 'salesforce_webforms.admin.inc',
     ),
   );
-}
-
-/**
- * Returns HTML for an 'add map' list.
- *
- * @param array $variables
- *   An associative array containing:
- *   - nid: The node ID.
- *
- * @ingroup themeable
- */
-function theme_salesforce_webforms_manage_add_map(array $variables) {
-  $nid = $variables['nid'];
-  $output = '';
-  $objects = salesforce_webforms_get_objects();
-
-  if ($objects) {
-    $output = '<h3>' . t('Add an object mapping') . '</h3>';
-    $output .= '<dl>';
-    foreach ($objects as $object_name => $object_info) {
-      $item = '';
-      $url = 'node/' . $nid . '/webform/salesforce/add/' . $object_name;
-      $item = '<dt>' . l($object_info['label'], $url, array('query' => drupal_get_destination())) . '</dt>';
-      $item .= '<dd>';
-      if ($object_info['fields']) {
-        $item .= "<ul>";
-        foreach ($object_info['fields'] as $field) {
-          $item .= '<li>' . $field['label'] . '</li>';
-        }
-        $item .= '</ul>';
-      }
-      $item .= '</dd>';
-      $output .= $item;
-    }
-    $output .= '</dl>';
-  }
-  return $output;
 }
 
 /**
@@ -429,7 +397,7 @@ function salesforce_webforms_save_fields($mapid, array $fields) {
           array(
             'mapid' => $mapid,
             'sf_fieldname' => $fname,
-            'source_data' => filter_xss($values['target']),
+            'source_data' => $values['target'],
             'is_keyfield' => $values['keyfield'][1],
             'displayorder' => $i++,
           )
@@ -716,12 +684,12 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
     $data = $sf->apiCall($url);
   }
   catch (SalesforceException $e) {
-    drupal_set_message($e->getMessage(), 'error');
+    drupal_set_message(check_plain($e->getMessage()), 'error');
     watchdog(
       'salesforce_webforms',
       'Salesforce Exception @code: @msg',
       array(
-        '@msg' => $e->getMessage(),
+        '@msg' => check_plain($e->getMessage()),
         '@code' => $e->getCode(),
       ),
       WATCHDOG_ERROR);
@@ -748,8 +716,21 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
  * Implements hook_cron().
  */
 function salesforce_webforms_cron() {
-  // The list of possible picklists is big
-  // Refresh the cache on a regular basis.
+  // See if enough time has passed since the last run.
+  $last = variable_get('salesforce_webforms_cron_last', 0);
+  $min = variable_get('salesforce_webforms_cron_min', 60);
+  $now = time();
+
+  if ($last + $min > $now) {
+    // Minimum time hasn't passed. Skip this run.
+    return;
+  }
+
+  // Store the current time for the next interval check.
+  variable_set('salesforce_webforms_cron_last', $now);
+
+  // The list of possible picklists is big, so we
+  // refresh the cache on a regular basis.
   watchdog("salesforce_webforms", "Initiate cache refresh");
   $objlist = salesforce_webforms_get_objects(FALSE);
   $queue = DrupalQueue::get('salesforce_webforms');
