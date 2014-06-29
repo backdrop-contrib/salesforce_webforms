@@ -203,15 +203,30 @@ function salesforce_webforms_get_objects($use_cache = TRUE) {
 /**
  * Gets the list of Saleforce objects as an array of options.
  *
+ * @param bool $filter
+ *   If TRUE, limit selections based on admin settings.
+ *
  * @return array
  *   An associative array appropriate for use as an 'options' element.
  */
-function salesforce_webforms_get_objects_selection() {
+function salesforce_webforms_get_objects_selection($filter = TRUE) {
   $selections = array();
+  if ($filter) {
+    $limit = variable_get('salesforce_webforms_all_objects', 1);
+    if ($limit != 1) {
+      $limited_list = variable_get('salesforce_webforms_objects', array());
+    }
+    else {
+      $filter = FALSE;
+    }
+  }
+
   $objs = salesforce_webforms_get_objects();
   if ($objs) {
     foreach ($objs as $info) {
-      $selections[$info['name']] = $info['label'];
+      if (!$filter || isset($limited_list[$info['name']])) {
+        $selections[$info['name']] = $info['label'];
+      }
     }
   }
   return $selections;
@@ -986,4 +1001,54 @@ function salesforce_webforms_get_object_records($object) {
   }
 
   return $options;
+}
+
+/**
+ * Builds a grouped array of picklists usable as an options array.
+ *
+ * @param bool $limit
+ *   If TRUE, then only those options allowed by the admin settings will
+ *   be returned.
+ *
+ * @return array
+ *   An associative array suitable for use as an #options element, where the
+ *   key is the object name concatinated with a "." and the field name, and
+ *   the value is the label of the field.
+ */
+function salesforce_webforms_get_picklist_options($limit = TRUE) {
+  $picklists = array();
+
+  // See if we should limit the list.
+  if ($limit) {
+    $all = variable_get('salesforce_webforms_all_picklists', '1');
+    if ($all == 2) {
+      $list = variable_get('salesforce_webforms_picklists', array());
+    }
+    else {
+      $limit = FALSE;
+    }
+  }
+
+  $objlist = salesforce_webforms_get_objects();
+  foreach (array_keys($objlist) as $obj) {
+    $fields = salesforce_webforms_get_object_fields($obj);
+    $picklists[$obj] = array();
+    foreach ($fields as $fieldname => $details) {
+      // Is this a picklist?
+      if ($details['type'] == 'picklist') {
+        $key = $obj . "." . $fieldname;
+
+        if (!$limit || isset($list[$key])) {
+          $picklists[$obj][$key] = $details['label'];
+        }
+      }
+    }
+
+    // Throw away the option if no picklists.
+    if (count($picklists[$obj]) == 0) {
+      unset($picklists[$obj]);
+    }
+  }
+
+  return $picklists;
 }

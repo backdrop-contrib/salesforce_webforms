@@ -146,6 +146,10 @@ function salesforce_webforms_uninstall() {
   // Delete the variables we created. Schema should be deleted automatically.
   variable_del('salesforce_webforms_cron_min');
   variable_del('salesforce_webforms_cron_last');
+  variable_del('salesforce_webforms_all_picklists');
+  variable_del('salesforce_webforms_picklists');
+  variable_del('salesforce_webforms_all_objects');
+  variable_del('salesforce_webforms_objects');
 }
 
 /**

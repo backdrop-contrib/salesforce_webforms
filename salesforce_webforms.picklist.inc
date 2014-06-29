@@ -57,22 +57,7 @@ function _webform_edit_sf_picklist($component) {
     '#weight' => -10,
   );
 
-  $objlist = salesforce_webforms_get_objects();
-  foreach (array_keys($objlist) as $obj) {
-    $fields = salesforce_webforms_get_object_fields($obj);
-    $picklists[$obj] = array();
-    foreach ($fields as $fieldname => $details) {
-      // Is this a picklist?
-      if ($details['type'] == 'picklist') {
-        $picklists[$obj][$obj . "." . $fieldname] = $details['label'];
-      }
-    }
-
-    // Throw away the option if no picklists.
-    if (count($picklists[$obj]) == 0) {
-      unset($picklists[$obj]);
-    }
-  }
+  $picklists = salesforce_webforms_get_picklist_options();
 
   $form['extra']['list'] = array(
     '#type' => 'select',

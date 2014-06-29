@@ -661,6 +661,56 @@ function salesforce_webforms_config($form, $form_state) {
       '#default_value' => variable_get('salesforce_webforms_cron_min', 60),
       '#field_suffix' => t('Minutes'),
     ),
+    'salesforce_webforms_all_picklists' => array(
+      '#type' => 'radios',
+      '#title' => t('Limit available picklists'),
+      '#options' => array(
+        '1' => t('Allow all picklists'),
+        '2' => t('Limit to the picklists selected below'),
+      ),
+      '#default_value' => variable_get('salesforce_webforms_all_picklists', 1),
+    ),
+    'salesforce_webforms_picklists' => array(
+      '#type' => 'select',
+      '#title' => t('Available picklists'),
+      '#description' => t('Select all picklists which should be available to form administrators'),
+      '#multiple' => TRUE,
+      '#default_value' => variable_get('salesforce_webforms_picklists', array()),
+      '#states' => array(
+        'enabled' => array(
+          ':input[name="salesforce_webforms_all_picklists"]' => array('value' => '2'),
+        ),
+        'disabled' => array(
+          ':input[name="salesforce_webforms_all_picklists"]' => array('value' => '1'),
+        ),
+      ),
+      '#options' => salesforce_webforms_get_picklist_options(FALSE),
+    ),
+    'salesforce_webforms_all_objects' => array(
+      '#type' => 'radios',
+      '#title' => t('Limit available objects'),
+      '#options' => array(
+        '1' => t('Allow all objects'),
+        '2' => t('Limit to the objects selected below'),
+      ),
+      '#default_value' => variable_get('salesforce_webforms_all_objects', 1),
+    ),
+    'salesforce_webforms_objects' => array(
+      '#type' => 'select',
+      '#title' => t('Available objects'),
+      '#description' => t('Select all objects which should be available to form administrators'),
+      '#multiple' => TRUE,
+      '#options' => salesforce_webforms_get_objects_selection(),
+      '#default_value' => variable_get('salesforce_webforms_objects', array()),
+      '#states' => array(
+        'enabled' => array(
+          ':input[name="salesforce_webforms_all_objects"]' => array('value' => '2'),
+        ),
+        'disabled' => array(
+          ':input[name="salesforce_webforms_all_objects"]' => array('value' => '1'),
+        ),
+      ),
+    ),
   );
 
   return system_settings_form($form);
