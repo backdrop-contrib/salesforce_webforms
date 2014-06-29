@@ -718,7 +718,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
 function salesforce_webforms_cron() {
   // See if enough time has passed since the last run.
   $last = variable_get('salesforce_webforms_cron_last', 0);
-  $min = variable_get('salesforce_webforms_cron_min', 60);
+  $min = variable_get('salesforce_webforms_cron_min', 60) * 60;
   $now = time();
 
   if ($last + $min > $now) {
