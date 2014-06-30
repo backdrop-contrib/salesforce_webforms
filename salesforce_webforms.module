@@ -7,8 +7,9 @@
 
 include_once 'salesforce_webforms.maps.inc';
 
-define("SALESFORCE_WEBFORMS_INCLUDE_ALL", 1);
-define("SALESFORCE_WEBFORMS_INCLUDE_FILTERED", 2);
+define('SALESFORCE_WEBFORMS_INCLUDE_ALL', 1);
+define('SALESFORCE_WEBFORMS_INCLUDE_FILTERED', 2);
+define('SALESFORCE_WEBFORMS_CACHE_DURATION', 60 * 60 * 12);
 
 /**
  * Implements hook_menu().
@@ -740,7 +741,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   }
 
   // Update the cache with the data.
-  cache_set($cachename, $data, 'cache_salesforce_webforms', time() + 60 * 60 * 12);
+  cache_set($cachename, $data, 'cache_salesforce_webforms', time() + SALESFORCE_WEBFORMS_CACHE_DURATION);
 
   return $data;
 }
