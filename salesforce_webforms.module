@@ -266,23 +266,38 @@ function salesforce_webforms_get_sfapi() {
  *   each field is an array of attributes as defined by Salesforce.
  */
 function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
-  $sf = salesforce_webforms_get_sfapi();
+  // See if we can get the data from our cache.
+  $cache_name = "object:$obj";
+  $sobject = NULL;
 
-  try {
-    $sobject = $sf->objectDescribe($obj, !$use_cache);
+  if ($use_cache) {
+    $cache = cache_get($cache_name, 'cache_salesforce_webforms');
+    if ($cache && $cache->expire >= time() && !empty($cache->data)) {
+      $sobject = $cache->data;
+    }
   }
-  catch (SalesforceException $e) {
-    drupal_set_message($e->getMessage(), 'error');
-    watchdog(
-      'salesforce_webforms',
-      'Salesforce Exception @code: @msg',
-      array(
-        '@msg' => $e->getMessage(),
-        '@code' => $e->getCode(),
-      ),
-      WATCHDOG_ERROR);
 
-    return NULL;
+  if ($sobject == NULL) {
+    $sf = salesforce_webforms_get_sfapi();
+
+    try {
+      $sobject = $sf->objectDescribe($obj, FALSE);
+      cache_set($cache_name, $sobject, 'cache_salesforce_webforms',
+        time() + SALESFORCE_WEBFORMS_CACHE_DURATION);
+    }
+    catch (SalesforceException $e) {
+      drupal_set_message($e->getMessage(), 'error');
+      watchdog(
+        'salesforce_webforms',
+        'Salesforce Exception @code: @msg',
+        array(
+          '@msg' => $e->getMessage(),
+          '@code' => $e->getCode(),
+        ),
+        WATCHDOG_ERROR);
+
+      return NULL;
+    }
   }
 
   $return = array();
@@ -682,9 +697,9 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   $lang = salesforce_webforms_language_prefix();
   $sf_lang = NULL;
 
-  $cachename = "salesforce_webforms_" . $lang . md5($url);
+  $cachename = "url:" . $lang . md5($url);
   if ($use_cache) {
-    $cached = cache_get($cachename);
+    $cached = cache_get($cachename, 'cache_salesforce_webforms');
     if ($cached && $cached->expire >= time() && !empty($cached->data)) {
       return $cached->data;
     }
@@ -713,7 +728,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
       WATCHDOG_ERROR);
 
     // See if we can still get the data from the cache.
-    $cached = cache_get($cachename);
+    $cached = cache_get($cachename, 'cache_salesforce_webforms');
     if ($cached && $cached->expire >= time() && !empty($cached->data)) {
       $data = $cached->data;
     }
@@ -725,7 +740,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
   }
 
   // Update the cache with the data.
-  cache_set($cachename, $data, "cache", time() + 60 * 60 * 12);
+  cache_set($cachename, $data, 'cache_salesforce_webforms', time() + 60 * 60 * 12);
 
   return $data;
 }
@@ -765,6 +780,13 @@ function salesforce_webforms_cron_queue_info() {
   );
 
   return $queues;
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function salesforce_webforms_flush_caches(){
+  return array('cache_salesforce_webforms');
 }
 
 /**

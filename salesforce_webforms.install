@@ -136,6 +136,10 @@ function salesforce_webforms_schema() {
       'sid' => array('sid'),
     ),
   );
+
+  // Create a custom cache table.
+  $schema['cache_salesforce_webforms'] = drupal_get_schema_unprocessed('system', 'cache');
+
   return $schema;
 }
 
@@ -212,4 +216,15 @@ function salesforce_webforms_update_7001() {
       'unsigned' => FALSE,
     )
   );
+}
+
+/**
+ * Add the new cache table.
+ */
+function salesforce_webforms_update_7002() {
+  $schema = drupal_get_schema_unprocessed('system', 'cache');
+
+  if (!db_table_exists('cache_salesforce_webforms')) {
+    db_create_table('cache_salesforce_webforms', $schema);
+  }
 }
