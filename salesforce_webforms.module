@@ -785,7 +785,7 @@ function salesforce_webforms_cron_queue_info() {
 /**
  * Implements hook_flush_caches().
  */
-function salesforce_webforms_flush_caches(){
+function salesforce_webforms_flush_caches() {
   return array('cache_salesforce_webforms');
 }
 
