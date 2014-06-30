@@ -663,10 +663,10 @@ function salesforce_webforms_config($form, $form_state) {
     ),
     'salesforce_webforms_all_picklists' => array(
       '#type' => 'radios',
-      '#title' => t('Limit available picklists'),
+      '#title' => t('Filter available picklists'),
       '#options' => array(
         SALESFORCE_WEBFORMS_INCLUDE_ALL => t('Allow all picklists'),
-        SALESFORCE_WEBFORMS_INCLUDE_FILTERED => t('Limit to the picklists selected below'),
+        SALESFORCE_WEBFORMS_INCLUDE_FILTERED => t('Limit the available picklists'),
       ),
       '#default_value' => variable_get('salesforce_webforms_all_picklists', 1),
     ),
@@ -677,10 +677,10 @@ function salesforce_webforms_config($form, $form_state) {
       '#multiple' => TRUE,
       '#default_value' => variable_get('salesforce_webforms_picklists', array()),
       '#states' => array(
-        'enabled' => array(
+        'visible' => array(
           ':input[name="salesforce_webforms_all_picklists"]' => array('value' => '2'),
         ),
-        'disabled' => array(
+        'hidden' => array(
           ':input[name="salesforce_webforms_all_picklists"]' => array('value' => '1'),
         ),
       ),
@@ -688,10 +688,10 @@ function salesforce_webforms_config($form, $form_state) {
     ),
     'salesforce_webforms_all_objects' => array(
       '#type' => 'radios',
-      '#title' => t('Limit available objects'),
+      '#title' => t('Filter available objects'),
       '#options' => array(
         SALESFORCE_WEBFORMS_INCLUDE_ALL => t('Allow all objects'),
-        SALESFORCE_WEBFORMS_INCLUDE_FILTERED => t('Limit to the objects selected below'),
+        SALESFORCE_WEBFORMS_INCLUDE_FILTERED => t('Limit the available objects'),
       ),
       '#default_value' => variable_get('salesforce_webforms_all_objects', 1),
     ),
@@ -703,10 +703,10 @@ function salesforce_webforms_config($form, $form_state) {
       '#options' => salesforce_webforms_get_objects_selection(),
       '#default_value' => variable_get('salesforce_webforms_objects', array()),
       '#states' => array(
-        'enabled' => array(
+        'visible' => array(
           ':input[name="salesforce_webforms_all_objects"]' => array('value' => '2'),
         ),
-        'disabled' => array(
+        'hidden' => array(
           ':input[name="salesforce_webforms_all_objects"]' => array('value' => '1'),
         ),
       ),
