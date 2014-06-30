@@ -7,6 +7,9 @@
 
 include_once 'salesforce_webforms.maps.inc';
 
+define("SALESFORCE_WEBFORMS_INCLUDE_ALL", 1);
+define("SALESFORCE_WEBFORMS_INCLUDE_FILTERED", 2);
+
 /**
  * Implements hook_menu().
  */
@@ -212,8 +215,8 @@ function salesforce_webforms_get_objects($use_cache = TRUE) {
 function salesforce_webforms_get_objects_selection($filter = TRUE) {
   $selections = array();
   if ($filter) {
-    $limit = variable_get('salesforce_webforms_all_objects', 1);
-    if ($limit != 1) {
+    $limit = variable_get('salesforce_webforms_all_objects', SALESFORCE_WEBFORMS_INCLUDE_ALL);
+    if ($limit != SALESFORCE_WEBFORMS_INCLUDE_ALL) {
       $limited_list = variable_get('salesforce_webforms_objects', array());
     }
     else {
@@ -1020,8 +1023,8 @@ function salesforce_webforms_get_picklist_options($limit = TRUE) {
 
   // See if we should limit the list.
   if ($limit) {
-    $all = variable_get('salesforce_webforms_all_picklists', '1');
-    if ($all == 2) {
+    $all = variable_get('salesforce_webforms_all_picklists', SALESFORCE_WEBFORMS_INCLUDE_ALL);
+    if ($all == SALESFORCE_WEBFORMS_INCLUDE_FILTERED) {
       $list = variable_get('salesforce_webforms_picklists', array());
     }
     else {

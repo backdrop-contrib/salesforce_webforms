@@ -665,8 +665,8 @@ function salesforce_webforms_config($form, $form_state) {
       '#type' => 'radios',
       '#title' => t('Limit available picklists'),
       '#options' => array(
-        '1' => t('Allow all picklists'),
-        '2' => t('Limit to the picklists selected below'),
+        SALESFORCE_WEBFORMS_INCLUDE_ALL => t('Allow all picklists'),
+        SALESFORCE_WEBFORMS_INCLUDE_FILTERED => t('Limit to the picklists selected below'),
       ),
       '#default_value' => variable_get('salesforce_webforms_all_picklists', 1),
     ),
@@ -690,8 +690,8 @@ function salesforce_webforms_config($form, $form_state) {
       '#type' => 'radios',
       '#title' => t('Limit available objects'),
       '#options' => array(
-        '1' => t('Allow all objects'),
-        '2' => t('Limit to the objects selected below'),
+        SALESFORCE_WEBFORMS_INCLUDE_ALL => t('Allow all objects'),
+        SALESFORCE_WEBFORMS_INCLUDE_FILTERED => t('Limit to the objects selected below'),
       ),
       '#default_value' => variable_get('salesforce_webforms_all_objects', 1),
     ),
