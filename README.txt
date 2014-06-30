@@ -174,6 +174,12 @@ TROUBLESHOOTING
 
 FAQ
 ---
+ * Why does it take so long to add a picklist control?
+   - When adding picklist controls, all of the available picklists must be
+     loaded from Salesforce. This can be a time-consuming operation, and the
+     component editing form cannot be displayed until this operation has
+     completed. If you enable cron to run for your site, then this data will
+     be cached locally, greatly increasing performance.
 
 MAINTAINERS
 -----------
