@@ -632,10 +632,10 @@ function salesforce_webforms_form_alter(&$form, &$state, $fid) {
 function salesforce_webforms_webform_select_options_info() {
   $items = array();
 
-  $objects = salesforce_webforms_get_objects();
-  foreach ($objects as $name => $info) {
+  $objects = salesforce_webforms_get_objects_selection();
+  foreach ($objects as $name => $label) {
     $items['salesforce_webforms_' . $name] = array(
-      'title' => t('Salesforce @object records', array('@object' => $info['label'])),
+      'title' => t('Salesforce @object records', array('@object' => $label)),
       'options callback' => 'salesforce_webforms_object_select_list',
       'options arguments' => $name,
     );
