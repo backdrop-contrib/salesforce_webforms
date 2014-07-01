@@ -1,5 +1,10 @@
 Version 7.x-1.x, (development version)
 -----------------------
+Issue #2282593 by dbcollies: Filter picklists and objects based on config.
+Added ability to limit frequency of cache refresh from cron.
+Added token placeholder for Webform 3.x
+Modified language handling to not hard-code en_US.
+Removed unused  menu routes.
 Issue #2282001 by dbcollies: Wrap all calls to Salesforce in try/catch.
                              Log all errors to watchdog.
 Issue #2282989 by dbcollies: Added support for prefefined select lists.
@@ -15,7 +20,3 @@ Modified picklist sort to be radio buttons instead of check boxes.
 Issue #2284315 by dbcollies: Added asterisk to field display.
 Issue #2281999 by dbcollies: Updated README to reformat and fix minor errors.
 Issue #2282007 by dbcollies: Added token field to list available tokens.
-
-Version 7.x-1.0, 2014-07-08
----------------------------
-Initial release
