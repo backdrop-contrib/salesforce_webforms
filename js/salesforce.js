@@ -1,7 +1,7 @@
 /**
  * @file Behaviors for the front-end display of Salesforce-driven picklists.
- *
  */
+
 (function ($) {
   'use strict';
 
