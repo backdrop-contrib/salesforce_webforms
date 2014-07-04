@@ -49,6 +49,7 @@ function salesforce_webforms_schema() {
     ),
     'primary key' => array('mapid'),
     'indexes' => array(
+      'mapid' => array('mapid'),
       'nid' => array('nid'),
     ),
   );
@@ -161,40 +162,8 @@ function salesforce_webforms_uninstall() {
  */
 function salesforce_webforms_update_7000() {
   // Add the key storage table.
-  $schema = array(
-    'description' => 'Stores Salesforce mapped object IDs',
-    'fields' => array(
-      'keymapid' => array(
-        'type' => 'serial',
-        'description' => 'Unique identifier for a mapping',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'sid' => array(
-        'type' => 'int',
-        'description' => 'The submission ID',
-        'not null' => TRUE,
-      ),
-      'mapname' => array(
-        'type' => 'varchar',
-        'description' => 'The name of the mapping',
-        'default' => '',
-        'length' => 32,
-        'not null' => TRUE,
-      ),
-      'sfid' => array(
-        'type' => 'varchar',
-        'description' => 'The Salesforce ID string',
-        'default' => '',
-        'length' => 64,
-        'not null' => FALSE,
-      ),
-    ),
-    'primary key' => array('keymapid'),
-    'indexes' => array(
-      'sid' => array('sid'),
-    ),
-  );
+  $schemas = salesforce_webforms_schema();
+  $schema = $schemas['salesforce_webforms_key'];
 
   db_create_table('salesforce_webforms_key', $schema);
   return "Add the key storage table";
@@ -204,17 +173,14 @@ function salesforce_webforms_update_7000() {
  * Change the displayorder column to be signed to use the 'weight' type.
  */
 function salesforce_webforms_update_7001() {
+  $schemas = salesforce_webforms_schema();
+  $field = $schemas['salesforce_webforms_map']['displayorder'];
+
   db_change_field(
     'salesforce_webforms_map',
     'displayorder',
     'displayorder',
-    array(
-      'type' => 'int',
-      'description' => 'The order of the map rules',
-      'not null' => TRUE,
-      'default' => 0,
-      'unsigned' => FALSE,
-    )
+    $field
   );
 }
 

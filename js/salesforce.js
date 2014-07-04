@@ -197,7 +197,7 @@ Drupal.salesforce_webforms.show_hide = function(idx, settings){
  *   The options array of currently valid choices.
  */
 Drupal.salesforce_webforms.salesforceGetPickList = function(element, map) {
-  var options = new Object();
+  var options = {};
   var controlFieldName = map[element].control;
 
   // First, figure out what DOM ID houses this field.
@@ -217,7 +217,7 @@ Drupal.salesforce_webforms.salesforceGetPickList = function(element, map) {
   var controlIndex = Drupal.salesforce_webforms.salesforceGetSelectedIndex(controlFieldId, map);
 
   // And determine which of our options apply to that position.
-  var optionmap = new Array();
+  var optionmap = [];
   optionmap[0] = -1;
   controlIndex--;
   for (var i = 0; controlIndex >= 0 && i < map[element]['full'].length; i++) {

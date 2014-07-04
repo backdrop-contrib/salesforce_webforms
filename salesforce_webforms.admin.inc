@@ -17,7 +17,7 @@
  *
  * @ingroup forms
  */
-function salesforce_webforms_maps_form($form, &$settings, $node) {
+function salesforce_webforms_maps_form($form, &$form_state, $node) {
   $maps = salesforce_webforms_get_webform_maps($node);
 
   $form = array(
@@ -117,10 +117,10 @@ function salesforce_webforms_maps_form($form, &$settings, $node) {
  *
  * @see salesforce_webforms_maps_form()
  */
-function salesforce_webforms_maps_form_validate($form, &$settings) {
+function salesforce_webforms_maps_form_validate($form, &$form_state) {
   // Make sure that the new map name is unique and formatted properly.
-  $name = $settings['values']['new']['mapname'];
-  $nid = $settings['values']['nid'];
+  $name = $form_state['values']['new']['mapname'];
+  $nid = $form_state['values']['nid'];
 
   // If new name is not blank, then validate it.
   if ($name != '') {
@@ -271,7 +271,7 @@ function salesforce_webforms_maps_form_submit($form, &$state) {
  *
  * @ingroup forms
  */
-function salesforce_webforms_delete_rule($form, &$settings, array $map) {
+function salesforce_webforms_delete_rule($form, &$form_state, array $map) {
   $objects = salesforce_webforms_get_objects_selection();
   $form = array(
     'mapid' => array(
@@ -309,11 +309,11 @@ function salesforce_webforms_delete_rule($form, &$settings, array $map) {
  *
  * @see salesforce_webforms_delete_rule()
  */
-function salesforce_webforms_delete_rule_submit($form, &$settings) {
-  $mapid = $settings['values']['mapid'];
+function salesforce_webforms_delete_rule_submit($form, &$form_state) {
+  $mapid = $form_state['values']['mapid'];
   salesforce_webforms_delete_mapping($mapid);
-  drupal_set_message(t('Map :mapid has been deleted', array(
-    ':mapid' => $mapid,
+  drupal_set_message(t('Map %mapid has been deleted', array(
+    '%mapid' => $mapid,
   )));
 }
 
@@ -472,7 +472,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#children' => '<div>' . '[submission:salesforce:?] - ' . t('The unique ID of the Salesforce object associated with a webform mapping. Replace the "?" with the name of the mapping') . '</div>',
+      '#children' => '<div>' . t('@token - The unique ID of the Salesforce object associated with a webform mapping. Replace the "?" with the name of the mapping', array('@token' => '[submission:salesforce:?]')) . '</div>',
       '#attributes' => array('class' => array('collapsible', 'collapsed')),
     );
 
