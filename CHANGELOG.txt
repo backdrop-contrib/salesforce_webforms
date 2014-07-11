@@ -1,5 +1,6 @@
 Version 7.x-1.x, (development version)
 -----------------------
+Issue #2298899 by dbcollies: Added initial hooks.
 Issue #2282629 by dbcollies: Fixed errors reported by heddn.
 Added check_plain around all SalesforceException message.
 Issue #2282593 by dbcollies: Filter picklists and objects based on config.

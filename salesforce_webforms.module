@@ -233,6 +233,10 @@ function salesforce_webforms_get_objects_selection($filter = TRUE) {
       }
     }
   }
+
+  // Allow modules to filter the list.
+  drupal_alter('salesforce_webforms_objects', $selections);
+
   return $selections;
 }
 
@@ -306,7 +310,11 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
   foreach ($sobject['fields'] as $field) {
     $return[$field['name']] = $field;
   }
-  return $return;
+
+  // Allow hooks to manipulate the list.
+  $hook_data = array($obj => $return);
+  drupal_alter('salesforce_webform_fields', $hook_data);
+  return $hook_data[$obj];
 }
 
 /**
@@ -371,6 +379,7 @@ function salesforce_webforms_webform_component_info() {
  *   - action: One of:
  *     - add.
  *     - edit.
+ *   - nid: Node ID.
  *   - map_id: Int ID of the map to be operated upon.
  *   - map_fields: Associative array of fields and values.
  *
@@ -378,6 +387,14 @@ function salesforce_webforms_webform_component_info() {
  *   The created or updated map id.
  */
 function salesforce_webforms_map_save(array $values) {
+  // Let any code process a pre-save function, allowing data to be updated.
+  foreach (module_implements('salesforce_webforms_map_presave') as $module) {
+    $function = $module . '_salesforce_webforms_map_presave';
+
+    // Call the hook handler, allowing for call by reference if requested.
+    $function($values);
+  }
+
   // Save map data.
   $values['sf_object'] = $values['object'];
 
@@ -402,6 +419,9 @@ function salesforce_webforms_map_save(array $values) {
       salesforce_webforms_save_fields($mapid, $values['map_fields']);
     }
   }
+
+  // Allow all post-save hooks to run.
+  module_invoke_all('salesforce_webforms_map_save', $values);
 
   return $mapid;
 }
@@ -477,6 +497,10 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
       // Get any existing keys.
       $existing_keys = salesforce_webforms_get_submission_keys($sub->sid);
     }
+
+    // Array of generated IDs to send to hook handlers.
+    $mapped_ids = array();
+
     foreach ($maps as $map) {
       // Fields to use as keys.
       $keyfields = array();
@@ -542,16 +566,19 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
         $target_id = $res['id'];
       }
 
+      $data = array(
+        'sid' => $sub->sid,
+        'mapname' => $map['mapname'],
+        'sfid' => $target_id,
+      );
       db_insert('salesforce_webforms_key')
-        ->fields(
-          array(
-            'sid' => $sub->sid,
-            'mapname' => $map['mapname'],
-            'sfid' => $target_id,
-          )
-        )
+        ->fields($data)
         ->execute();
+
+      $mapped_ids[] = $data;
     }
+
+    module_invoke_all('salesforce_webforms_save_submission', $mapped_ids, $sub->sid);
   }
 }
 
@@ -559,6 +586,10 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
  * Implements hook_webform_submission_delete().
  */
 function salesforce_webforms_webform_submission_delete($node, $sub) {
+  // Allow other modules to clean up if they need to on delete.
+  module_invoke_all('salesforce_webforms_delete_submission', $sub->sid);
+
+  // And delete the key data.
   db_delete('salesforce_webforms_key')
     ->condition('sid', $sub->sid)
     ->execute();
@@ -1026,6 +1057,8 @@ function salesforce_webforms_get_object_records($object) {
     }
   }
 
+  drupal_alter('salesforce_webforms_object_records', $options);
+
   return $options;
 }
 
@@ -1076,5 +1109,6 @@ function salesforce_webforms_get_picklist_options($limit = TRUE) {
     }
   }
 
+  drupal_alter('salesforce_webforms_picklists', $picklists);
   return $picklists;
 }
