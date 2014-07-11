@@ -152,3 +152,7 @@ function hook_salesforce_webforms_object_records_alter($records) {
 function hook_salesforce_webforms_picklists_alter(&$picklists) {
   unset($picklists['Contact']);
 }
+
+/**
+ * @} salesforce_webforms_hooks
+ */
