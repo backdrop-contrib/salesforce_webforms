@@ -203,6 +203,7 @@ function theme_salesforce_webforms_maps_form(array $vars) {
   }
 
   // Add the row for a new mapping.
+  $form['new']['weight']['#attributes']['class'] = array('salesforce-webforms-map-weight');
   $rows[] = array(
     'data' => array(
       drupal_render($form['new']['mapname']),
