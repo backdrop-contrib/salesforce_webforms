@@ -1,3 +1,10 @@
+Version 7.x-1.0-alpha2
+Issue #2302527 by dbcollies: Fixed table drag with new map
+
+Version 7.x-1.0-alpha1
+----------------------
+Initial Alpha release
+
 Version 7.x-1.x, (development version)
 -----------------------
 Issue #2301367 by dbcollies: Wrapped variable in isset() to remove warning.
