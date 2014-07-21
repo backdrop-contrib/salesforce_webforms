@@ -1,4 +1,9 @@
+Version 7.x-1.0-alpha3
+----------------------
+Issue #2306725 by dbcollies: Fixed bug preventing picklist mappings.
+
 Version 7.x-1.0-alpha2
+----------------------
 Issue #2302527 by dbcollies: Fixed table drag with new map
 
 Version 7.x-1.0-alpha1
