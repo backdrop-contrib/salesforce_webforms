@@ -29,19 +29,15 @@ function salesforce_webforms_drush_command() {
       'field-data' => 'Display information about a specific field that is part of an object',
     ),
   );
-/*
   $items['sf-webforms-resubmit'] = array(
     'description' => 'Resubmits submission data to Salesforce',
     'aliases' => array('sfwfr'),
     'arguments' => array(
       'submission' => 'The Submission ID.',
+      'update-objects' => 'Update existing objects (1) or new objects (0)',
     ),
-    'required-arguments' => TRUE,
-    'options' => array(
-      'new-objects' => 'Force creation of new objects, unless a key field is specified.',
-    ),
+    'required-arguments' => 1,
   );
-*/
   return $items;
 }
 
@@ -57,7 +53,7 @@ function drush_salesforce_webforms_sf_webforms_map($nid) {
 /**
  * Resubmits the submission data to Salesforce.
  */
-function drush_salesforce_webforms_sf_webforms_resubmit($sid, $new = FALSE) {
+function drush_salesforce_webforms_sf_webforms_resubmit($sid, $update = FALSE) {
   $salesforce = salesforce_get_api();
   if (!$salesforce->isAuthorized()) {
     drupal_print("Salesforce cannot connect");
@@ -78,7 +74,7 @@ function drush_salesforce_webforms_sf_webforms_resubmit($sid, $new = FALSE) {
   $node = webform_menu_load($nid);
   $submission = webform_menu_submission_load($sid, $nid);
 
-  salesforce_webforms_webform_submission_insert($node, $submission, !$new);
+  salesforce_webforms_webform_submission_insert($node, $submission, $update);
 
   // Now dump the data.
   drush_salesforce_webforms_sf_webforms_objects($sid);
