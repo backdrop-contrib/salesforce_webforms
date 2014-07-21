@@ -1,5 +1,6 @@
 Version 7.x-1.x-dev
 -------------------
+Issue #2306517 by dbcollies: Updated base module for drush resubmit.
 Issue #2306517 by dbcollies: Added partial drush support.
 
 Version 7.x-1.0-alpha3
