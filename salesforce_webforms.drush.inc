@@ -60,10 +60,10 @@ function drush_salesforce_webforms_sf_webforms_resubmit($sid, $update = FALSE) {
     drupal_exit();
   }
 
-  // Load the mapped IDs
+  // Load the mapped IDs.
   $keys = salesforce_webforms_get_submission_keys($sid);
 
-  // Find out which node this belongs to
+  // Find out which node this belongs to.
   $row = db_select('webform_submissions', 'w')
     ->fields('w', array('nid'))
     ->condition('sid', $sid)
@@ -83,7 +83,7 @@ function drush_salesforce_webforms_sf_webforms_resubmit($sid, $update = FALSE) {
 /**
  * Find all of the objects mapped to a given webform submission.
  *
- * @param $ubmission
+ * @param $submission
  *   The submission it.
  */
 function drush_salesforce_webforms_sf_webforms_objects($submission) {
@@ -93,10 +93,10 @@ function drush_salesforce_webforms_sf_webforms_objects($submission) {
     drupal_exit();
   }
 
-  // Load the mapped IDs
+  // Load the mapped IDs.
   $keys = salesforce_webforms_get_submission_keys($submission);
 
-  // Find out which node this belongs to
+  // Find out which node this belongs to.
   $row = db_select('webform_submissions', 'w')
     ->fields('w', array('nid'))
     ->condition('sid', $submission)
@@ -105,7 +105,7 @@ function drush_salesforce_webforms_sf_webforms_objects($submission) {
 
   $nid = $row->nid;
 
-  // Now get the mappings for that node
+  // Now get the mappings for that node.
   $maps = salesforce_webforms_get_node_maps($nid);
 
   foreach ($maps as &$map) {

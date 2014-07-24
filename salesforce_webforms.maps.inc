@@ -82,6 +82,111 @@ function salesforce_webforms_get_map_fields($mapid, $nid) {
 }
 
 /**
+ * Reads the maps for nodes and store in the webform field of the node.
+ *
+ * @param array $nodes
+ *   An array of node objects.
+ */
+function salesforce_webforms_get_nodes_maps($nodes) {
+  $nids = array_keys($nodes);
+  $maps = db_select('salesforce_webforms_map', 'm')
+    ->fields('m', array('mapid', 'mapname', 'nid', 'sf_object', 'displayorder'))
+    ->condition('nid', $nids, 'IN')
+    ->orderBy('displayorder', 'ASC')
+    ->execute()
+    ->fetchAll();
+
+  if (count($maps) == 0) {
+    return;
+  }
+
+  $mids = array();
+  $map_list = array();
+  foreach ($maps as $map) {
+    $mids[] = $map->mapid;
+    $map_list[$map->mapid] = array(
+      'mapname' => $map->mapname,
+      'object' => $map->sf_object,
+      'nid' => $map->nid,
+      'map_fields' => array(),
+    );
+  }
+
+  // Now get all of the fields for those maps.
+  $fields = db_select('salesforce_webforms_field', 'f')
+    ->fields('f', array('mapid', 'sf_fieldname', 'source_data', 'is_keyfield'))
+    ->condition('mapid', $mids, 'IN')
+    ->execute()
+    ->fetchAll();
+
+  foreach ($fields as $field) {
+    $map_list[$field->mapid]['map_fields'][$field->sf_fieldname] = array(
+      'target' => $field->source_data,
+      'keyfield' => $field->is_keyfield,
+    );
+  }
+
+  // Now put the maps into the right nodes.
+  foreach ($map_list as $mapid => $map) {
+    $nodes[$map['nid']]->webform['salesforce'][$mapid] = $map;
+  }
+}
+
+/**
+ * Deletes all of the maps associated with a given node.
+ *
+ * @param int $nid
+ *   The node ID to process.
+ */
+function salesforce_webforms_delete_node_maps($nid) {
+  // Find the mapid of all current maps for this node.
+  $maps = db_select('salesforce_webforms_map', 'm')
+    ->fields('m', array('mapid'))
+    ->condition('nid', $nid, '=')
+    ->execute()
+    ->fetchAll();
+
+  foreach ($maps as $map) {
+    $mapids[] = $map->mapid;
+  }
+
+  if (count($maps) == 0) {
+    return;
+  }
+
+  // Delete the fields.
+  db_delete('salesforce_webforms_field')
+    ->condition('mapid', $mapids, 'IN')
+    ->execute();
+
+  // And now delete the maps.
+  db_delete('salesforce_webforms_map')
+    ->condition('mapid', $mapids, 'IN')
+    ->execute();
+}
+
+/**
+ * Rebuilds the map tables from the contents of the node object.
+ */
+function salesforce_webforms_save_node_maps($node) {
+  if (!isset($node->webform['salesforce'])) {
+    return;
+  }
+
+  $nid = $node->nid;
+
+  // Delete the current maps.
+  salesforce_webforms_delete_node_maps($nid);
+
+  // Add back the maps.
+  foreach ($node->webform['salesforce'] as $map) {
+    $map['action'] = 'add';
+    $map['nid'] = $nid;
+    salesforce_webforms_map_save($map);
+  }
+}
+
+/**
  * Deletes a mapping and dependencies.
  *
  * @param int $mapid

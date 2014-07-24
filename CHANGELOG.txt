@@ -1,5 +1,9 @@
-Version 7.x-1.x-dev
+Version 7.x-1.0-beta1
 -------------------
+Issue #2306519 by dbcollies: Included sf data in webform field for export.
+
+Version 7.x-1.0-alpha4
+----------------------
 Issue #2306517 by dbcollies: Updated base module for drush resubmit.
 Issue #2306517 by dbcollies: Added partial drush support.
 

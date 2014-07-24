@@ -82,6 +82,43 @@ function salesforce_webforms_menu() {
 }
 
 /**
+ * Implements hook_module_implements_alter().
+ *
+ * Makes sure our hooks are called after the equivalent webform hooks.
+ */
+function salesforce_webforms_module_implements_alter(&$implementations, $hook) {
+  switch ($hook) {
+    case 'node_load':
+      $group = $implementations['salesforce_webforms'];
+      unset($implementations['salesforce_webforms']);
+      $implementations['salesforce_webforms'] = $group;
+
+      break;
+  }
+}
+
+/**
+ * Implements hook_node_load().
+ */
+function salesforce_webforms_node_load($nodes, $types) {
+  salesforce_webforms_get_nodes_maps($nodes);
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function salesforce_webforms_node_insert($node) {
+  salesforce_webforms_save_node_maps($node);
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function salesforce_webforms_node_update($node) {
+  salesforce_webforms_save_node_maps($node);
+}
+
+/**
  * Implements hook_help().
  */
 function salesforce_webforms_help($path, $arg) {
@@ -380,7 +417,7 @@ function salesforce_webforms_webform_component_info() {
  *     - add.
  *     - edit.
  *   - nid: Node ID.
- *   - map_id: Int ID of the map to be operated upon.
+ *   - mapid: Int ID of the map to be operated upon.
  *   - map_fields: Associative array of fields and values.
  *
  * @return int|NULL
@@ -434,7 +471,7 @@ function salesforce_webforms_map_save(array $values) {
  * @param array $fields
  *   An associative array of fields and values, keyed by field name, containing:
  *   - target: String identifying target value.
- *   - key_field: Boolean indicating if this is a key field.
+ *   - keyfield: Boolean indicating if this is a key field.
  *   - picklist: (optional) String to override target.
  */
 function salesforce_webforms_save_fields($mapid, array $fields) {
@@ -452,7 +489,8 @@ function salesforce_webforms_save_fields($mapid, array $fields) {
             'mapid' => $mapid,
             'sf_fieldname' => $fname,
             'source_data' => $values['target'],
-            'is_keyfield' => $values['keyfield'][1],
+            // 'is_keyfield' => $values['keyfield'][1],
+            'is_keyfield' => $values['keyfield'],
             'displayorder' => $i++,
           )
         )
