@@ -1,3 +1,6 @@
+Version 7.x-1.0-beta2
+Issue #2361333 by dbcollies: Added salesforce_webforms_language_code().
+
 Version 7.x-1.0-beta1
 -------------------
 Issue #2306519 by dbcollies: Included sf data in webform field for export.
