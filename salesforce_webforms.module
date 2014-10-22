@@ -1150,3 +1150,16 @@ function salesforce_webforms_get_picklist_options($limit = TRUE) {
   drupal_alter('salesforce_webforms_picklists', $picklists);
   return $picklists;
 }
+
+/**
+ * Returns the current language code as SalesForce expects it.
+ *
+ * In most cases, SalesForce and Drupal use the same code. However,
+ * for English, Drupal, uses 'en' while SalesForce expects 'en_US'
+ */
+function salesforce_webforms_language_code($language = null) {
+  if(!isset($language)) $language = $GLOBALS['language']->language;
+  if($language == 'en') $language = 'en_US';
+
+  return $language;
+}
