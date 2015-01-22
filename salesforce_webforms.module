@@ -452,7 +452,7 @@ function salesforce_webforms_map_save(array $values) {
       ->condition('mapid', $mapid)
       ->execute();
 
-    if (array_filter($values['map_fields'])) {
+    if (isset($values['map_fields']) && array_filter($values['map_fields'])) {
       salesforce_webforms_save_fields($mapid, $values['map_fields']);
     }
   }
