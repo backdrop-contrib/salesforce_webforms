@@ -89,7 +89,7 @@ function _webform_edit_sf_picklist($component) {
   $form['display']['sort'] = array(
     '#type' => 'radios',
     '#title' => t('Sort Order'),
-    '#default_value' => $component['extra']['sort'],
+    '#default_value' => (!empty($component['extra']['sort'])) ? $component['extra']['sort'] : 0,
     '#description' => t('Determines how options are sorted when they are displayed in the form.'),
     '#parents' => array('extra', 'sort'),
     '#options' => array(
