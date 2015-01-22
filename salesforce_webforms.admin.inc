@@ -234,13 +234,15 @@ function theme_salesforce_webforms_maps_form(array $vars) {
  * @see salesforce_webforms_maps_form()
  */
 function salesforce_webforms_maps_form_submit($form, &$state) {
-  foreach ($state['values']['maps'] as $id => $map) {
-    db_update('salesforce_webforms_map')
-      ->fields(array(
-        'displayorder' => $map['weight'],
-      ))
-      ->condition('mapid', $id, '=')
-      ->execute();
+  if (isset($state['values']['maps']) && !empty($state['values']['maps'])) {
+    foreach ($state['values']['maps'] as $id => $map) {
+      db_update('salesforce_webforms_map')
+        ->fields(array(
+          'displayorder' => $map['weight'],
+        ))
+        ->condition('mapid', $id, '=')
+        ->execute();
+    }
   }
 
   // Now see if we have a new map to create.
