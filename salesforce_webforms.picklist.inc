@@ -120,7 +120,7 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
   );
 
   $default_value = $component['value'];
-  list($options, $control, $full, $fieldname) = _webform_sf_picklist_options($component);
+  list($options, $control, $full, $fieldname, $fieldtype) = _webform_sf_picklist_options($component);
 
   $optionmap = array(-1);
   // $i = 0;
@@ -139,10 +139,11 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
   // Set the default value.
   if (isset($value)) {
     // Set the value as a single string.
-    $element['#default_value'] = '';
-    foreach ((array) $value as $option_value) {
-      $element['#default_value'] = $option_value;
-    }
+    // $element['#default_value'] = '';
+    // foreach ((array) $value as $option_value) {
+      // $element['#default_value'] = $option_value;
+    // }
+    $element['#default_value'] = $value;
   }
   elseif ($default_value !== '') {
     $element['#default_value'] = $default_value;
@@ -150,6 +151,9 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
 
   // Set display as a select list.
   $element['#type'] = 'select';
+
+  // Set multi select as appropriate.
+  $element['#multiple'] = ($fieldtype == 'multipicklist');
 
   $myid = salesforce_webforms_map_fieldid($component['form_key']);
   $sfobj = array(
@@ -186,9 +190,10 @@ function salesforce_webforms_map_fieldid($formkey) {
  * Implements _webform_display_component().
  */
 function _webform_display_sf_picklist($component, $value, $format = 'html') {
-  list($options, $control, $full) = _webform_sf_picklist_options($component);
+  list($options, $control, $full, $fieldpath, $fieldtype) = _webform_sf_picklist_options($component);
   return array(
     '#title' => $component['name'],
+    '#title_display' => $component['extra']['title_display'] ? $component['extra']['title_display'] : 'before',
     '#weight' => $component['weight'],
     '#theme' => 'webform_display_sf_picklist',
     '#theme_wrappers' => $format == 'html' ? array('webform_element') : array('webform_element_text'),
@@ -200,19 +205,8 @@ function _webform_display_sf_picklist($component, $value, $format = 'html') {
     ),
     '#value' => (array) $value,
     '#translatable' => array('title', 'options'),
+    '#multiple' => ($fieldtype == 'multipicklist'),
   );
-}
-
-/**
- * Implements _webform_submit_component().
- */
-function _webform_submit_sf_picklist($component, $value) {
-  $return = NULL;
-  if (is_string($value)) {
-    $return = $value;
-  }
-
-  return $return;
 }
 
 /**
@@ -242,7 +236,9 @@ function theme_webform_display_sf_picklist(array $variables) {
   }
 
   $items = array();
-  if (isset($element['#value'][0]) && $element['#value'][0] !== '') {
+  if ($element['#multiple']) {
+    return implode(';', $element['#value']);
+  } else if (isset($element['#value'][0]) && $element['#value'][0] !== '') {
     // Administer provided values.
     if (isset($options[$element['#value'][0]])) {
       $items[] = $options[$element['#value'][0]];
@@ -394,13 +390,14 @@ function _webform_options_sf_picklist($component) {
  *   A webform component array.
  *
  * @return array
- *   Returns an array of 4 elements:
+ *   Returns an array of 5 elements:
  *   - Array of options suitable for use in an 'options' element.
  *   - String name of a field which controls the validity of values within
  *     this field, if this is a dependent picklist.
  *   - The full list of values, possibly sorted, with extra control data to
  *     allow for control between dependent fields.
  *   - String name of this field.
+ *   - String field type (picklist or multipicklist)
  */
 function _webform_sf_picklist_options(array $component) {
   $options = array();
@@ -426,6 +423,7 @@ function _webform_sf_picklist_options(array $component) {
   }
 
   $picklist = $info[$field]['picklistValues'];
+  $fieldtype = $info[$field]['type'];
 
   $position = 1;
   foreach ($picklist as &$pick) {
@@ -457,7 +455,7 @@ function _webform_sf_picklist_options(array $component) {
     }
   }
 
-  return array($options, $control, $newlist, $picklist_key);
+  return array($options, $control, $newlist, $picklist_key, $fieldtype);
 }
 
 /**

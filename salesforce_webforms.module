@@ -1132,7 +1132,7 @@ function salesforce_webforms_get_picklist_options($limit = TRUE) {
     $picklists[$obj] = array();
     foreach ($fields as $fieldname => $details) {
       // Is this a picklist?
-      if ($details['type'] == 'picklist') {
+      if ($details['type'] == 'picklist' || $details['type'] == 'multipicklist') {
         $key = $obj . "." . $fieldname;
 
         if (!$limit || isset($list[$key])) {

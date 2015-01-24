@@ -159,10 +159,16 @@ Drupal.salesforce_webforms.show_hide = function(idx, settings){
   if (showComponent) {
     var $options = $component.find('select');
 
-    // Get the first option to add back in.
-    var emptyOpt = $options.find("option").first();
+    // Keep the first option if this is not a multi-select.
+    var multi = $options.attr("multiple");
+    if (!multi) {
+      // Get the first option to add back in.
+      var emptyOpt = $options.find("option").first();
+    }
     $options.find("option").remove();
-    $options.append(emptyOpt);
+    if (!multi) {
+      $options.append(emptyOpt);
+    }
 
     $.each(options, function (key, lbl) {
       $options.append($('<option>', { lbl : key })

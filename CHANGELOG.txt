@@ -1,4 +1,5 @@
 Version 7.x-1.x
+Issue #2411783 by dbcollies: Added support for multi picklists.
 Issue #2398853 by jasonawant: Removed undefined index warning.
 Issue #2398843 by jasonawant: Removed array_filter warning.
 Issue #2398841 by jasonawant: Removed undefined index warning.
