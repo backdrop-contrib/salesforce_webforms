@@ -1,14 +1,16 @@
-Version 7.x-1.x
+Version 7.x-1.0-beta3
+---------------------
 Issue #2411783 by dbcollies: Added support for multi picklists.
 Issue #2398853 by jasonawant: Removed undefined index warning.
 Issue #2398843 by jasonawant: Removed array_filter warning.
 Issue #2398841 by jasonawant: Removed undefined index warning.
 
 Version 7.x-1.0-beta2
+---------------------
 Issue #2361333 by dbcollies: Added salesforce_webforms_language_code().
 
 Version 7.x-1.0-beta1
--------------------
+---------------------
 Issue #2306519 by dbcollies: Included sf data in webform field for export.
 
 Version 7.x-1.0-alpha4
