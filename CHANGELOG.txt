@@ -1,3 +1,6 @@
+Version 7.x-1.x
+---------------
+
 Version 7.x-1.0-beta3
 ---------------------
 Issue #2411783 by dbcollies: Added support for multi picklists.
