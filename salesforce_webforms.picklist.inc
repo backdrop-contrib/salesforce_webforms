@@ -26,6 +26,7 @@ function _webform_defaults_sf_picklist() {
       'custom_keys' => FALSE,
       'options_source' => '',
       'private' => FALSE,
+      'size' => '',
     ),
   );
 }
@@ -74,6 +75,17 @@ function _webform_edit_sf_picklist($component) {
     '#default_value' => $component['extra']['exclude'],
     '#description' => t('List options which should be removed from the list provided by Salesforce, one per line. This does not impact the data stored in Salesforce. This option simply allows for a filtering of picklist items displayed on this form.'),
     '#required' => FALSE,
+  );
+
+  $form['display']['size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Control Size'),
+    '#default_value' => $component['extra']['size'],
+    '#description' => t('By default, picklists are rendered as a a drop down (size 1) and multi picklists are rendered as a listbox 4 rows high. The default behavior can be changed by setting a height in rows.'),
+    '#required' => FALSE,
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#size' => 2,
+    '#parents' => array('extra', 'size'),
   );
 
   $form['value'] = array(
@@ -153,6 +165,11 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
   // Set display as a select list.
   $element['#type'] = 'select';
 
+  // Set the size, if specified.
+  if (isset($component['extra']['size']) && $component['extra']['size'] > 0) {
+    $element['#size'] = $component['extra']['size'];
+  }
+
   // Set multi select as appropriate.
   $element['#multiple'] = ($fieldtype == 'multipicklist');
 
@@ -207,6 +224,7 @@ function _webform_display_sf_picklist($component, $value, $format = 'html') {
     '#value' => (array) $value,
     '#translatable' => array('title', 'options'),
     '#multiple' => ($fieldtype == 'multipicklist'),
+    '#size' => $component['extra']['size'],
   );
 }
 
