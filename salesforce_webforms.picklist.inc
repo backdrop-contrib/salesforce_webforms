@@ -106,6 +106,7 @@ function _webform_edit_sf_picklist($component) {
  * Implements _webform_render_component().
  */
 function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) {
+  $wrapper_name = salesforce_webforms_map_fieldid($component['form_key']);
   $element = array(
     '#title' => $component['name'],
     '#title_display' => $component['extra']['title_display'] ? $component['extra']['title_display'] : 'before',
@@ -115,7 +116,7 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
     '#theme_wrappers' => array('webform_element'),
     '#translatable' => array('title', 'description', 'options'),
     '#element_validate' => array('salesforce_webforms_validate_picklist'),
-    '#prefix' => '<div class="sf-picklist-wrapper" id="' . salesforce_webforms_map_fieldid($component['form_key']) . '">',
+    '#prefix' => '<div class="sf-picklist-wrapper" id="' . $wrapper_name . '"><input type="hidden" value="1" name="' . $wrapper_name . '-control">',
     '#suffix' => '</div>',
   );
 
@@ -527,7 +528,9 @@ function _salesforce_webforms_alpha_cmp($a, $b) {
  */
 function salesforce_webforms_validate_picklist(&$el, &$state, $form) {
   $form_key = $el['#webform_component']['form_key'];
-  if (!isset($state['input']['submitted'][$form_key])) {
+  $control = salesforce_webforms_map_fieldid($form_key) . "-control";
+  // if (!isset($state['input']['submitted'][$form_key]) && !is_null($state['input']['submiited'][$form_key])) {
+  if (!$state['input'][$control]) {
     // We are disabled - flag as OK to be empty.
     $errors = form_get_errors();
 

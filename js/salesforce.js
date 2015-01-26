@@ -156,7 +156,11 @@ Drupal.salesforce_webforms.show_hide = function(idx, settings){
     // Show this component.
     showComponent = true;
   }
+
+  // Flag variable.
+  var $flag = $component.find('input[type="hidden"]');
   if (showComponent) {
+    $flag.val('1');
     var $options = $component.find('select');
 
     // Keep the first option if this is not a multi-select.
@@ -178,6 +182,7 @@ Drupal.salesforce_webforms.show_hide = function(idx, settings){
     $component.find('select').focus();
   }
   else {
+    $flag.val('0');
     $component.find('select').attr('disabled', true).val(null).addClass('salesforce-webform-disabled').end().hide();
   }
 
