@@ -1,6 +1,11 @@
 Version 7.x-1.x
 ---------------
 
+Version 7.x-1.0-beta4
+---------------------
+Issue #2414025 by dbcollies: Fixed bug which ignored required flag.
+Issue #2413961 by dbcollies: Added support for resizing picklist controls.
+
 Version 7.x-1.0-beta3
 ---------------------
 Issue #2411783 by dbcollies: Added support for multi picklists.
