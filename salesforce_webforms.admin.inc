@@ -527,6 +527,14 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
         '#options' => salesforce_webforms_picklist_select($fdata['picklistValues']),
       );
     }
+    elseif ($fdata['type'] == 'multipicklist') {
+      $form['map']['map_fields'][$fname]['picklist'] = array(
+        '#type' => 'select',
+        '#multiple' => TRUE,
+        '#title' => t('Or select predefined value(s)'),
+        '#options' => salesforce_webforms_picklist_select($fdata['picklistValues'], FALSE),
+      );
+    }
     elseif ($fdata['type'] == 'boolean') {
       $form['map']['map_fields'][$fname]['picklist'] = array(
         '#type' => 'select',
@@ -556,10 +564,10 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     if (isset($form['map']['map_fields'][$fname]['picklist'])) {
       $form['map']['map_fields'][$fname]['target']['#states'] = array(
         'enabled' => array(
-          ':input[name="map_fields[' . $fname . '][picklist]"]' => array('value' => ''),
+          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $form['map']['map_fields'][$fname]['picklist']['#multiple'] ?  array('select_not_empty' => FALSE) : array('value' => ''),
         ),
         'disabled' => array(
-          ':input[name="map_fields[' . $fname . '][picklist]"]' => array('!value' => ''),
+          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $form['map']['map_fields'][$fname]['picklist']['#multiple'] ?  array('select_not_empty' => TRUE) : array('!value' => ''),
         ),
       );
     }
@@ -577,7 +585,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
       $form['map']['map_fields'][$field['sf_fieldname']]['#collapsed'] = FALSE;
       $form['map']['map_fields'][$field['sf_fieldname']]['target']['#default_value'] = $field['source_data'];
       if ($form['map']['map_fields'][$field['sf_fieldname']]['picklist']) {
-        $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#default_value'] = array($field['source_data']);
+        $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#default_value'] = $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#multiple'] ? explode(';', $field['source_data']) : array($field['source_data']);
       }
       $form['map']['map_fields'][$field['sf_fieldname']]['keyfield']['#default_value'] = $field['keyfield'] ? array('1') : array();
     }
@@ -588,6 +596,8 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     '#value' => (isset($map['mapid'])) ? t('Save map') : t('Add map'),
     '#weight' => 25,
   );
+
+  $form['#attached']['js'][] = drupal_get_path('module', 'salesforce_webforms') . '/js/salesforce-admin.js';
 
   return $form;
 }
@@ -728,8 +738,13 @@ function salesforce_webforms_config($form, $form_state) {
  * @return array
  *   An array suitable for use as an 'options' element in a form.
  */
-function salesforce_webforms_picklist_select(array $picklist) {
-  $options = array('' => t('- Select -'));
+function salesforce_webforms_picklist_select(array $picklist, $include_select = TRUE) {
+  if ($include_select) {
+    $options = array('' => t('- Select -'));
+  }
+  else {
+    $options = array();
+  }
 
   foreach ($picklist as $pick) {
     if ($pick['active']) {

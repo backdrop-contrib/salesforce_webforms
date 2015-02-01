@@ -476,10 +476,17 @@ function salesforce_webforms_map_save(array $values) {
  */
 function salesforce_webforms_save_fields($mapid, array $fields) {
   $i = 1;
-  foreach ($fields as $fname => $values) {
+  foreach ($fields as $fname => &$values) {
     // Only process if we are given source data.
-    if (isset($values['picklist']) && $values['picklist'] != '') {
-      $values['target'] = $values['picklist'];
+    if (isset($values['picklist'])) {
+      if (is_array($values['picklist'])) {
+        if (count($values['picklist']) > 0) {
+          $values['target'] = implode(';', $values['picklist']);
+        }
+      }
+      else if ($values['picklist'] != '') {
+        $values['target'] = $values['picklist'];
+      }
     }
 
     if ($values['target']) {
