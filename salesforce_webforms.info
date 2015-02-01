@@ -5,3 +5,4 @@ package = Salesforce
 configure = admin/config/salesforce/webforms
 dependencies[] = salesforce (>= 3.0)
 dependencies[] = webform
+dependencies[] = behavior_weights
