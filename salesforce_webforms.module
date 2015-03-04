@@ -587,7 +587,7 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
       }
 
       // See if we are always creating new, or trying to update existing.
-      $target_id = $existing_keys[$mapname];
+      $target_id = isset($existing_keys[$mapname]) ? $existing_keys[$mapname] : FALSE;
       if (!$target_id && count($keyfields) > 0) {
         // Try to find the ID.
         $sql = "SELECT Id FROM $object WHERE ";
