@@ -637,7 +637,7 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
  */
 function salesforce_webforms_webform_submission_update($node, $sub) {
   // Call the insert hook, with instructions to update any existing maps.
-  salesforce_webforms_submission_insert($node, $sub, TRUE);
+  salesforce_webforms_webform_submission_insert($node, $sub, TRUE);
 }
 
 /**
