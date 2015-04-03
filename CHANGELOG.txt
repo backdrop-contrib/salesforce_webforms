@@ -1,5 +1,6 @@
 Version 7.x-1.x-dev
 -------------------
+Issue #2465139 by dbcollies: Added support for draft webforms.
 Issue #2428197 by rmontero: Fixed unititialized variable warning.
 Issue #2416005 by dbcollies: Added support for multi picklists in maps.
 

@@ -529,6 +529,11 @@ function salesforce_webforms_webform_version() {
  * Implements hook_webform_submission_insert().
  */
 function salesforce_webforms_webform_submission_insert($node, $sub, $update = FALSE) {
+  // Skip if draft.
+  if ($sub->is_draft) {
+    return;
+  }
+
   // Get the version of Webform to know how to filter.
   $webform_version = salesforce_webforms_webform_version();
 
@@ -625,6 +630,14 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
 
     module_invoke_all('salesforce_webforms_save_submission', $mapped_ids, $sub->sid);
   }
+}
+
+/**
+ * Implements hook_webform_submission_update().
+ */
+function salesforce_webforms_webform_submission_update($node, $sub) {
+  // Call the insert hook, with instructions to update any existing maps.
+  salesforce_webforms_submission_insert($node, $sub, TRUE);
 }
 
 /**
