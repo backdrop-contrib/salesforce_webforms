@@ -267,7 +267,7 @@
     var $find = $elem.find('select');
 
     // Get the selected option.
-    var idx = $find.prop('selectedIndex');
+    var idx = $find.prop ? $find.prop('selectedIndex') : $find.attr('selectedIndex');
 
     // Now map that back to the original order.
     var ret = idx == 0 ? -1 : map[el].optionmap[idx];
