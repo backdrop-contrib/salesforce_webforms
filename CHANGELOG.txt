@@ -1,4 +1,4 @@
-Version 7.x-1.x-dev
+Version 7.x-1.0-beta5
 -------------------
 Issue #2465139 by dbcollies: Added support for draft webforms.
 Issue #2428197 by rmontero: Fixed unititialized variable warning.
