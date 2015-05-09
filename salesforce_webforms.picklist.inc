@@ -551,6 +551,9 @@ function salesforce_webforms_validate_picklist(&$el, &$state, $form) {
   if (!$state['input'][$control]) {
     // We are disabled - flag as OK to be empty.
     $errors = form_get_errors();
+    if (!$errors) {
+      $errors = array();
+    }
 
     // Clear out error log.
     drupal_get_messages('error');

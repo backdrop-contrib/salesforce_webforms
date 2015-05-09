@@ -386,8 +386,20 @@ function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
  * @see salesforce_webforms_resubmit()
  */
 function salesforce_webforms_resubmit_submit($form, $form_state) {
+  // Load the submission if not already in the state (Webform 3.x).
+  if(!isset($form_state['submission'])) {
+    $sid = $form_state['values']['sid'];
+    $submissions = webform_get_submissions(array('sid' => $sid));
+    $form_state['submission'] = $submissions[$sid];
+  }
   $sub = $form_state['submission'];
+
   $update = $form_state['values']['update']['1'];
+
+  // Load the node if not already in the state (Webform 3.x).
+  if (!isset($form_state['node'])) {
+    $form_state['node'] = node_load($sub->nid);
+  }
   $node = $form_state['node'];
 
   salesforce_webforms_webform_submission_insert($node, $sub, $update);
