@@ -1,3 +1,7 @@
+Version 7.x-1.x
+---------------
+Issue #2485561 by dbcollies: Added checks to prevent PHP warnings.
+
 Version 7.x-1.0-beta5
 -------------------
 Issue #2465139 by dbcollies: Added support for draft webforms.

@@ -562,12 +562,14 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
 
     // Did we add a picklist?
     if (isset($form['map']['map_fields'][$fname]['picklist'])) {
+      $field = $form['map']['map_fields'][$fname]['picklist'];
+      $multiple = isset($field['#multiple']) ? $field['#multiple'] : FALSE;
       $form['map']['map_fields'][$fname]['target']['#states'] = array(
         'enabled' => array(
-          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $form['map']['map_fields'][$fname]['picklist']['#multiple'] ?  array('select_not_empty' => FALSE) : array('value' => ''),
+          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $multiple ?  array('select_not_empty' => FALSE) : array('value' => ''),
         ),
         'disabled' => array(
-          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $form['map']['map_fields'][$fname]['picklist']['#multiple'] ?  array('select_not_empty' => TRUE) : array('!value' => ''),
+          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $multiple ?  array('select_not_empty' => TRUE) : array('!value' => ''),
         ),
       );
     }
@@ -584,8 +586,8 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     foreach ($map['fields'] as $field) {
       $form['map']['map_fields'][$field['sf_fieldname']]['#collapsed'] = FALSE;
       $form['map']['map_fields'][$field['sf_fieldname']]['target']['#default_value'] = $field['source_data'];
-      if ($form['map']['map_fields'][$field['sf_fieldname']]['picklist']) {
-        $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#default_value'] = $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#multiple'] ? explode(';', $field['source_data']) : array($field['source_data']);
+      if (isset($form['map']['map_fields'][$field['sf_fieldname']]['picklist'])) {
+        $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#default_value'] = $multiple ? explode(';', $field['source_data']) : array($field['source_data']);
       }
       $form['map']['map_fields'][$field['sf_fieldname']]['keyfield']['#default_value'] = $field['keyfield'] ? array('1') : array();
     }
