@@ -328,7 +328,7 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
         time() + SALESFORCE_WEBFORMS_CACHE_DURATION);
     }
     catch (SalesforceException $e) {
-      drupal_set_message(t('Get Object Fields: ') . check_plain($e->getMessage()), 'error');
+      drupal_set_message(t('Get Object fields: @msg', array('@msg' => check_plain($e->getMessage()))), 'error');
 
       watchdog(
         'salesforce_webforms',
@@ -485,7 +485,7 @@ function salesforce_webforms_save_fields($mapid, array $fields) {
           $values['target'] = implode(';', $values['picklist']);
         }
       }
-      else if ($values['picklist'] != '') {
+      elseif ($values['picklist'] != '') {
         $values['target'] = $values['picklist'];
       }
     }
@@ -820,7 +820,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE, $suppress_errors = 
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Salesforce webforms fetch data: ') . check_plain($e->getMessage()), 'error');
+      drupal_set_message(t('Salesforce webforms fetch data: @msg', array('@msg' => check_plain($e->getMessage()))), 'error');
     }
 
     watchdog(
@@ -935,7 +935,7 @@ function salesforce_webforms_update_object($object, $id, array $fields, $suppres
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Error updating Salesforce object: ') . check_plain($e->getMessage()), 'error'); 
+      drupal_set_message(t('Error updating Salesforce object: @msg', array('@msg' => check_plain($e->getMessage()))), 'error');
     }
 
     watchdog(
@@ -971,7 +971,7 @@ function salesforce_webforms_create_object($object, array $fields, $suppress_err
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Error creating Salesforce object:') . check_plain($e->getMessage()), 'error');
+      drupal_set_message(t('Error creating Salesforce object: @msg', array('@msg' => check_plain($e->getMessage()))), 'error');
     }
 
     watchdog(
@@ -1198,9 +1198,14 @@ function salesforce_webforms_get_picklist_options($limit = TRUE) {
  * In most cases, SalesForce and Drupal use the same code. However,
  * for English, Drupal, uses 'en' while SalesForce expects 'en_US'
  */
-function salesforce_webforms_language_code($language = null) {
-  if(!isset($language)) $language = $GLOBALS['language']->language;
-  if($language == 'en') $language = 'en_US';
+function salesforce_webforms_language_code($language = NULL) {
+  if (!isset($language)) {
+    $language = $GLOBALS['language']->language;
+  }
+
+  if ($language == 'en') {
+    $language = 'en_US';
+  }
 
   return $language;
 }

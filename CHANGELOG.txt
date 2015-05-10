@@ -1,5 +1,6 @@
 Version 7.x-1.x
 ---------------
+Updated code to fix coding standard errors.
 Issue #2486323 by dbcollies: Added support for disabling error messages.
 Issue #2485625 by DarrellDuane: Added additional help text.
 Issue #2485625 by DarrellDuane: Updated error messages displayed to users.

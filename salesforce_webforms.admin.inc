@@ -259,7 +259,7 @@ function theme_salesforce_webforms_maps_form(array $vars) {
  * @see salesforce_webforms_maps_form()
  */
 function salesforce_webforms_maps_form_submit($form, &$state) {
-  // Save the settings
+  // Save the settings.
   $settings = array(
     'nid' => $state['values']['nid'],
     'suppress_errors' => $state['values']['settings']['suppress_errors'],
@@ -424,7 +424,7 @@ function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
  */
 function salesforce_webforms_resubmit_submit($form, $form_state) {
   // Load the submission if not already in the state (Webform 3.x).
-  if(!isset($form_state['submission'])) {
+  if (!isset($form_state['submission'])) {
     $sid = $form_state['values']['sid'];
     $submissions = webform_get_submissions(array('sid' => $sid));
     $form_state['submission'] = $submissions[$sid];
@@ -617,10 +617,10 @@ e field key.  See more deails under Webform submission values by clicking on Bro
       $multiple = isset($field['#multiple']) ? $field['#multiple'] : FALSE;
       $form['map']['map_fields'][$fname]['target']['#states'] = array(
         'enabled' => array(
-          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $multiple ?  array('select_not_empty' => FALSE) : array('value' => ''),
+          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $multiple ? array('select_not_empty' => FALSE) : array('value' => ''),
         ),
         'disabled' => array(
-          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $multiple ?  array('select_not_empty' => TRUE) : array('!value' => ''),
+          ':input[name^="map_fields[' . $fname . '][picklist]"]' => $multiple ? array('select_not_empty' => TRUE) : array('!value' => ''),
         ),
       );
     }

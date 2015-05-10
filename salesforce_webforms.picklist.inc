@@ -154,7 +154,7 @@ function _webform_render_sf_picklist($component, $value = NULL, $filter = TRUE) 
     // Set the value as a single string.
     // $element['#default_value'] = '';
     // foreach ((array) $value as $option_value) {
-      // $element['#default_value'] = $option_value;
+    // $element['#default_value'] = $option_value;
     // }
     $element['#default_value'] = $value;
   }
@@ -257,7 +257,8 @@ function theme_webform_display_sf_picklist(array $variables) {
   $items = array();
   if ($element['#multiple']) {
     return implode(';', $element['#value']);
-  } else if (isset($element['#value'][0]) && $element['#value'][0] !== '') {
+  }
+  elseif (isset($element['#value'][0]) && $element['#value'][0] !== '') {
     // Administer provided values.
     if (isset($options[$element['#value'][0]])) {
       $items[] = $options[$element['#value'][0]];
@@ -547,7 +548,6 @@ function _salesforce_webforms_alpha_cmp($a, $b) {
 function salesforce_webforms_validate_picklist(&$el, &$state, $form) {
   $form_key = $el['#webform_component']['form_key'];
   $control = salesforce_webforms_map_fieldid($form_key) . "-control";
-  // if (!isset($state['input']['submitted'][$form_key]) && !is_null($state['input']['submiited'][$form_key])) {
   if (!$state['input'][$control]) {
     // We are disabled - flag as OK to be empty.
     $errors = form_get_errors();

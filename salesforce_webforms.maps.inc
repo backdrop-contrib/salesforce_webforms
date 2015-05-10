@@ -54,7 +54,8 @@ function salesforce_webforms_settings_delete($nid) {
  *
  * @param array $settings
  *   Associative array of settings:
- *   - settingid: (int) ID of existing record to update. Will create new if missing.
+ *   - settingid: (int) ID of existing record to update. Will create new if
+ *       missing.
  *   - nid: (int) Node ID
  *   - suppress_errors: (int) flag indicating if errors should be suppressed.
  */
@@ -156,7 +157,7 @@ function salesforce_webforms_get_map_fields($mapid, $nid) {
 }
 
 /**
- * Reads the maps and settings for nodes and store in the webform field of the node.
+ * Reads the maps and settings for nodes and store in the node.
  *
  * @param array $nodes
  *   An array of node objects.

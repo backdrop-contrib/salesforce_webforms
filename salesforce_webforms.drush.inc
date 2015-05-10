@@ -83,8 +83,8 @@ function drush_salesforce_webforms_sf_webforms_resubmit($sid, $update = FALSE) {
 /**
  * Find all of the objects mapped to a given webform submission.
  *
- * @param $submission
- *   The submission it.
+ * @param int $submission
+ *   The submission ID.
  */
 function drush_salesforce_webforms_sf_webforms_objects($submission) {
   $salesforce = salesforce_get_api();
