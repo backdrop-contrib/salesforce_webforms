@@ -138,6 +138,34 @@ function salesforce_webforms_schema() {
     ),
   );
 
+  $schema['salesforce_webforms_settings'] = array(
+    'description' => 'Stores Salesforce mapping settings',
+    'fields' => array(
+      'settingid' => array(
+        'type' => 'serial',
+        'description' => 'Unique identifier for a setting',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'The node ID',
+        'not null' => TRUE,
+      ),
+      'suppress_errors' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'description' => 'Should error messages be suppressed?',
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('settingid'),
+    'indexes' => array(
+      'nid' => array('nid'),
+    ),
+  );
+
   // Create a custom cache table.
   $schema['cache_salesforce_webforms'] = drupal_get_schema_unprocessed('system', 'cache');
 
@@ -192,5 +220,41 @@ function salesforce_webforms_update_7002() {
 
   if (!db_table_exists('cache_salesforce_webforms')) {
     db_create_table('cache_salesforce_webforms', $schema);
+  }
+}
+
+/**
+ * Add a new table to store settings for mappings.
+ */
+function salesforce_webforms_update_7003() {
+  $schema = array(
+    'description' => 'Stores Salesforce mapping settings',
+    'fields' => array(
+      'settingid' => array(
+        'type' => 'serial',
+        'description' => 'Unique identifier for a setting',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'The node ID',
+        'not null' => TRUE,
+      ),
+      'suppress_errors' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'description' => 'Should error messages be suppressed?',
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('settingid'),
+    'indexes' => array(
+      'nid' => array('nid'),
+    ),
+  );
+  if (!db_table_exists('salesforce_webforms_settings')) {
+    db_create_table('salesforce_webforms_settings', $schema);
   }
 }

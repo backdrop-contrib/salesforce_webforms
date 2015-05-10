@@ -19,6 +19,7 @@
  */
 function salesforce_webforms_maps_form($form, &$form_state, $node) {
   $maps = salesforce_webforms_get_webform_maps($node);
+  $settings = salesforce_webforms_settings_get($node->nid);
 
   $form = array(
     '#tree' => TRUE,
@@ -29,7 +30,31 @@ function salesforce_webforms_maps_form($form, &$form_state, $node) {
       '#type' => 'value',
       '#value' => $node->nid,
     ),
+    'settings' => array(
+      '#type' => 'fieldset',
+      '#title' => t('Settings'),
+      'suppress_errors' => array(
+        '#title' => t('Suppress Errors?'),
+        '#description' => t('Check this field to suppress display of Salesforce error messages when a user submits a form'),
+        '#type' => 'checkboxes',
+        '#options' => array(
+          '1' => t('Yes'),
+        ),
+        '#default_value' => $settings['suppress_errors'] ? array('1') : array(),
+      ),
+    ),
+    'helptext' => array(
+      '#type' => 'markup',
+      '#markup' => t("Maps are used to allow multiple Salesforce objects to be updated / inserted from a single form.  Typically, you will have only one map per Salesforce object, unless the intent is to create/update multiple records of the same object from one form.  For each map that you want to use to update an existing object, you will need to specify the key(s) as well as the fields you want updated."),
+    ),
   );
+
+  if (isset($settings['settingid'])) {
+    $form['settingid'] = array(
+      '#type' => 'value',
+      '#value' => $settings['settingid'],
+    );
+  }
 
   $objects = salesforce_webforms_get_objects_selection();
 
@@ -221,7 +246,6 @@ function theme_salesforce_webforms_maps_form(array $vars) {
     'attributes' => array('id' => $table_id),
   ));
 
-  $output .= t("Maps are used to allow for multiple Salesforce objects to be updated / inserted from a single form.  Typically, you will have only one map per Salesforce object, unless the intent is to create/update multiple records of the same object from one form.  For each map that you want to use to update an existing object, you will need to specify the key(s) as well as the fields you want updated.");
   $output .= drupal_render_children($form);
 
   drupal_add_tabledrag($table_id, 'order', 'sibling', 'salesforce-webforms-map-weight');
@@ -235,6 +259,18 @@ function theme_salesforce_webforms_maps_form(array $vars) {
  * @see salesforce_webforms_maps_form()
  */
 function salesforce_webforms_maps_form_submit($form, &$state) {
+  // Save the settings
+  $settings = array(
+    'nid' => $state['values']['nid'],
+    'suppress_errors' => $state['values']['settings']['suppress_errors'],
+  );
+
+  if (isset($state['values']['settingid'])) {
+    $settings['settingid'] = $state['values']['settingid'];
+  }
+
+  salesforce_webforms_settings_save($settings);
+
   if (isset($state['values']['maps']) && !empty($state['values']['maps'])) {
     foreach ($state['values']['maps'] as $id => $map) {
       db_update('salesforce_webforms_map')
@@ -403,7 +439,7 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
   }
   $node = $form_state['node'];
 
-  salesforce_webforms_webform_submission_insert($node, $sub, $update);
+  salesforce_webforms_webform_submission_insert($node, $sub, $update, TRUE);
 
   drupal_set_message(t('Salesforce updated'));
 }

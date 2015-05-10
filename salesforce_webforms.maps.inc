@@ -6,6 +6,80 @@
  */
 
 /**
+ * Get the settings associated with a node.
+ *
+ * @param int $nid
+ *   The node ID.
+ *
+ * @returns array
+ *   An associative array of setting names and values
+ *    - suppress_errors: (int) Flag indicating if errors should be suppressed.
+ */
+function salesforce_webforms_settings_get($nid) {
+  // Set default values.
+  $return = array(
+    'suppress_errors' => FALSE,
+    'nid' => $nid,
+  );
+
+  // Pull any settings found in the database.
+  $settings = db_select('salesforce_webforms_settings', 's')
+    ->fields('s', array('settingid', 'nid', 'suppress_errors'))
+    ->condition('nid', $nid)
+    ->execute()
+    ->fetchAll();
+
+  foreach ($settings as $setting) {
+    $return['settingid'] = $setting->settingid;
+    $return['suppress_errors'] = $setting->suppress_errors;
+  }
+  return $return;
+}
+
+/**
+ * Deletes settings associated with a node.
+ *
+ * @param int $nid
+ *   The node ID.
+ */
+function salesforce_webforms_settings_delete($nid) {
+  // Delete mapping.
+  db_delete('salesforce_webforms_settings')
+    ->condition('nid', $nid)
+    ->execute();
+}
+
+/**
+ * Saves the settings.
+ *
+ * @param array $settings
+ *   Associative array of settings:
+ *   - settingid: (int) ID of existing record to update. Will create new if missing.
+ *   - nid: (int) Node ID
+ *   - suppress_errors: (int) flag indicating if errors should be suppressed.
+ */
+function salesforce_webforms_settings_save($settings) {
+  // See if we're updating an existing record.
+  $count = 0;
+  $fields = array(
+    'nid' => $settings['nid'],
+    'suppress_errors' => $settings['suppress_errors'],
+  );
+
+  if (isset($settings['settingid'])) {
+    $count = db_update('salesforce_webforms_settings')
+      ->fields($fields)
+      ->condition('settingid', $settings['settingid'])
+      ->execute();
+  }
+  else {
+    db_insert('salesforce_webforms_settings')
+      ->fields($fields)
+      ->execute();
+  }
+}
+
+/**
  * Get a map entry.
  *
  * @param int $mapid
@@ -82,13 +156,25 @@ function salesforce_webforms_get_map_fields($mapid, $nid) {
 }
 
 /**
- * Reads the maps for nodes and store in the webform field of the node.
+ * Reads the maps and settings for nodes and store in the webform field of the node.
  *
  * @param array $nodes
  *   An array of node objects.
  */
 function salesforce_webforms_get_nodes_maps($nodes) {
   $nids = array_keys($nodes);
+
+  // First look for settings.
+  $settings = db_select('salesforce_webforms_settings', 's')
+    ->fields('s', array('settingid', 'nid', 'suppress_errors'))
+    ->condition('nid', $nids, 'IN')
+    ->execute()
+    ->fetchAll();
+
+  foreach ($settings as $setting) {
+    $nodes[$setting->nid]->webform['salesforce_settings'] = $setting;
+  }
+
   $maps = db_select('salesforce_webforms_map', 'm')
     ->fields('m', array('mapid', 'mapname', 'nid', 'sf_object', 'displayorder'))
     ->condition('nid', $nids, 'IN')

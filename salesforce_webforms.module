@@ -329,6 +329,7 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
     }
     catch (SalesforceException $e) {
       drupal_set_message(t('Get Object Fields: ') . check_plain($e->getMessage()), 'error');
+
       watchdog(
         'salesforce_webforms',
         'Salesforce Exception @code: @msg',
@@ -528,7 +529,7 @@ function salesforce_webforms_webform_version() {
 /**
  * Implements hook_webform_submission_insert().
  */
-function salesforce_webforms_webform_submission_insert($node, $sub, $update = FALSE) {
+function salesforce_webforms_webform_submission_insert($node, $sub, $update = FALSE, $force_error_display = FALSE) {
   // Skip if draft.
   if ($sub->is_draft) {
     return;
@@ -543,6 +544,13 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
     return;
   }
   else {
+    // Load the settings.
+    $settings = salesforce_webforms_settings_get($node->nid);
+    if ($force_error_display) {
+      // In admin. Always show error messages.
+      $settings['suppress_errors'] = FALSE;
+    }
+
     if ($update) {
       // Get any existing keys.
       $existing_keys = salesforce_webforms_get_submission_keys($sub->sid);
@@ -605,7 +613,7 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
           $sql .= "$union$field = '$val'";
           $union = " AND ";
         }
-        $res = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
+        $res = _salesforce_webforms_fetch("query?q=" . urlencode($sql), TRUE, $settings['suppress_errors']);
         if (count($res['records']) > 0) {
           $target_id = $res['records'][0]['Id'];
         }
@@ -613,10 +621,10 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
 
       if ($target_id) {
         // Do an update.
-        $res = salesforce_webforms_update_object($object, $target_id, $fields);
+        $res = salesforce_webforms_update_object($object, $target_id, $fields, $settings['suppress_errors']);
       }
       else {
-        $res = salesforce_webforms_create_object($object, $fields);
+        $res = salesforce_webforms_create_object($object, $fields, $settings['suppress_errors']);
         $target_id = $res['id'];
       }
 
@@ -785,7 +793,7 @@ function salesforce_webforms_object_select_list(array $object) {
  * @return array
  *   The Salesforce response data.
  */
-function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
+function _salesforce_webforms_fetch($url, $use_cache = TRUE, $suppress_errors = FALSE) {
   $data = NULL;
   // Do we need to switch languages for the connection?
   $lang = salesforce_webforms_language_prefix();
@@ -811,7 +819,10 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
     $data = $sf->apiCall($url);
   }
   catch (SalesforceException $e) {
-    drupal_set_message(t('Salesforce webforms fetch data: ') . check_plain($e->getMessage()), 'error');
+    if (!$suppress_errors) {
+      drupal_set_message(t('Salesforce webforms fetch data: ') . check_plain($e->getMessage()), 'error');
+    }
+
     watchdog(
       'salesforce_webforms',
       'Salesforce Exception @code: @msg',
@@ -913,7 +924,7 @@ function salesforce_webforms_queue_obj($objlist) {
  * @return array|NULL
  *   The Salesforce response as an array.
  */
-function salesforce_webforms_update_object($object, $id, array $fields) {
+function salesforce_webforms_update_object($object, $id, array $fields, $suppress_errors = FALSE) {
   $sf = salesforce_webforms_get_sfapi();
   if (!$sf->isAuthorized()) {
     return NULL;
@@ -923,7 +934,10 @@ function salesforce_webforms_update_object($object, $id, array $fields) {
     $res = $sf->objectUpsert($object, 'id', $id, $fields);
   }
   catch (SalesforceException $e) {
-    drupal_set_message(t('Error updating Salesforce object: ') . check_plain($e->getMessage()), 'error'); 
+    if (!$suppress_errors) {
+      drupal_set_message(t('Error updating Salesforce object: ') . check_plain($e->getMessage()), 'error'); 
+    }
+
     watchdog(
       'salesforce_webforms',
       'Salesforce Exception @code: @msg',
@@ -950,13 +964,16 @@ function salesforce_webforms_update_object($object, $id, array $fields) {
  * @return array|NULL
  *   The Salesforce response as an array.
  */
-function salesforce_webforms_create_object($object, array $fields) {
+function salesforce_webforms_create_object($object, array $fields, $suppress_errors = FALSE) {
   $sf = salesforce_webforms_get_sfapi();
   try {
     $res = $sf->objectCreate($object, $fields);
   }
   catch (SalesforceException $e) {
-    drupal_set_message(t('Error creating Salesforce object:') . check_plain($e->getMessage()), 'error');
+    if (!$suppress_errors) {
+      drupal_set_message(t('Error creating Salesforce object:') . check_plain($e->getMessage()), 'error');
+    }
+
     watchdog(
       'salesforce_webforms',
       'Salesforce Exception @code: @msg',
