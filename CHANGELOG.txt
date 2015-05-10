@@ -1,5 +1,7 @@
 Version 7.x-1.x
 ---------------
+Issue #2485625 by DarrellDuane: Added additional help text.
+Issue #2485625 by DarrellDuane: Updated error messages displayed to users.
 Issue #2485037 by dbcollies: Fixed resend logic for Webform 3.x.
 Issue #2485037 by dbcollies: Removed warning when clearing errors on form.
 Issue #2485037 by DarrellDuane: Refactored code to avoid deprecated function.

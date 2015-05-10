@@ -171,7 +171,7 @@ function theme_salesforce_webforms_maps_form(array $vars) {
 
   $header = array(
     t('Map name'),
-    t('Object'),
+    t('Salesforce Object'),
     t('Fields (* indicates key field)'),
     t('Weight'),
     array(
@@ -221,6 +221,7 @@ function theme_salesforce_webforms_maps_form(array $vars) {
     'attributes' => array('id' => $table_id),
   ));
 
+  $output .= t("Maps are used to allow for multiple Salesforce objects to be updated / inserted from a single form.  Typically, you will have only one map per Salesforce object, unless the intent is to create/update multiple records of the same object from one form.  For each map that you want to use to update an existing object, you will need to specify the key(s) as well as the fields you want updated.");
   $output .= drupal_render_children($form);
 
   drupal_add_tabledrag($table_id, 'order', 'sibling', 'salesforce-webforms-map-weight');
@@ -520,6 +521,8 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     $tmp = array(
       '#title' => t('Source data'),
       '#required' => FALSE,
+      '#description' => t('Select Token or Constant to insert/update or to use as the key value for this field.  Typically this will be the token [submission:values:?] where ? is replaced with th
+e field key.  See more deails under Webform submission values by clicking on Browse availble tokens.'),
     );
 
     if ($fdata['type'] == 'textarea') {

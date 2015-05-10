@@ -328,7 +328,7 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
         time() + SALESFORCE_WEBFORMS_CACHE_DURATION);
     }
     catch (SalesforceException $e) {
-      drupal_set_message(check_plain($e->getMessage()), 'error');
+      drupal_set_message(t('Get Object Fields: ') . check_plain($e->getMessage()), 'error');
       watchdog(
         'salesforce_webforms',
         'Salesforce Exception @code: @msg',
@@ -811,7 +811,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE) {
     $data = $sf->apiCall($url);
   }
   catch (SalesforceException $e) {
-    drupal_set_message(check_plain($e->getMessage()), 'error');
+    drupal_set_message(t('Salesforce webforms fetch data: ') . check_plain($e->getMessage()), 'error');
     watchdog(
       'salesforce_webforms',
       'Salesforce Exception @code: @msg',
@@ -923,7 +923,7 @@ function salesforce_webforms_update_object($object, $id, array $fields) {
     $res = $sf->objectUpsert($object, 'id', $id, $fields);
   }
   catch (SalesforceException $e) {
-    drupal_set_message(check_plain($e->getMessage()), 'error');
+    drupal_set_message(t('Error updating Salesforce object: ') . check_plain($e->getMessage()), 'error'); 
     watchdog(
       'salesforce_webforms',
       'Salesforce Exception @code: @msg',
@@ -956,7 +956,7 @@ function salesforce_webforms_create_object($object, array $fields) {
     $res = $sf->objectCreate($object, $fields);
   }
   catch (SalesforceException $e) {
-    drupal_set_message(check_plain($e->getMessage()), 'error');
+    drupal_set_message(t('Error creating Salesforce object:') . check_plain($e->getMessage()), 'error');
     watchdog(
       'salesforce_webforms',
       'Salesforce Exception @code: @msg',
