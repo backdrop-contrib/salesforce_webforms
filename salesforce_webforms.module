@@ -328,7 +328,7 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
         time() + SALESFORCE_WEBFORMS_CACHE_DURATION);
     }
     catch (SalesforceException $e) {
-      drupal_set_message(t('Get Object fields: @msg', array('@msg' => check_plain($e->getMessage()))), 'error');
+      drupal_set_message(t('Get Object fields: @msg', array('@msg' => $e->getMessage())), 'error');
 
       watchdog(
         'salesforce_webforms',
@@ -820,7 +820,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE, $suppress_errors = 
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Salesforce webforms fetch data: @msg', array('@msg' => check_plain($e->getMessage()))), 'error');
+      drupal_set_message(t('Salesforce webforms fetch data: @msg', array('@msg' => $e->getMessage())), 'error');
     }
 
     watchdog(
@@ -935,7 +935,7 @@ function salesforce_webforms_update_object($object, $id, array $fields, $suppres
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Error updating Salesforce object: @msg', array('@msg' => check_plain($e->getMessage()))), 'error');
+      drupal_set_message(t('Error updating Salesforce object: @msg', array('@msg' => $e->getMessage())), 'error');
     }
 
     watchdog(
@@ -971,7 +971,7 @@ function salesforce_webforms_create_object($object, array $fields, $suppress_err
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Error creating Salesforce object: @msg', array('@msg' => check_plain($e->getMessage()))), 'error');
+      drupal_set_message(t('Error creating Salesforce object: @msg', array('@msg' => $e->getMessage())), 'error');
     }
 
     watchdog(
