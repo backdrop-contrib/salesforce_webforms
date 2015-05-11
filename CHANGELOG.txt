@@ -1,4 +1,4 @@
-Version 7.x-1.x
+Version 7.x-1.0-beta6
 ---------------
 Issue #2485625 by dbcollies: Fixed spelling errors.
 Updated code to fix coding standard errors.
