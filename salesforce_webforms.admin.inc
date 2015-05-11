@@ -557,8 +557,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     $tmp = array(
       '#title' => t('Source data'),
       '#required' => FALSE,
-      '#description' => t('Select Token or Constant to insert/update or to use as the key value for this field.  Typically this will be the token [submission:values:?] where ? is replaced with th
-e field key.  See more deails under Webform submission values by clicking on Browse availble tokens.'),
+      '#description' => t('Select Token or Constant to insert/update or to use as the key value for this field.  Typically this will be the token [submission:values:?] where ? is replaced with the field key.  See more details under Webform submission values by clicking on Browse available tokens.'),
     );
 
     if ($fdata['type'] == 'textarea') {
