@@ -35,7 +35,7 @@ function salesforce_webforms_maps_form($form, &$form_state, $node) {
       '#title' => t('Settings'),
       'suppress_errors' => array(
         '#title' => t('Suppress Errors?'),
-        '#description' => t('Check this field to suppress display of Salesforce error messages when a user submits a form'),
+        '#description' => t('Check this field to suppress display of Salesforce error messages when a user submits this form. Note that this setting has no effect on errors produced when resubmitting results through the admin UI, or on error messages sent to the system log.'),
         '#type' => 'checkboxes',
         '#options' => array(
           '1' => t('Yes'),
