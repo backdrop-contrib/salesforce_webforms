@@ -1,5 +1,9 @@
-Version 7.x-1.0-beta6
+Version 7.x-1.x
 ---------------
+Issue #2501129 by dbcollies: Removed cache on key lookup.
+
+Version 7.x-1.0-beta6
+---------------------
 Issue #2485625 by dbcollies: Fixed spelling errors.
 Updated code to fix coding standard errors.
 Issue #2486323 by dbcollies: Added support for disabling error messages.
@@ -11,7 +15,7 @@ Issue #2485037 by DarrellDuane: Refactored code to avoid deprecated function.
 Issue #2485561 by dbcollies: Added checks to prevent PHP warnings.
 
 Version 7.x-1.0-beta5
--------------------
+---------------------
 Issue #2465139 by dbcollies: Added support for draft webforms.
 Issue #2428197 by rmontero: Fixed unititialized variable warning.
 Issue #2416005 by dbcollies: Added support for multi picklists in maps.

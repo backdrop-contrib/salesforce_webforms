@@ -613,7 +613,7 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
           $sql .= "$union$field = '$val'";
           $union = " AND ";
         }
-        $res = _salesforce_webforms_fetch("query?q=" . urlencode($sql), TRUE, $settings['suppress_errors']);
+        $res = _salesforce_webforms_fetch("query?q=" . urlencode($sql), FALSE, $settings['suppress_errors']);
         if (count($res['records']) > 0) {
           $target_id = $res['records'][0]['Id'];
         }
