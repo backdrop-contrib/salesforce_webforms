@@ -1,5 +1,6 @@
 Version 7.x-1.x
 ---------------
+Issue #2504921 by peter-caritas, dbcollies: Added submission_save_alter hook.
 Issue #2501129 by dbcollies: Removed cache on key lookup.
 
 Version 7.x-1.0-beta6

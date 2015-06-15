@@ -154,5 +154,29 @@ function hook_salesforce_webforms_picklists_alter(&$picklists) {
 }
 
 /**
+ * Alter hook to modify data before syncing to Salesforce.
+ *
+ * @param array $fields
+ *   Associative array of key value pairs.
+ * @param array $context
+ *   Associative array of context data for this update.
+ *   - mapping
+ *     Salesforce mapping array.
+ *   - node
+ *     node object that the webform is attached to
+ *   - submission
+ *     webform submission array.
+ *   - id
+ *     Salesforce object ID to be updated.
+ */
+function hook_salesforce_webforms_push_params_alter(&$fields, $context) {
+  switch ($context['map']['mapname']) {
+    case 'my_map':
+      unset($fields['my_field']);
+      break;
+  }
+}
+
+/**
  * @} salesforce_webforms_hooks
  */
