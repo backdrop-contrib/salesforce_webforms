@@ -400,7 +400,7 @@ function salesforce_webforms_webform_component_info() {
     ),
 
     // Conditional comparison type.
-    'conditional_type' => 'select',
+    'conditional_type' => 'sf_picklist',
 
     'file' => 'salesforce_webforms.picklist.inc',
   );
@@ -774,6 +774,40 @@ function salesforce_webforms_webform_select_options_info() {
 }
 
 /**
+ * Implements hook_webform_conditional_operator_info().
+ */
+function salesforce_webforms_webform_conditional_operator_info() {
+  return array(
+    'sf_picklist' => array(
+      'equal' => array(
+        'label' => t('is'),
+        'comparison callback' => 'webform_conditional_operator_string_equal',
+        'js comparison callback' => 'conditionalOperatorStringEqual',
+        'form callback' => 'salesforce_webforms_conditional_select',
+      ),
+      'not_equal' => array(
+        'label' => t('is not'),
+        'comparison callback' => 'webform_conditional_operator_string_not_equal',
+        'js comparison callback' => 'conditionalOperatorStringNotEqual',
+        'form callback' => 'salesforce_webforms_conditional_select',
+      ),
+      'empty' => array(
+        'label' => t('is empty'),
+        'comparison callback' => 'webform_conditional_operator_string_empty',
+        'js comparison callback' => 'conditionalOperatorStringEmpty',
+        'form callback' => FALSE,
+      ),
+      'not_empty' => array(
+        'label' => t('is not empty'),
+        'comparison callback' => 'webform_conditional_operator_string_not_empty',
+        'js comparison callback' => 'conditionalOperatorStringNotEmpty',
+        'form callback' => FALSE,
+      ),
+    ),
+  );
+}
+
+/**
  * Callback to build the list of records of the given object.
  *
  * @param array $object
@@ -788,6 +822,38 @@ function salesforce_webforms_object_select_list(array $object) {
   $obj = substr($obj, strlen('salesforce_webforms_'));
   $recs = salesforce_webforms_get_object_records($obj);
   return $recs;
+}
+
+/**
+ * Callback for picklist conditional fields.
+ *
+ * Patterned after webform_conditional_form_select() from webform module.
+ */
+function salesforce_webforms_conditional_select($node) {
+  static $count = 0;
+  $forms = array();
+
+  webform_component_include('sf_picklist');
+  foreach ($node->webform['components'] as $cid => $component) {
+    if (webform_component_property($component['type'], 'conditional_type') == 'sf_picklist') {
+      list($options) = _webform_sf_picklist_options($component);
+      $element = array(
+        '#type' => 'select',
+        '#multiple' => FALSE,
+        '#size' => NULL,
+        '#attributes' => array(),
+        '#id' => NULL,
+        '#name' => 'webform-conditional-sf-picklist-' . $cid . '-' . $count,
+        '#options' => $options,
+        '#parents' => array(),
+      );
+
+      $forms[$cid] = drupal_render($element);
+    }
+  }
+
+  $count++;
+  return $forms;
 }
 
 /**
