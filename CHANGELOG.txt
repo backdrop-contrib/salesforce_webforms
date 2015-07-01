@@ -1,6 +1,7 @@
 Version 7.x-1.x
 ---------------
-Issue #10075998 by dbcollies: Added permission to enable resend to Salesforce.
+Issue #2514806 by dbcollies: Fixed issue number in CHANGELOG.txt
+Issue #2514806 by dbcollies: Added permission to enable resend to Salesforce.
 
 Version 7.x-1.0
 ---------------
