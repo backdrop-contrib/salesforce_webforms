@@ -686,11 +686,13 @@ function salesforce_webforms_webform_submission_actions($node, $sub) {
     return $actions;
   }
 
-  $actions['sf'] = array(
-    'title' => t('Resend to Salesforce'),
-    'href' => 'node/' . $node->nid . '/submission/' . $sub->sid . '/sf',
-    'query' => drupal_get_destination(),
-  );
+  if (webform_results_access($node) && user_access('resend salesforce webform results')) {
+    $actions['sf'] = array(
+      'title' => t('Resend to Salesforce'),
+      'href' => 'node/' . $node->nid . '/submission/' . $sub->sid . '/sf',
+      'query' => drupal_get_destination(),
+    );
+  }
 
   return $actions;
 }
@@ -967,6 +969,18 @@ function salesforce_webforms_cron_queue_info() {
  */
 function salesforce_webforms_flush_caches() {
   return array('cache_salesforce_webforms');
+}
+
+/**
+ * Implements hook_permission().
+ */
+function salesforce_webforms_permission() {
+  return array(
+    'resend salesforce webform results' => array(
+      'title' => t('Allow resending webform results to Salesforce'),
+      'description' => t('Users with this permission can resend weborm data to Salesforce for any submission which they hav access to.'),
+    ),
+  );
 }
 
 /**
