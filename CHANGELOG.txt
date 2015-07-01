@@ -1,3 +1,7 @@
+Version 7.x-1.x
+---------------
+Issue #10075998 by dbcollies: Added permission to enable resend to Salesforce.
+
 Version 7.x-1.0
 ---------------
 Issue #2508331 by dbcollies: Added support for conditional display.
