@@ -1151,30 +1151,6 @@ function salesforce_webforms_get_sf_language() {
 }
 
 /**
- * Gets the Salesforce language code for the given Drupal language code.
- *
- * In most instances, these two values are the same. However, for English,
- * Drupal uses 'en' while Salesforce expects 'en_US'.
- *
- * @param string $language
- *   The language to query. If not specified, the language of the current
- *   page is used.
- *
- * @return string
- *   The Salesforce language code corresponding to the Drupal language code.
- */
-function salesforce_webforms_langauge_code($language = NULL) {
-  if (!isset($language)) {
-    $language = $GLOBALS['language']->language;
-  }
-  if ($language == 'en') {
-    $language = 'en_US';
-  }
-
-  return $language;
-}
-
-/**
  * Builds an array of objects of the given type usable as an options array.
  *
  * @param string $object
@@ -1282,10 +1258,17 @@ function salesforce_webforms_get_picklist_options($limit = TRUE) {
 }
 
 /**
- * Returns the current language code as SalesForce expects it.
+ * Gets the Salesforce language code for the given Drupal language code.
  *
- * In most cases, SalesForce and Drupal use the same code. However,
- * for English, Drupal, uses 'en' while SalesForce expects 'en_US'
+ * In most instances, these two values are the same. However, for English,
+ * Drupal uses 'en' while Salesforce expects 'en_US'.
+ *
+ * @param string $language
+ *   The language to query. If not specified, the language of the current
+ *   page is used.
+ *
+ * @return string
+ *   The Salesforce language code corresponding to the Drupal language code.
  */
 function salesforce_webforms_language_code($language = NULL) {
   if (!isset($language)) {
