@@ -1,5 +1,6 @@
 Version 7.x-1.x
 ---------------
+Issue #2533866 by martin.krischik.ublox: Removed duplicate language method.
 Issue #2514806 by dbcollies: Fixed issue number in CHANGELOG.txt
 Issue #2514806 by dbcollies: Added permission to enable resend to Salesforce.
 
