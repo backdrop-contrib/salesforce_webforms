@@ -160,7 +160,7 @@ function hook_salesforce_webforms_picklists_alter(&$picklists) {
  *   Associative array of key value pairs.
  * @param array $context
  *   Associative array of context data for this update.
- *   - mapping
+ *   - map
  *     Salesforce mapping array.
  *   - node
  *     node object that the webform is attached to

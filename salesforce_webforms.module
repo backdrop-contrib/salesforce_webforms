@@ -626,7 +626,7 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
         'submission' => $sub,
         'id' => $target_id,
       );
-      drupal_alter('salesforce_webforms_save_submission', $fields, $context);
+      drupal_alter('salesforce_webforms_push_params', $fields, $context);
 
       if ($target_id) {
         // Do an update.
