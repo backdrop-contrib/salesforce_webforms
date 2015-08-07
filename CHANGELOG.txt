@@ -1,5 +1,6 @@
 Version 7.x-1.x
 ---------------
+Issue #2545240 by farse: Added allow_anonymous flag to _webform_filter_values.
 Issue #2504921 by peter-caritas, dbcollies: Fixed wrong hook name.
 Issue #2533866 by martin.krischik.ublox: Removed duplicate language method.
 Issue #2514806 by dbcollies: Fixed issue number in CHANGELOG.txt

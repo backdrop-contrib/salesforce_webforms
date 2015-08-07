@@ -575,7 +575,7 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
 
         // See if we're running on webform 3.x. If so, replace tokens.
         if ($webform_version < 4) {
-          $filtered_source = _webform_filter_values($source, $node, $sub, NULL, FALSE);
+          $filtered_source = _webform_filter_values($source, $node, $sub, NULL, FALSE, TRUE);
           if ($filtered_source != '') {
             $tokens = array(
               'node' => $node,
