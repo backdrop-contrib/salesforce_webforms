@@ -1261,7 +1261,9 @@ function salesforce_webforms_get_picklist_options($limit = TRUE) {
  * Gets the Salesforce language code for the given Drupal language code.
  *
  * In most instances, these two values are the same. However, for English,
- * Drupal uses 'en' while Salesforce expects 'en_US'.
+ * Drupal uses 'en' while Salesforce expects 'en_US'. Also, when the country
+ * is included in the language code, Drupal follows RFC 4646, where the string
+ * is of the form ll-CC, while Salesforce expects ll_CC.
  *
  * @param string $language
  *   The language to query. If not specified, the language of the current
@@ -1278,6 +1280,9 @@ function salesforce_webforms_language_code($language = NULL) {
   if ($language == 'en') {
     $language = 'en_US';
   }
+
+  // Map dashes (-) (RFC 4646)  to underscore (_) (Salesforce standard).
+  $language = str_replace("-", "_", $language);
 
   return $language;
 }
