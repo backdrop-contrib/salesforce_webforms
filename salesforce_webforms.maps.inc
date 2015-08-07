@@ -173,7 +173,11 @@ function salesforce_webforms_get_nodes_maps($nodes) {
     ->fetchAll();
 
   foreach ($settings as $setting) {
-    $nodes[$setting->nid]->webform['salesforce_settings'] = $setting;
+    $nodes[$setting->nid]->webform['salesforce_settings'] = array(
+      'settingid' => $setting->settingid,
+      'nid' => $setting->nid,
+      'suppress_errors' => $setting->suppress_errors,
+    );
   }
 
   $maps = db_select('salesforce_webforms_map', 'm')
