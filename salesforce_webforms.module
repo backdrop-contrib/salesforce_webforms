@@ -619,13 +619,16 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
         }
       }
 
-      // Add hook_salesforce_webforms_push_params_alter.
+      // Call hook_salesforce_webforms_submission_save_alter.
       $context = array(
         'map' => $map,
         'node' => $node,
         'submission' => $sub,
         'id' => $target_id,
       );
+      drupal_alter('salesforce_webforms_submission_save', $fields, $context);
+
+      // @deprecated as of 7.x-1.1
       drupal_alter('salesforce_webforms_push_params', $fields, $context);
 
       if ($target_id) {

@@ -1,5 +1,6 @@
 Version 7.x-1.x
 ---------------
+Issue #2554207 by dbcollies: Renamed hook_salesforce_webforms_push_params_alter.
 Fixed injection of settings into node data structure.
 Issue #2534453 by martin.krischix.ublox, dbcollies: better RFC 4646 handling.
 Issue #2545240 by farse: Added allow_anonymous flag to _webform_filter_values.

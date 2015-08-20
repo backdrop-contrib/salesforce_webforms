@@ -169,6 +169,21 @@ function hook_salesforce_webforms_picklists_alter(&$picklists) {
  *   - id
  *     Salesforce object ID to be updated.
  */
+function hook_salesforce_webforms_submission_save_alter(&$fields, $context) {
+  switch ($context['map']['mapname']) {
+    case 'my_map':
+      unset($fields['my_field']);
+      break;
+  }
+}
+
+/**
+ * Alter hook to modify data before syncing to Salesforce.
+ *
+ * @deprecated as of 7.x-1.1.
+ *
+ * @see hook_salesforce_webforms_submission_save_alter()
+ */
 function hook_salesforce_webforms_push_params_alter(&$fields, $context) {
   switch ($context['map']['mapname']) {
     case 'my_map':
