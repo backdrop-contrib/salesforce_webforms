@@ -193,5 +193,47 @@ function hook_salesforce_webforms_push_params_alter(&$fields, $context) {
 }
 
 /**
+ * Info hook to define new data filters.
+ *
+ * Data structure: array of filters, keyed on the machine name of the filter.
+ * Each filter is an array with the following keys:
+ * - label -- The human-readable label for the filter.
+ * - callback -- The name of the function which implements this filter. The
+ *               function should accept a single parameter which will be the
+ *               unfiltered data as a string, and should return the filtered
+ *               string.
+ * - field types -- An array of Salesforce field for which this filter is valid.
+ *                  If not defined, then the filter will be available for all
+ *                  data types.
+ * - file -- (optional) The filename where this function is defined. Not needed
+ *           if the function is defined in the .module file.
+ */
+function hook_salesforce_webforms_filter_info($value) {
+  return array(
+    'salesforce webforms date' => array(
+      'label' => t('Format as Salesforce Date'),
+      'file' => 'salesforce_webforms.filters.inc',
+      'callback' => 'salesforce_webforms_date_filter',
+      'field types' => array('Date'),
+    ),
+    'salesforce webforms date time' => array(
+      'label' => t('Format as Salesforce Date/Time'),
+      'file' => 'salesforce_webforms.filters.inc',
+      'callback' => 'salesforce_webforms_datetime_filter',
+      'field types' => array('Date/Time'),
+    ),
+  );
+}
+
+/**
+ * Alter hook to modify filters.
+ *
+ * @see hook_salesforce_webforms_filter_info()
+ */
+function hook_salesforce_webforms_filter_info_alter(&$filters) {
+  $filters['salesforce webforms date']['callback'] = 'new_callback';
+}
+
+/**
  * @} salesforce_webforms_hooks
  */

@@ -474,6 +474,8 @@ function salesforce_webforms_map_save(array $values) {
  *   - target: String identifying target value.
  *   - keyfield: Boolean indicating if this is a key field.
  *   - picklist: (optional) String to override target.
+ *   - filter: (optional) name of a filter defined by
+ *             hook_salesforce_webforms_filter_info().
  */
 function salesforce_webforms_save_fields($mapid, array $fields) {
   $i = 1;
@@ -499,6 +501,7 @@ function salesforce_webforms_save_fields($mapid, array $fields) {
             'source_data' => $values['target'],
             // 'is_keyfield' => $values['keyfield'][1],
             'is_keyfield' => $values['keyfield'],
+            'filter' => isset($values['filter']) ? $values['filter'] : NULL,
             'displayorder' => $i++,
           )
         )
@@ -588,6 +591,11 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
         }
         else {
           $filtered_source = webform_replace_tokens($source, $node, $sub, NULL, FALSE);
+        }
+
+        // Do we have any filters to apply?
+        if (isset($field['filter'])) {
+          $filtered_source = salesforce_webforms_filter_invoke($field['filter'], $filtered_source);
         }
 
         if ($key) {
@@ -779,6 +787,26 @@ function salesforce_webforms_webform_select_options_info() {
 }
 
 /**
+ * Implements hook_salesforce_webforms_filter_info().
+ */
+function salesforce_webforms_salesforce_webforms_filter_info() {
+  return array(
+    'salesforce webforms date' => array(
+      'label' => t('Format as Salesforce Date'),
+      'file' => 'salesforce_webforms.filters.inc',
+      'callback' => 'salesforce_webforms_date_filter',
+      'field types' => array('date'),
+    ),
+    'salesforce webforms date time' => array(
+      'label' => t('Format as Salesforce Date/Time'),
+      'file' => 'salesforce_webforms.filters.inc',
+      'callback' => 'salesforce_webforms_datetime_filter',
+      'field types' => array('datetime'),
+    ),
+  );
+}
+
+/**
  * Implements hook_webform_conditional_operator_info().
  */
 function salesforce_webforms_webform_conditional_operator_info() {
@@ -928,6 +956,93 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE, $suppress_errors = 
   cache_set($cachename, $data, 'cache_salesforce_webforms', time() + SALESFORCE_WEBFORMS_CACHE_DURATION);
 
   return $data;
+}
+
+/**
+ * Gets the list of data filters defined by this and other modules.
+ */
+function salesforce_webforms_filters() {
+  static $filters;
+
+  if (!$filters) {
+    $filters = array();
+
+    // Invoke all of the hooks to define filters.
+    foreach (module_implements('salesforce_webforms_filter_info') as $module) {
+      $module_filters = module_invoke($module, 'salesforce_webforms_filter_info');
+      foreach ($module_filters as $type => $info) {
+        // Store the module name so we can include the file if needed.
+        $module_filters[$type]['module'] = $module;
+      }
+      $filters += $module_filters;
+    }
+
+    // Invoke all implementations of hook_salesforce_webforms_filter_info_alter.
+    drupal_alter('salesforce_webforms_filter_info', $filters);
+
+    // Sort by the label.
+    uasort($filters, function($a, $b) {
+      return strnatcasecmp($a['label'], $b['label']);
+    });
+  }
+
+  return $filters;
+}
+
+/**
+ * Load a filter file into memory.
+ *
+ * @param string $filter_type
+ *   The string machine name of the filter.
+ */
+function salesforce_webforms_filter_include($filter_type) {
+  static $included = array();
+
+  // Don't load it if we've already loaded this filter.
+  if (!isset($included[$filter_type])) {
+    $filters = salesforce_webforms_filters();
+    $included[$filter_type] = TRUE;
+
+    // Is the file attribute specified?
+    if (($info = $filters[$filter_type]) && isset($info['file'])) {
+      $pathinfo = pathinfo($info['file']);
+      $basename = basename($pathinfo['basename'], '.' . $pathinfo['extension']);
+      $path = (!empty($pathinfo['dirname']) ? $pathinfo['dirname'] . '/' : '') . $basename;
+      module_load_include($pathinfo['extension'], $info['module'], $path);
+    }
+  }
+}
+
+/**
+ * Invokes a filter.
+ *
+ * @param string $filter
+ *   The machine name of the filter.
+ * @param string $value
+ *   The source value, after all tokens have been replaced.
+ *
+ * @return string|array
+ *   The filtered value, as returned by the callback function.
+ */
+function salesforce_webforms_filter_invoke($filter, $value) {
+  // Initialize the return value to be the same as the source.
+  $return = $value;
+
+  // Look up the filter.
+  $filters = salesforce_webforms_filters();
+
+  // Is there a callback specified?
+  if (isset($filters[$filter]) && isset($filters[$filter]['callback'])) {
+    $callback = $filters[$filter]['callback'];
+
+    // Make sure the function's definition has been included.
+    salesforce_webforms_filter_include($filter);
+    if (function_exists($callback)) {
+      $return = $callback($value);
+    }
+  }
+
+  return $return;
 }
 
 /**

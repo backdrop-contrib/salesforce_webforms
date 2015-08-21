@@ -143,12 +143,13 @@ function salesforce_webforms_get_node_maps($nid) {
  */
 function salesforce_webforms_get_map_fields($mapid, $nid) {
   $fields = array();
-  $result = db_query("SELECT fieldmapid,sf_fieldname,source_data,is_keyfield FROM {salesforce_webforms_field} WHERE mapid = :mapid", array(':mapid' => $mapid));
+  $result = db_query("SELECT fieldmapid,sf_fieldname,source_data,is_keyfield,filter FROM {salesforce_webforms_field} WHERE mapid = :mapid", array(':mapid' => $mapid));
   foreach ($result as $row) {
     $fields[] = array(
       'fieldmapid' => $row->fieldmapid,
       'sf_fieldname' => $row->sf_fieldname,
       'source_data' => $row->source_data,
+      'filter' => $row->filter,
       'keyfield' => $row->is_keyfield,
     );
   }
@@ -205,7 +206,8 @@ function salesforce_webforms_get_nodes_maps($nodes) {
 
   // Now get all of the fields for those maps.
   $fields = db_select('salesforce_webforms_field', 'f')
-    ->fields('f', array('mapid', 'sf_fieldname', 'source_data', 'is_keyfield'))
+    ->fields('f',
+      array('mapid', 'sf_fieldname', 'source_data', 'is_keyfield', 'filter'))
     ->condition('mapid', $mids, 'IN')
     ->execute()
     ->fetchAll();
@@ -214,6 +216,7 @@ function salesforce_webforms_get_nodes_maps($nodes) {
     $map_list[$field->mapid]['map_fields'][$field->sf_fieldname] = array(
       'target' => $field->source_data,
       'keyfield' => $field->is_keyfield,
+      'filter' => $field->filter,
     );
   }
 

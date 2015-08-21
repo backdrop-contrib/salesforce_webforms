@@ -89,6 +89,11 @@ function salesforce_webforms_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'filter' => array(
+        'type' => 'text',
+        'description' => 'A filter to be applied to the data',
+        'not null' => FALSE,
+      ),
       'displayorder' => array(
         'type' => 'int',
         'description' => 'The order of the map rules',
@@ -257,4 +262,19 @@ function salesforce_webforms_update_7003() {
   if (!db_table_exists('salesforce_webforms_settings')) {
     db_create_table('salesforce_webforms_settings', $schema);
   }
+}
+
+/**
+ * Add the 'filter' column to the field table.
+ */
+function salesforce_webforms_update_7004() {
+  db_add_field(
+    'salesforce_webforms_field',
+    'filter',
+    array(
+      'type' => 'text',
+      'description' => 'A filter to be applied to the data',
+      'not null' => FALSE,
+    )
+  );
 }

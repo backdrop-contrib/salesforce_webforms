@@ -470,6 +470,8 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
   $form = array();
   $obj_info = salesforce_webforms_get_object_fields($obj);
 
+  $filters = salesforce_webforms_filters();
+
   $form['map'] = array(
     '#type' => 'fieldset',
     '#title' => ($action == 'edit') ? t('Edit mapping') : t('Add mapping'),
@@ -624,6 +626,15 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
       );
     }
 
+    // Do we have any valid filters for this data type?
+    $filter_options = salesforce_webforms_filter_options($filters, $fdata['type']);
+    if (count($filter_options) > 0) {
+      $form['map']['map_fields'][$fname]['filter'] = array(
+        '#type' => 'select',
+        '#title' => t('Apply a filter to the data'),
+        '#options' => array('' => t('--None--')) + $filter_options,
+      );
+    }
     $form['map']['map_fields'][$fname]['keyfield'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Key field?'),
@@ -640,6 +651,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
         $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#default_value'] = $multiple ? explode(';', $field['source_data']) : array($field['source_data']);
       }
       $form['map']['map_fields'][$field['sf_fieldname']]['keyfield']['#default_value'] = $field['keyfield'] ? array('1') : array();
+      $form['map']['map_fields'][$field['sf_fieldname']]['filter']['#default_value'] = isset($field['filter']) ? array($field['filter']) : array();
     }
   }
 
@@ -703,6 +715,29 @@ function salesforce_webforms_manage_map_validate($form, &$form_state) {
 function salesforce_webforms_manage_map_submit($form, &$form_state) {
   $values = $form_state['values'];
   salesforce_webforms_map_save($values);
+}
+
+/**
+ * Returns an array of filter options valid for the given data type.
+ *
+ * @param array $filters
+ *   An array of all defined filters.
+ * @param string $datatype
+ *   The current Salesforce data type.
+ *
+ * @return array
+ *   An array, suitable for use as an '#options' element in a form.
+ */
+function salesforce_webforms_filter_options($filters, $datatype) {
+  $options = array();
+
+  foreach ($filters as $key => $filter) {
+    if (!isset($filter['field types']) || in_array($datatype, $filter['field types'])) {
+      $options[$key] = $filter['label'];
+    }
+  }
+
+  return $options;
 }
 
 /**
