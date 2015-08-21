@@ -633,6 +633,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
         '#type' => 'select',
         '#title' => t('Apply a filter to the data'),
         '#options' => array('' => t('--None--')) + $filter_options,
+        '#description' => t('Any selected filter will be applied after all tokens have been replaced.'),
       );
     }
     $form['map']['map_fields'][$fname]['keyfield'] = array(
