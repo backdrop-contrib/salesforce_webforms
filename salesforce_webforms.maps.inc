@@ -143,13 +143,22 @@ function salesforce_webforms_get_node_maps($nid) {
  */
 function salesforce_webforms_get_map_fields($mapid, $nid) {
   $fields = array();
-  $result = db_query("SELECT fieldmapid,sf_fieldname,source_data,is_keyfield,filter FROM {salesforce_webforms_field} WHERE mapid = :mapid", array(':mapid' => $mapid));
+  $schema_version = salesforce_webforms_schema_version();
+  $include_filter = ($schema_version >= 7004);
+
+
+  $sql = "SELECT fieldmapid,sf_fieldname,source_data,is_keyfield";
+  if ($include_filter) {
+    $sql .= ",filter";
+  }
+  $sql .= " FROM {salesforce_webforms_field} WHERE mapid = :mapid";
+  $result = db_query($sql, array(':mapid' => $mapid));
   foreach ($result as $row) {
     $fields[] = array(
       'fieldmapid' => $row->fieldmapid,
       'sf_fieldname' => $row->sf_fieldname,
       'source_data' => $row->source_data,
-      'filter' => $row->filter,
+      'filter' => $include_filter ? $row->filter : NULL,
       'keyfield' => $row->is_keyfield,
     );
   }
@@ -205,9 +214,16 @@ function salesforce_webforms_get_nodes_maps($nodes) {
   }
 
   // Now get all of the fields for those maps.
+  $schema_version = salesforce_webforms_schema_version();
+  $include_filter = ($schema_version >= 7004);
+
+
+  $field_list = array('mapid', 'sf_fieldname', 'source_data', 'is_keyfield');
+  if ($include_filter) {
+    $field_list[] = 'filter';
+  }
   $fields = db_select('salesforce_webforms_field', 'f')
-    ->fields('f',
-      array('mapid', 'sf_fieldname', 'source_data', 'is_keyfield', 'filter'))
+    ->fields('f', $field_list)
     ->condition('mapid', $mids, 'IN')
     ->execute()
     ->fetchAll();
@@ -216,7 +232,7 @@ function salesforce_webforms_get_nodes_maps($nodes) {
     $map_list[$field->mapid]['map_fields'][$field->sf_fieldname] = array(
       'target' => $field->source_data,
       'keyfield' => $field->is_keyfield,
-      'filter' => $field->filter,
+      'filter' => $include_filter ? $field->filter : NULL,
     );
   }
 

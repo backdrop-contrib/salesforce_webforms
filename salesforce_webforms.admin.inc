@@ -470,7 +470,18 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
   $form = array();
   $obj_info = salesforce_webforms_get_object_fields($obj);
 
-  $filters = salesforce_webforms_filters();
+  $schema_version = salesforce_webforms_schema_version();
+  $include_filter = ($schema_version >= 7004);
+
+  if ($include_filter) {
+    $filters = salesforce_webforms_filters();
+  }
+  else {
+    drupal_set_message(
+      t('There are database updates pending. Please ask your system admiistrator to run update.php'),
+      'warning'
+    );
+  }
 
   $form['map'] = array(
     '#type' => 'fieldset',
@@ -627,14 +638,16 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     }
 
     // Do we have any valid filters for this data type?
-    $filter_options = salesforce_webforms_filter_options($filters, $fdata['type']);
-    if (count($filter_options) > 0) {
-      $form['map']['map_fields'][$fname]['filter'] = array(
-        '#type' => 'select',
-        '#title' => t('Apply a filter to the data'),
-        '#options' => array('' => t('--None--')) + $filter_options,
-        '#description' => t('Any selected filter will be applied after all tokens have been replaced.'),
-      );
+    if ($include_filter) {
+      $filter_options = salesforce_webforms_filter_options($filters, $fdata['type']);
+      if (count($filter_options) > 0) {
+        $form['map']['map_fields'][$fname]['filter'] = array(
+          '#type' => 'select',
+          '#title' => t('Apply a filter to the data'),
+          '#options' => array('' => t('--None--')) + $filter_options,
+          '#description' => t('Any selected filter will be applied after all tokens have been replaced.'),
+        );
+      }
     }
     $form['map']['map_fields'][$fname]['keyfield'] = array(
       '#type' => 'checkboxes',
@@ -652,7 +665,9 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
         $form['map']['map_fields'][$field['sf_fieldname']]['picklist']['#default_value'] = $multiple ? explode(';', $field['source_data']) : array($field['source_data']);
       }
       $form['map']['map_fields'][$field['sf_fieldname']]['keyfield']['#default_value'] = $field['keyfield'] ? array('1') : array();
-      $form['map']['map_fields'][$field['sf_fieldname']]['filter']['#default_value'] = isset($field['filter']) ? array($field['filter']) : array();
+      if ($include_filter) {
+        $form['map']['map_fields'][$field['sf_fieldname']]['filter']['#default_value'] = isset($field['filter']) ? array($field['filter']) : array();
+      }
     }
   }
 

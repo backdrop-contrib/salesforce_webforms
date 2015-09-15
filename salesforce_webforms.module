@@ -479,6 +479,9 @@ function salesforce_webforms_map_save(array $values) {
  */
 function salesforce_webforms_save_fields($mapid, array $fields) {
   $i = 1;
+  $schema_version = salesforce_webforms_schema_version();
+  $include_filter = ($schema_version >= 7004);
+
   foreach ($fields as $fname => &$values) {
     // Only process if we are given source data.
     if (isset($values['picklist'])) {
@@ -493,18 +496,19 @@ function salesforce_webforms_save_fields($mapid, array $fields) {
     }
 
     if ($values['target']) {
+      $field_values = array(
+        'mapid' => $mapid,
+        'sf_fieldname' => $fname,
+        'source_data' => $values['target'],
+        'is_keyfield' => $values['keyfield'],
+        'displayorder' => $i++,
+      );
+      if ($include_filter) {
+        $field_values['filter'] = isset($values['filter']) ? $values['filter'] : NULL;
+      }
+
       db_insert('salesforce_webforms_field')
-        ->fields(
-          array(
-            'mapid' => $mapid,
-            'sf_fieldname' => $fname,
-            'source_data' => $values['target'],
-            // 'is_keyfield' => $values['keyfield'][1],
-            'is_keyfield' => $values['keyfield'],
-            'filter' => isset($values['filter']) ? $values['filter'] : NULL,
-            'displayorder' => $i++,
-          )
-        )
+        ->fields($field_values)
         ->execute();
     }
   }
@@ -527,6 +531,20 @@ function salesforce_webforms_webform_version() {
   }
 
   return $webform_version;
+}
+
+/**
+ * Gets the current database schema version for this module.
+ */
+function salesforce_webforms_schema_version() {
+  static $version = NULL;
+
+  if ($version === NULL) {
+    module_load_include('inc', 'content', 'includes/install');
+    $version = drupal_get_installed_schema_version('salesforce_webforms');
+  }
+
+  return $version;
 }
 
 /**
