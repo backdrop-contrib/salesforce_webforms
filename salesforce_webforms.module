@@ -657,6 +657,9 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
       // @deprecated as of 7.x-1.1
       drupal_alter('salesforce_webforms_push_params', $fields, $context);
 
+      // Retrieve the id from $context so it can be updated by alter hooks.
+      $target_id = $context['id'];
+
       if ($target_id) {
         // Do an update.
         $res = salesforce_webforms_update_object($object, $target_id, $fields, $settings['suppress_errors']);
