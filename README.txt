@@ -21,6 +21,7 @@ REQUIREMENTS
 This module requires the following modules
  * Salesforce Suite 3.x (https://drupal.org/project/salesforce)
  * Webform (https://drupal.org/project/webform)
+ * Behavior weights (https://www.drupal.org/project/behavior_weights)
 
 INSTALLATION
 ------------
