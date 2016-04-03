@@ -1,5 +1,6 @@
 Version 7.x-1.x-dev
 -------------------
+Issue #2656462 by dbcollies: Made createable but not updateble field writeable
 Issue #2697483 by martini9011: Updated requirements to include Behavior_weights
 Issue #2666204 by jfhovinne: Alter target ID during submission insert
 

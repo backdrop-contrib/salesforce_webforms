@@ -555,7 +555,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
 
   foreach ($obj_info as $fname => $fdata) {
     // Skip if not writable.
-    if ($fdata['createable'] == FALSE || $fdata['updateable'] == FALSE) {
+    if ($fdata['createable'] == FALSE && $fdata['updateable'] == FALSE) {
       continue;
     }
 
@@ -566,6 +566,11 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
       '#collapsed' => TRUE,
       '#tree' => TRUE,
     );
+
+    if ($fdata['updateable'] == FALSE) {
+      $form['map']['map_fields'][$fname]['#description'] =
+        t('This field can be created when a new record is created, but not updated to a new value. Any value placed in this field will only be used when creating a new Salesforce record, and will be ignored when updating an existing record.');
+    }
 
     $tmp = array(
       '#title' => t('Source data'),
