@@ -9,7 +9,11 @@ include_once 'salesforce_webforms.maps.inc';
 
 define('SALESFORCE_WEBFORMS_INCLUDE_ALL', 1);
 define('SALESFORCE_WEBFORMS_INCLUDE_FILTERED', 2);
+define('SALESFORCE_WEBFORMS_HIDE_LARGE_LIST', 1);
+define('SALESFORCE_WEBFORMS_SHOW_LARGE_LIST', 2);
+define('SALESFORCE_WEBFORMS_CRON_MIN', 60);
 define('SALESFORCE_WEBFORMS_CACHE_DURATION', 60 * 60 * 12);
+define('SALESFORCE_WEBFORMS_MAX_LIST_SIZE', 20);
 
 /**
  * Implements hook_menu().
@@ -1072,7 +1076,8 @@ function salesforce_webforms_filter_invoke($filter, $value) {
 function salesforce_webforms_cron() {
   // See if enough time has passed since the last run.
   $last = variable_get('salesforce_webforms_cron_last', 0);
-  $min = variable_get('salesforce_webforms_cron_min', 60) * 60;
+  $min = variable_get('salesforce_webforms_cron_min',
+    SALESFORCE_WEBFORMS_CRON_MIN) * 60;
   $now = time();
 
   if ($last + $min > $now) {
@@ -1315,6 +1320,7 @@ function salesforce_webforms_get_object_records($object) {
 
   // Start building up the query.
   $sql = "SELECT id";
+  $countSql = "SELECT count()";
 
   // Use a 'Name' field if one exists.
   if (isset($details['Name'])) {
@@ -1327,14 +1333,33 @@ function salesforce_webforms_get_object_records($object) {
   }
 
   $sql .= " FROM $object";
+  $countSql .= " FROM $object";
 
   // If the object supports the 'IsDeleted' flag then use it to filter.
   if (isset($details['IsDeleted'])) {
     $sql .= " WHERE IsDeleted=FALSE";
+    $countSql .= " WHERE IsDeleted=FALSE";
   }
 
-  $records = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
+  $sql .= " LIMIT " . variable_get('salesforce_webforms_limit_picklists',
+    SALESFORCE_WEBFORMS_MAX_LIST_SIZE);
+
   $options = array();
+
+  // Are we supposed to hide lists that are too big?
+  if (variable_get('salesforce_webforms_hide_large_lists',
+    SALESFORCE_WEBFORMS_HIDE_LARGE_LIST) == SALESFORCE_WEBFORMS_HIDE_LARGE_LIST) {
+    // Yes. See how many records there are
+    $countData = _salesforce_webforms_fetch("query?q=" . urlencode($countSql));
+    $count = $countData['totalSize'];
+
+    if ($count > variable_get('salesforce_webforms_limit_picklists',
+      SALESFORCE_WEBFORMS_MAX_LIST_SIZE)) {
+      return $options;
+    }
+  }
+  
+  $records = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
 
   foreach ($records['records'] as $row) {
     $id = $row['Id'];

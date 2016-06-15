@@ -832,6 +832,28 @@ function salesforce_webforms_config($form, $form_state) {
         ),
       ),
     ),
+    'salesforce_webforms_limit_picklists' => array(
+      '#type' => 'textfield',
+      '#title' => t('Maximum number of elements in reference fields'),
+      '#description' => t('The maximum number of options to show in fields which are references to other objects.'),
+      '#element_validate' => array('element_validate_integer'),
+      '#required' => TRUE,
+      '#size' => 4,
+      '#default_value' => variable_get('salesforce_webforms_limit_picklists',
+        SALESFORCE_WEBFORMS_MAX_LIST_SIZE),
+      '#field_suffix' => t('Records'),
+    ),
+    'salesforce_webforms_hide_large_lists' => array(
+      '#type' => 'radios',
+      '#title' => t('Include partial lists'),
+      '#description' => t('When creating a map, if a list has more values than allowed, should the partial list be shown, or should it be hidden?'),
+      '#options' => array(
+        SALESFORCE_WEBFORMS_HIDE_LARGE_LIST => t('Hide partial lists'),
+        SALESFORCE_WEBFORMS_SHOW_LARGE_LIST => t('Show partial lists'),
+      ),
+      '#default_value' => variable_get('salesforce_webforms_hide_large_lists',
+         SALESFORCE_WEBFORMS_HIDE_LARGE_LIST),
+    ),
   );
 
   return system_settings_form($form);
