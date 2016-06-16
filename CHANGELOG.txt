@@ -1,5 +1,7 @@
 Version 7.x-1.x-dev
 -------------------
+Added setting to supress Salesforce error messages in webform admin pages.
+Issue #2745291 by dbcollies: Added error handing for communication problems.
 Issue #2745291 by dbcollies: Added config option to limit referenced list size.
 Issue #2656462 by dbcollies: Made createable but not updateble field writeable
 Issue #2697483 by martini9011: Updated requirements to include Behavior_weights

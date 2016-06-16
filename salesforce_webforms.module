@@ -236,11 +236,14 @@ function salesforce_webforms_theme() {
  *   Salesforce name of the object.
  */
 function salesforce_webforms_get_objects($use_cache = TRUE) {
-  $sobjects = _salesforce_webforms_fetch("sobjects", $use_cache);
+  $sobjects = _salesforce_webforms_fetch("sobjects", $use_cache,
+    variable_get('salesforce_webforms_supress_admin_errors', FALSE));
   $return = array();
 
-  foreach ($sobjects['sobjects'] as $data) {
-    $return[$data['name']] = $data;
+  if ($sobjects != NULL) {
+    foreach ($sobjects['sobjects'] as $data) {
+      $return[$data['name']] = $data;
+    }
   }
   return $return;
 }
@@ -644,7 +647,7 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
           $union = " AND ";
         }
         $res = _salesforce_webforms_fetch("query?q=" . urlencode($sql), FALSE, $settings['suppress_errors']);
-        if (count($res['records']) > 0) {
+        if ($res != NULL && count($res['records']) > 0) {
           $target_id = $res['records'][0]['Id'];
         }
       }
@@ -1350,7 +1353,11 @@ function salesforce_webforms_get_object_records($object) {
   if (variable_get('salesforce_webforms_hide_large_lists',
     SALESFORCE_WEBFORMS_HIDE_LARGE_LIST) == SALESFORCE_WEBFORMS_HIDE_LARGE_LIST) {
     // Yes. See how many records there are
-    $countData = _salesforce_webforms_fetch("query?q=" . urlencode($countSql));
+    $countData = _salesforce_webforms_fetch("query?q=" . urlencode($countSql),
+      TRUE, variable_get('salesforce_webforms_supress_admin_errors', FALSE));
+    if ($countData == NULL) {
+      return $options;
+    }
     $count = $countData['totalSize'];
 
     if ($count > variable_get('salesforce_webforms_limit_picklists',
@@ -1359,7 +1366,12 @@ function salesforce_webforms_get_object_records($object) {
     }
   }
   
-  $records = _salesforce_webforms_fetch("query?q=" . urlencode($sql));
+  $records = _salesforce_webforms_fetch("query?q=" . urlencode($sql),
+    TRUE, variable_get('salesforce_webforms_supress_admin_errors', FALSE));
+
+  if ($records == NULL) {
+    return $options;
+  }
 
   foreach ($records['records'] as $row) {
     $id = $row['Id'];

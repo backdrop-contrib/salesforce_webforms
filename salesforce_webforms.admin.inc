@@ -439,7 +439,8 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
   }
   $node = $form_state['node'];
 
-  salesforce_webforms_webform_submission_insert($node, $sub, $update, TRUE);
+  salesforce_webforms_webform_submission_insert($node, $sub, $update,
+    variable_get('salesforce_webforms_supress_admin_errors', FALSE));
 
   drupal_set_message(t('Salesforce updated'));
 }
@@ -853,6 +854,17 @@ function salesforce_webforms_config($form, $form_state) {
       ),
       '#default_value' => variable_get('salesforce_webforms_hide_large_lists',
          SALESFORCE_WEBFORMS_HIDE_LARGE_LIST),
+    ),
+    'salesforce_webforms_supress_admin_errors' => array(
+      '#title' => t('Suppress Errors in webform admin pages?'),
+      '#description' => t('Check this field to suppress display of Salesforce error messages when a form administrator manages a webform mapping.'),
+      '#type' => 'checkboxes',
+      '#options' => array(
+        '1' => t('Yes'),
+      ),
+      '#default_value' =>
+        variable_get('salesforce_webforms_supress_admin_errors', FALSE)
+          ? array('1') : array(),
     ),
   );
 

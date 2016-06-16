@@ -190,6 +190,7 @@ function salesforce_webforms_uninstall() {
   variable_del('salesforce_webforms_objects');
   variable_del('salesforce_webforms_limit_picklists');
   variable_del('salesforce_webforms_hide_large_lists');
+  variable_del('salesforce_webforms_supress_admin_errors');
 }
 
 /**
