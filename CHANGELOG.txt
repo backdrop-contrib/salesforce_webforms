@@ -1,5 +1,6 @@
 Version 7.x-1.x-dev
 -------------------
+Issue #2671922 by jfhovinne: Added check for valid picklist in salesforce.js.
 Added setting to supress Salesforce error messages in webform admin pages.
 Issue #2745291 by dbcollies: Added error handing for communication problems.
 Issue #2745291 by dbcollies: Added config option to limit referenced list size.

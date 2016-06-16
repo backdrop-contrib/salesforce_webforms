@@ -119,11 +119,13 @@
    */
   Drupal.salesforce_webforms.salesforceCheck = function(e) {
     var $div = $(e.target).parents('.sf-picklist-wrapper:first');
-    var formId = $div.attr('id');
-    var settings = e.data.settings;
+    if ($div.length > 0) {
+      var formId = $div.attr('id');
+      var settings = e.data.settings;
 
-    for (var i = 0; i < settings[formId].children.length; i++) {
-      Drupal.salesforce_webforms.show_hide(settings[formId].children[i], settings);
+      for (var i = 0; i < settings[formId].children.length; i++) {
+        Drupal.salesforce_webforms.show_hide(settings[formId].children[i], settings);
+      }
     }
   };
 
