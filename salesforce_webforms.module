@@ -105,7 +105,9 @@ function salesforce_webforms_module_implements_alter(&$implementations, $hook) {
  * Implements hook_node_load().
  */
 function salesforce_webforms_node_load($nodes, $types) {
-  salesforce_webforms_get_nodes_maps($nodes);
+  if ($webform_nodes = array_filter($nodes, function($node) { return isset($node->webform); })) {
+    salesforce_webforms_get_nodes_maps($webform_nodes);
+  }
 }
 
 /**
