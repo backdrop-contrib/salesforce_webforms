@@ -549,7 +549,7 @@ function salesforce_webforms_schema_version() {
   static $version = NULL;
 
   if ($version === NULL) {
-    module_load_include('inc', 'content', 'includes/install');
+    include_once DRUPAL_ROOT . '/includes/install.inc';
     $version = drupal_get_installed_schema_version('salesforce_webforms');
   }
 

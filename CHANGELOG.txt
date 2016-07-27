@@ -1,5 +1,6 @@
 Version 7.x-1.x-dev
 -------------------
+Issue #2773089 by nathandentzau: Removed user warning about content module.
 Issue #2753691 by ChaseOnTheWeb: Added filter not to process non-webform nodes.
 
 Version 7.x-1.2
