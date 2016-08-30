@@ -1173,12 +1173,11 @@ function salesforce_webforms_update_object($object, $id, array $fields, $suppres
     $obj_info = salesforce_webforms_get_object_fields($object);
     $updated_fields = array();
     foreach ($obj_info as $fname => $fdata) {
-      if ($fdata['updateable']) {
+      if ($fdata['updateable'] && isset($fields[$fname])) {
         $updated_fields[$fname] = $fields[$fname];
       }
     }
 
-    // $res = $sf->objectUpsert($object, 'id', $id, $fields);
     $res = $sf->objectUpsert($object, 'id', $id, $updated_fields);
   }
   catch (SalesforceException $e) {
