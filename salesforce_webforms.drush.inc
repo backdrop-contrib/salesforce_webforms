@@ -57,7 +57,7 @@ function drush_salesforce_webforms_sf_webforms_resubmit($sid, $update = FALSE) {
   $salesforce = salesforce_get_api();
   if (!$salesforce->isAuthorized()) {
     drupal_print("Salesforce cannot connect");
-    drupal_exit();
+    backdrop_exit();
   }
 
   // Load the mapped IDs.
@@ -90,7 +90,7 @@ function drush_salesforce_webforms_sf_webforms_objects($submission) {
   $salesforce = salesforce_get_api();
   if (!$salesforce->isAuthorized()) {
     drupal_print("Salesforce cannot connect");
-    drupal_exit();
+    backdrop_exit();
   }
 
   // Load the mapped IDs.

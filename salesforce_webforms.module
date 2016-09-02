@@ -23,7 +23,7 @@ function salesforce_webforms_menu() {
 
   $items['node/%webform_menu/webform/salesforce'] = array(
     'title' => 'Salesforce',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('salesforce_webforms_maps_form', 1),
     'access callback' => 'node_access',
     'access arguments' => array('update', 1),
@@ -34,7 +34,7 @@ function salesforce_webforms_menu() {
 
   $items['node/%webform_menu/webform/salesforce/add/%'] = array(
     'title' => 'Add object mapping',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('salesforce_webforms_manage_map', 1, 'add', 5),
     'access callback' => 'node_access',
     'access arguments' => array('update', 1),
@@ -44,7 +44,7 @@ function salesforce_webforms_menu() {
 
   $items['node/%webform_menu/webform/salesforce/edit/%/%salesforce_webforms_map'] = array(
     'title' => 'Edit map',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('salesforce_webforms_manage_map', 1, 'edit', 5, 6),
     'access callback' => 'node_access',
     'access arguments' => array('update', 1),
@@ -54,7 +54,7 @@ function salesforce_webforms_menu() {
 
   $items['node/%webform_menu/webform/salesforce/delete/%salesforce_webforms_map'] = array(
     'title' => 'Delete map',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('salesforce_webforms_delete_rule', 5),
     'access callback' => 'node_access',
     'access arguments' => array('update', 1),
@@ -64,7 +64,7 @@ function salesforce_webforms_menu() {
 
   $items['node/%webform_menu/submission/%webform_menu_submission/sf'] = array(
     'title' => 'Resubmit to Salesforce',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('salesforce_webforms_resubmit', 1, 3),
     'access callback' => 'node_access',
     'access arguments' => array('update', 1),
@@ -75,7 +75,7 @@ function salesforce_webforms_menu() {
   $items['admin/config/salesforce/webforms'] = array(
     'title' => 'Configure Webforms integration',
     'description' => 'Allows the administrator to configure site wide details related to the integration with webforms.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('salesforce_webforms_config'),
     'access arguments' => array('administer salesforce'),
     'file' => 'salesforce_webforms.admin.inc',
@@ -227,6 +227,17 @@ function salesforce_webforms_theme() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function salesforce_webforms_config_info() {
+  $prefixes['salesforce_webforms.settings'] = array(
+    'label' => t('Salesforce Webforms settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Returns all defined Salesforce objects.
  *
  * @param bool $use_cache
@@ -238,8 +249,9 @@ function salesforce_webforms_theme() {
  *   Salesforce name of the object.
  */
 function salesforce_webforms_get_objects($use_cache = TRUE) {
+  $config = config('salesforce_webforms.settings');
   $sobjects = _salesforce_webforms_fetch("sobjects", $use_cache,
-    variable_get('salesforce_webforms_supress_admin_errors', FALSE));
+    $config->get('salesforce_webforms_supress_admin_errors'));
   $return = array();
 
   if ($sobjects != NULL) {
@@ -260,11 +272,12 @@ function salesforce_webforms_get_objects($use_cache = TRUE) {
  *   An associative array appropriate for use as an 'options' element.
  */
 function salesforce_webforms_get_objects_selection($filter = TRUE) {
+  $config = config('salesforce_webforms.settings');
   $selections = array();
   if ($filter) {
-    $limit = variable_get('salesforce_webforms_all_objects', SALESFORCE_WEBFORMS_INCLUDE_ALL);
+    $limit = $config->get('salesforce_webforms_all_objects');
     if ($limit != SALESFORCE_WEBFORMS_INCLUDE_ALL) {
-      $limited_list = variable_get('salesforce_webforms_objects', array());
+      $limited_list = $config->get('salesforce_webforms_objects');
     }
     else {
       $filter = FALSE;
@@ -281,7 +294,7 @@ function salesforce_webforms_get_objects_selection($filter = TRUE) {
   }
 
   // Allow modules to filter the list.
-  drupal_alter('salesforce_webforms_objects', $selections);
+  backdrop_alter('salesforce_webforms_objects', $selections);
 
   return $selections;
 }
@@ -293,7 +306,7 @@ function salesforce_webforms_get_objects_selection($filter = TRUE) {
  *   The Salesforce object used for communicating with Salesforce.
  */
 function salesforce_webforms_get_sfapi() {
-  $sf = &drupal_static(__FUNCTION__);
+  $sf = &backdrop_static(__FUNCTION__);
 
   if (!isset($sf)) {
     $sf = salesforce_get_api();
@@ -337,7 +350,7 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
         time() + SALESFORCE_WEBFORMS_CACHE_DURATION);
     }
     catch (SalesforceException $e) {
-      drupal_set_message(t('Get Object fields: @msg', array('@msg' => $e->getMessage())), 'error');
+      backdrop_set_message(t('Get Object fields: @msg', array('@msg' => $e->getMessage())), 'error');
 
       watchdog(
         'salesforce_webforms',
@@ -360,7 +373,7 @@ function salesforce_webforms_get_object_fields($obj, $use_cache = TRUE) {
 
   // Allow hooks to manipulate the list.
   $hook_data = array($obj => $return);
-  drupal_alter('salesforce_webform_fields', $hook_data);
+  backdrop_alter('salesforce_webform_fields', $hook_data);
   return $hook_data[$obj];
 }
 
@@ -446,10 +459,10 @@ function salesforce_webforms_map_save(array $values) {
   $values['sf_object'] = $values['object'];
 
   if ($values['action'] == 'add') {
-    drupal_write_record('salesforce_webforms_map', $values);
+    backdrop_write_record('salesforce_webforms_map', $values);
   }
   elseif ($values['action'] == 'edit') {
-    drupal_write_record('salesforce_webforms_map', $values, 'mapid');
+    backdrop_write_record('salesforce_webforms_map', $values, 'mapid');
   }
   else {
     // Invalid operation. Return.
@@ -528,7 +541,7 @@ function salesforce_webforms_save_fields($mapid, array $fields) {
  */
 function salesforce_webforms_webform_version() {
   // Keep track of the current version of webform.
-  $webform_version = &drupal_static(__FUNCTION__);
+  $webform_version = &backdrop_static(__FUNCTION__);
   if (!$webform_version) {
     $info = system_get_info('module', 'webform');
 
@@ -550,7 +563,7 @@ function salesforce_webforms_schema_version() {
 
   if ($version === NULL) {
     include_once DRUPAL_ROOT . '/includes/install.inc';
-    $version = drupal_get_installed_schema_version('salesforce_webforms');
+    $version = backdrop_get_installed_schema_version('salesforce_webforms');
   }
 
   return $version;
@@ -661,10 +674,10 @@ function salesforce_webforms_webform_submission_insert($node, $sub, $update = FA
         'submission' => $sub,
         'id' => $target_id,
       );
-      drupal_alter('salesforce_webforms_submission_save', $fields, $context);
+      backdrop_alter('salesforce_webforms_submission_save', $fields, $context);
 
       // @deprecated as of 7.x-1.1
-      drupal_alter('salesforce_webforms_push_params', $fields, $context);
+      backdrop_alter('salesforce_webforms_push_params', $fields, $context);
 
       // Retrieve the id from $context so it can be updated by alter hooks.
       $target_id = $context['id'];
@@ -731,7 +744,7 @@ function salesforce_webforms_webform_submission_actions($node, $sub) {
     $actions['sf'] = array(
       'title' => t('Resend to Salesforce'),
       'href' => 'node/' . $node->nid . '/submission/' . $sub->sid . '/sf',
-      'query' => drupal_get_destination(),
+      'query' => backdrop_get_destination(),
     );
   }
 
@@ -794,7 +807,7 @@ function salesforce_webforms_form_alter(&$form, &$state, $fid) {
   }
 
   if ($needs_update) {
-    $form['#attached']['js'][] = drupal_get_path('module', 'salesforce_webforms') . '/js/salesforce.js';
+    $form['#attached']['js'][] = backdrop_get_path('module', 'salesforce_webforms') . '/js/salesforce.js';
   }
 }
 
@@ -911,7 +924,7 @@ function salesforce_webforms_conditional_select($node) {
         '#parents' => array(),
       );
 
-      $forms[$cid] = drupal_render($element);
+      $forms[$cid] = backdrop_render($element);
     }
   }
 
@@ -958,7 +971,7 @@ function _salesforce_webforms_fetch($url, $use_cache = TRUE, $suppress_errors = 
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Salesforce webforms fetch data: @msg', array('@msg' => $e->getMessage())), 'error');
+      backdrop_set_message(t('Salesforce webforms fetch data: @msg', array('@msg' => $e->getMessage())), 'error');
     }
 
     watchdog(
@@ -1008,7 +1021,7 @@ function salesforce_webforms_filters() {
     }
 
     // Invoke all implementations of hook_salesforce_webforms_filter_info_alter.
-    drupal_alter('salesforce_webforms_filter_info', $filters);
+    backdrop_alter('salesforce_webforms_filter_info', $filters);
 
     // Sort by the label.
     uasort($filters, function($a, $b) {
@@ -1079,10 +1092,11 @@ function salesforce_webforms_filter_invoke($filter, $value) {
  * Implements hook_cron().
  */
 function salesforce_webforms_cron() {
+  $config = config('salesforce_webforms.settings');
+
   // See if enough time has passed since the last run.
-  $last = variable_get('salesforce_webforms_cron_last', 0);
-  $min = variable_get('salesforce_webforms_cron_min',
-    SALESFORCE_WEBFORMS_CRON_MIN) * 60;
+  $last = $config->get('salesforce_webforms_cron_last');
+  $min = $config->get('salesforce_webforms_cron_min') * 60;
   $now = time();
 
   if ($last + $min > $now) {
@@ -1091,13 +1105,13 @@ function salesforce_webforms_cron() {
   }
 
   // Store the current time for the next interval check.
-  variable_set('salesforce_webforms_cron_last', $now);
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_cron_last', $now);
 
   // The list of possible picklists is big, so we
   // refresh the cache on a regular basis.
   watchdog("salesforce_webforms", "Initiate cache refresh");
   $objlist = salesforce_webforms_get_objects(FALSE);
-  $queue = DrupalQueue::get('salesforce_webforms');
+  $queue = BackdropQueue::get('salesforce_webforms');
   $queue->createItem(array_keys($objlist));
 }
 
@@ -1182,7 +1196,7 @@ function salesforce_webforms_update_object($object, $id, array $fields, $suppres
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Error updating Salesforce object: @msg', array('@msg' => $e->getMessage())), 'error');
+      backdrop_set_message(t('Error updating Salesforce object: @msg', array('@msg' => $e->getMessage())), 'error');
     }
 
     watchdog(
@@ -1218,7 +1232,7 @@ function salesforce_webforms_create_object($object, array $fields, $suppress_err
   }
   catch (SalesforceException $e) {
     if (!$suppress_errors) {
-      drupal_set_message(t('Error creating Salesforce object: @msg', array('@msg' => $e->getMessage())), 'error');
+      backdrop_set_message(t('Error creating Salesforce object: @msg', array('@msg' => $e->getMessage())), 'error');
     }
 
     watchdog(
@@ -1254,7 +1268,10 @@ function salesforce_webforms_language_prefix($lang = NULL) {
     $prefix = $list[$lang]->prefix;
   }
   else {
-    $prefix = $GLOBALS['language']->prefix;
+    if (isset($GLOBALS['language']->prefix)){
+      $prefix = $GLOBALS['language']->prefix;
+    }
+    $prefix = "";
   }
   if ($prefix != "") {
     $prefix .= "_";
@@ -1320,6 +1337,7 @@ function salesforce_webforms_get_sf_language() {
  *   as to an intelligent label for that object.
  */
 function salesforce_webforms_get_object_records($object) {
+  $config = config('salesforce_webforms.settings');
   $details = salesforce_webforms_get_object_fields($object);
 
   // Start building up the query.
@@ -1345,30 +1363,27 @@ function salesforce_webforms_get_object_records($object) {
     $countSql .= " WHERE IsDeleted=FALSE";
   }
 
-  $sql .= " LIMIT " . variable_get('salesforce_webforms_limit_picklists',
-    SALESFORCE_WEBFORMS_MAX_LIST_SIZE);
+  $sql .= " LIMIT " . $config->get('salesforce_webforms_limit_picklists');
 
   $options = array();
 
   // Are we supposed to hide lists that are too big?
-  if (variable_get('salesforce_webforms_hide_large_lists',
-    SALESFORCE_WEBFORMS_HIDE_LARGE_LIST) == SALESFORCE_WEBFORMS_HIDE_LARGE_LIST) {
+  if ($config->get('salesforce_webforms_hide_large_lists') == SALESFORCE_WEBFORMS_HIDE_LARGE_LIST) {
     // Yes. See how many records there are
     $countData = _salesforce_webforms_fetch("query?q=" . urlencode($countSql),
-      TRUE, variable_get('salesforce_webforms_supress_admin_errors', FALSE));
+      TRUE, $config->get('salesforce_webforms_supress_admin_errors'));
     if ($countData == NULL) {
       return $options;
     }
     $count = $countData['totalSize'];
 
-    if ($count > variable_get('salesforce_webforms_limit_picklists',
-      SALESFORCE_WEBFORMS_MAX_LIST_SIZE)) {
+    if ($count > $config->get('salesforce_webforms_limit_picklists')) {
       return $options;
     }
   }
-  
+
   $records = _salesforce_webforms_fetch("query?q=" . urlencode($sql),
-    TRUE, variable_get('salesforce_webforms_supress_admin_errors', FALSE));
+    TRUE, $config->get('salesforce_webforms_supress_admin_errors'));
 
   if ($records == NULL) {
     return $options;
@@ -1388,7 +1403,7 @@ function salesforce_webforms_get_object_records($object) {
     }
   }
 
-  drupal_alter('salesforce_webforms_object_records', $options);
+  backdrop_alter('salesforce_webforms_object_records', $options);
 
   return $options;
 }
@@ -1406,13 +1421,14 @@ function salesforce_webforms_get_object_records($object) {
  *   the value is the label of the field.
  */
 function salesforce_webforms_get_picklist_options($limit = TRUE) {
+  $config = config('salesforce_webforms.settings');
   $picklists = array();
 
   // See if we should limit the list.
   if ($limit) {
-    $all = variable_get('salesforce_webforms_all_picklists', SALESFORCE_WEBFORMS_INCLUDE_ALL);
+    $all = $config->get('salesforce_webforms_all_picklists');
     if ($all == SALESFORCE_WEBFORMS_INCLUDE_FILTERED) {
-      $list = variable_get('salesforce_webforms_picklists', array());
+      $list = $config->get('salesforce_webforms_picklists');
     }
     else {
       $limit = FALSE;
@@ -1440,7 +1456,7 @@ function salesforce_webforms_get_picklist_options($limit = TRUE) {
     }
   }
 
-  drupal_alter('salesforce_webforms_picklists', $picklists);
+  backdrop_alter('salesforce_webforms_picklists', $picklists);
   return $picklists;
 }
 

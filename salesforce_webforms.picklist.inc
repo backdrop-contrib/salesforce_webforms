@@ -39,7 +39,7 @@ function _webform_theme_sf_picklist() {
     'webform_display_sf_picklist' => array(
       'render element' => 'element',
       'file' => 'salesforce_webforms.picklist.inc',
-      'path' => drupal_get_path('module', 'salesforce_webforms'),
+      'path' => backdrop_get_path('module', 'salesforce_webforms'),
     ),
   );
 }
@@ -556,7 +556,7 @@ function salesforce_webforms_validate_picklist(&$el, &$state, $form) {
     }
 
     // Clear out error log.
-    drupal_get_messages('error');
+    backdrop_get_messages('error');
     form_clear_error();
 
     // Add back in the errors, except for this one.

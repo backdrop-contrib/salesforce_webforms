@@ -1,0 +1,12 @@
+{
+    "_config_name": "salesforce_webforms.settings",
+    "salesforce_webforms_supress_admin_errors": false,
+    "salesforce_webforms_cron_min": 60,
+    "salesforce_webforms_all_picklists": 1,
+    "salesforce_webforms_picklists": [],
+    "salesforce_webforms_all_objects": 1,
+    "salesforce_webforms_objects": [],
+    "salesforce_webforms_limit_picklists": 20,
+    "salesforce_webforms_hide_large_lists": 1,
+    "salesforce_webforms_cron_last": 0
+}

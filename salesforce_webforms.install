@@ -172,7 +172,7 @@ function salesforce_webforms_schema() {
   );
 
   // Create a custom cache table.
-  $schema['cache_salesforce_webforms'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_salesforce_webforms'] = backdrop_get_schema_unprocessed('system', 'cache');
 
   return $schema;
 }
@@ -182,15 +182,55 @@ function salesforce_webforms_schema() {
  */
 function salesforce_webforms_uninstall() {
   // Delete the variables we created. Schema should be deleted automatically.
-  variable_del('salesforce_webforms_cron_min');
-  variable_del('salesforce_webforms_cron_last');
-  variable_del('salesforce_webforms_all_picklists');
-  variable_del('salesforce_webforms_picklists');
-  variable_del('salesforce_webforms_all_objects');
-  variable_del('salesforce_webforms_objects');
-  variable_del('salesforce_webforms_limit_picklists');
-  variable_del('salesforce_webforms_hide_large_lists');
-  variable_del('salesforce_webforms_supress_admin_errors');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_cron_min');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_cron_last');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_all_picklists');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_picklists');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_all_objects');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_objects');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_limit_picklists');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_hide_large_lists');
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_supress_admin_errors');
+}
+/**
+ * Implements hook_update_last_removed().
+ */
+function salesforce_webforms_update_last_removed() {
+  return 7004;
+}
+
+/**
+ * Migrate salesforce_webforms variables to config.
+ */
+function salesforce_webforms_update_1000() {
+  $config = config('salesforce_webforms.settings');
+  $config->set('salesforce_webforms_supress_admin_errors', update_variable_get('salesforce_webforms_supress_admin_errors', array()));
+  $config->set('salesforce_webforms_cron_min', update_variable_get('salesforce_webforms_cron_min', 60));
+  $config->set('salesforce_webforms_all_picklists', update_variable_get('salesforce_webforms_all_picklists', 1));
+  $config->set('salesforce_webforms_picklists', update_variable_get('salesforce_webforms_picklists', array()));
+  $config->set('salesforce_webforms_all_objects', update_variable_get('salesforce_webforms_all_objects', 1));
+  $config->set('salesforce_webforms_objects', update_variable_get('salesforce_webforms_objects', array()));
+  $config->set('salesforce_webforms_limit_picklists', update_variable_get('salesforce_webforms_limit_picklists', 20));
+  $config->set('salesforce_webforms_hide_large_lists', update_variable_get('salesforce_webforms_hide_large_lists', 1));
+  $config->set('salesforce_webforms_cron_last', update_variable_get('salesforce_webforms_cron_last', 0));
+  $config->save();
+
+  update_variable_del('salesforce_webforms_supress_admin_errors');
+  update_variable_del('salesforce_webforms_cron_min');
+  update_variable_del('salesforce_webforms_all_picklists');
+  update_variable_del('salesforce_webforms_picklists');
+  update_variable_del('salesforce_webforms_all_objects');
+  update_variable_del('salesforce_webforms_objects');
+  update_variable_del('salesforce_webforms_limit_picklists');
+  update_variable_del('salesforce_webforms_hide_large_lists');
+  update_variable_del('salesforce_webforms_cron_last');
+}
+
+/**
+ * Implements hook_install().
+ */
+function salesforce_webforms_install() {
+  // Dynamically generated variable data was detected.
 }
 
 /**
@@ -224,7 +264,7 @@ function salesforce_webforms_update_7001() {
  * Add the new cache table.
  */
 function salesforce_webforms_update_7002() {
-  $schema = drupal_get_schema_unprocessed('system', 'cache');
+  $schema = backdrop_get_schema_unprocessed('system', 'cache');
 
   if (!db_table_exists('cache_salesforce_webforms')) {
     db_create_table('cache_salesforce_webforms', $schema);

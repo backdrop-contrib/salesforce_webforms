@@ -153,9 +153,9 @@ function salesforce_webforms_maps_form_validate($form, &$form_state) {
     if (!preg_match('/^[a-z0-9_]+$/i', $name)) {
       form_set_error('name',
         t('The map name %mapname is invalid. Please include only alphanumeric characters and underscores.',
-        array(
-          '%mapname' => $name,
-        ))
+          array(
+            '%mapname' => $name,
+          ))
       );
 
       // No need to process further if the format is invalid.
@@ -168,9 +168,9 @@ function salesforce_webforms_maps_form_validate($form, &$form_state) {
       if ($map['mapname'] == $name) {
         form_set_error('name',
           t('The map name %mapname is already in use. Please use a unique name.',
-          array(
-            '%mapname' => $name,
-          ))
+            array(
+              '%mapname' => $name,
+            ))
         );
 
         // No need to continue processing.
@@ -216,12 +216,12 @@ function theme_salesforce_webforms_maps_form(array $vars) {
 
     $rows[] = array(
       'data' => array(
-        drupal_render($form['maps'][$mid]['mapname']),
-        drupal_render($form['maps'][$mid]['sf_object']),
-        drupal_render($form['maps'][$mid]['fields']),
-        drupal_render($form['maps'][$mid]['weight']),
-        l(t('Edit'), 'node/' . $nid . '/webform/salesforce/edit/' . $map['sf_object'] . '/' . $map['mapid'], array('query' => drupal_get_destination())),
-        l(t('Delete'), 'node/' . $nid . '/webform/salesforce/delete/' . $map['mapid'], array('query' => drupal_get_destination())),
+        backdrop_render($form['maps'][$mid]['mapname']),
+        backdrop_render($form['maps'][$mid]['sf_object']),
+        backdrop_render($form['maps'][$mid]['fields']),
+        backdrop_render($form['maps'][$mid]['weight']),
+        l(t('Edit'), 'node/' . $nid . '/webform/salesforce/edit/' . $map['sf_object'] . '/' . $map['mapid'], array('query' => backdrop_get_destination())),
+        l(t('Delete'), 'node/' . $nid . '/webform/salesforce/delete/' . $map['mapid'], array('query' => backdrop_get_destination())),
       ),
       'class' => array('draggable'),
     );
@@ -231,10 +231,10 @@ function theme_salesforce_webforms_maps_form(array $vars) {
   $form['new']['weight']['#attributes']['class'] = array('salesforce-webforms-map-weight');
   $rows[] = array(
     'data' => array(
-      drupal_render($form['new']['mapname']),
-      drupal_render($form['new']['sf_object']),
+      backdrop_render($form['new']['mapname']),
+      backdrop_render($form['new']['sf_object']),
       '',
-      drupal_render($form['new']['weight']),
+      backdrop_render($form['new']['weight']),
     ),
     'class' => array('draggable'),
   );
@@ -246,9 +246,9 @@ function theme_salesforce_webforms_maps_form(array $vars) {
     'attributes' => array('id' => $table_id),
   ));
 
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
-  drupal_add_tabledrag($table_id, 'order', 'sibling', 'salesforce-webforms-map-weight');
+  backdrop_add_tabledrag($table_id, 'order', 'sibling', 'salesforce-webforms-map-weight');
 
   return $output;
 }
@@ -295,8 +295,8 @@ function salesforce_webforms_maps_form_submit($form, &$state) {
       'mapname' => $new['mapname'],
     ));
 
-    drupal_goto("node/$nid/webform/salesforce/edit/$obj/$newid", array(
-      'query' => drupal_get_destination(),
+    backdrop_goto("node/$nid/webform/salesforce/edit/$obj/$newid", array(
+      'query' => backdrop_get_destination(),
     ));
   }
 }
@@ -341,7 +341,7 @@ function salesforce_webforms_delete_rule($form, &$form_state, array $map) {
   return confirm_form(
     $form,
     t('Are you sure you wish to delete this map?'),
-    drupal_get_destination());
+    backdrop_get_destination());
 }
 
 /**
@@ -352,7 +352,7 @@ function salesforce_webforms_delete_rule($form, &$form_state, array $map) {
 function salesforce_webforms_delete_rule_submit($form, &$form_state) {
   $mapid = $form_state['values']['mapid'];
   salesforce_webforms_delete_mapping($mapid);
-  drupal_set_message(t('Map %mapid has been deleted', array(
+  backdrop_set_message(t('Map %mapid has been deleted', array(
     '%mapid' => $mapid,
   )));
 }
@@ -423,6 +423,7 @@ function salesforce_webforms_resubmit($form, $form_state, $node, $sub) {
  * @see salesforce_webforms_resubmit()
  */
 function salesforce_webforms_resubmit_submit($form, $form_state) {
+  $config = config('salesforce_webforms.settings');
   // Load the submission if not already in the state (Webform 3.x).
   if (!isset($form_state['submission'])) {
     $sid = $form_state['values']['sid'];
@@ -440,9 +441,9 @@ function salesforce_webforms_resubmit_submit($form, $form_state) {
   $node = $form_state['node'];
 
   salesforce_webforms_webform_submission_insert($node, $sub, $update,
-    variable_get('salesforce_webforms_supress_admin_errors', FALSE));
+    $config->get('salesforce_webforms_supress_admin_errors'));
 
-  drupal_set_message(t('Salesforce updated'));
+ backdrop_set_message(t('Salesforce updated'));
 }
 
 /**
@@ -478,7 +479,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     $filters = salesforce_webforms_filters();
   }
   else {
-    drupal_set_message(
+    backdrop_set_message(
       t('There are database updates pending. Please ask your system admiistrator to run update.php'),
       'warning'
     );
@@ -525,7 +526,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
 
   $form['map']['tokens'] = array(
     '#markup' => theme('webform_token_help', array(
-      'groups' => array('node', 'submission'),
+        'groups' => array('node', 'submission'),
       )
     ),
     '#weight' => 3,
@@ -623,10 +624,10 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
       }
       $form['map']['map_fields'][$fname]['picklist']
         = array(
-          '#type' => 'select',
-          '#title' => t('Or select a predefined value'),
-          '#options' => $options,
-        );
+        '#type' => 'select',
+        '#title' => t('Or select a predefined value'),
+        '#options' => $options,
+      );
     }
 
     // Did we add a picklist?
@@ -683,7 +684,7 @@ function salesforce_webforms_manage_map($form, $form_state, $node, $action, $obj
     '#weight' => 25,
   );
 
-  $form['#attached']['js'][] = drupal_get_path('module', 'salesforce_webforms') . '/js/salesforce-admin.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'salesforce_webforms') . '/js/salesforce-admin.js';
 
   return $form;
 }
@@ -703,9 +704,9 @@ function salesforce_webforms_manage_map_validate($form, &$form_state) {
   if (!preg_match('/^[a-z0-9_]+$/i', $name)) {
     form_set_error('name',
       t('The map name %mapname is invalid. Please include only alphanumeric characters and underscores.',
-      array(
-        '%mapname' => $name,
-      ))
+        array(
+          '%mapname' => $name,
+        ))
     );
 
     // No need to process further if the format is invalid.
@@ -718,9 +719,9 @@ function salesforce_webforms_manage_map_validate($form, &$form_state) {
     if ($map['mapname'] == $name && $map['mapid'] != $mapid) {
       form_set_error('name',
         t('The map name %mapname is already in use. Please use a unique name.',
-        array(
-          '%mapname' => $name,
-        ))
+          array(
+            '%mapname' => $name,
+          ))
       );
 
       // No need to continue processing.
@@ -772,6 +773,7 @@ function salesforce_webforms_filter_options($filters, $datatype) {
  * @ingroup forms
  */
 function salesforce_webforms_config($form, $form_state) {
+  $config = config('salesforce_webforms.settings');
   $form = array(
     'salesforce_webforms_cron_min' => array(
       '#type' => 'textfield',
@@ -780,7 +782,7 @@ function salesforce_webforms_config($form, $form_state) {
       '#element_validate' => array('element_validate_integer'),
       '#required' => TRUE,
       '#size' => 5,
-      '#default_value' => variable_get('salesforce_webforms_cron_min', 60),
+      '#default_value' => $config->get('salesforce_webforms_cron_min'),
       '#field_suffix' => t('Minutes'),
     ),
     'salesforce_webforms_all_picklists' => array(
@@ -790,14 +792,14 @@ function salesforce_webforms_config($form, $form_state) {
         SALESFORCE_WEBFORMS_INCLUDE_ALL => t('Allow all picklists'),
         SALESFORCE_WEBFORMS_INCLUDE_FILTERED => t('Limit the available picklists'),
       ),
-      '#default_value' => variable_get('salesforce_webforms_all_picklists', 1),
+      '#default_value' => $config->get('salesforce_webforms_all_picklists'),
     ),
     'salesforce_webforms_picklists' => array(
       '#type' => 'select',
       '#title' => t('Available picklists'),
       '#description' => t('Select all picklists which should be available to form administrators'),
       '#multiple' => TRUE,
-      '#default_value' => variable_get('salesforce_webforms_picklists', array()),
+      '#default_value' => $config->get('salesforce_webforms_picklists'),
       '#states' => array(
         'visible' => array(
           ':input[name="salesforce_webforms_all_picklists"]' => array('value' => '2'),
@@ -815,7 +817,7 @@ function salesforce_webforms_config($form, $form_state) {
         SALESFORCE_WEBFORMS_INCLUDE_ALL => t('Allow all objects'),
         SALESFORCE_WEBFORMS_INCLUDE_FILTERED => t('Limit the available objects'),
       ),
-      '#default_value' => variable_get('salesforce_webforms_all_objects', 1),
+      '#default_value' => $config->get('salesforce_webforms_all_objects'),
     ),
     'salesforce_webforms_objects' => array(
       '#type' => 'select',
@@ -823,7 +825,7 @@ function salesforce_webforms_config($form, $form_state) {
       '#description' => t('Select all objects which should be available to form administrators'),
       '#multiple' => TRUE,
       '#options' => salesforce_webforms_get_objects_selection(),
-      '#default_value' => variable_get('salesforce_webforms_objects', array()),
+      '#default_value' => $config->get('salesforce_webforms_objects'),
       '#states' => array(
         'visible' => array(
           ':input[name="salesforce_webforms_all_objects"]' => array('value' => '2'),
@@ -840,8 +842,7 @@ function salesforce_webforms_config($form, $form_state) {
       '#element_validate' => array('element_validate_integer'),
       '#required' => TRUE,
       '#size' => 4,
-      '#default_value' => variable_get('salesforce_webforms_limit_picklists',
-        SALESFORCE_WEBFORMS_MAX_LIST_SIZE),
+      '#default_value' => $config->get('salesforce_webforms_limit_picklists'),
       '#field_suffix' => t('Records'),
     ),
     'salesforce_webforms_hide_large_lists' => array(
@@ -852,8 +853,7 @@ function salesforce_webforms_config($form, $form_state) {
         SALESFORCE_WEBFORMS_HIDE_LARGE_LIST => t('Hide partial lists'),
         SALESFORCE_WEBFORMS_SHOW_LARGE_LIST => t('Show partial lists'),
       ),
-      '#default_value' => variable_get('salesforce_webforms_hide_large_lists',
-         SALESFORCE_WEBFORMS_HIDE_LARGE_LIST),
+      '#default_value' => $config->get('salesforce_webforms_hide_large_lists'),
     ),
     'salesforce_webforms_supress_admin_errors' => array(
       '#title' => t('Suppress Errors in webform admin pages?'),
@@ -863,14 +863,36 @@ function salesforce_webforms_config($form, $form_state) {
         '1' => t('Yes'),
       ),
       '#default_value' =>
-        variable_get('salesforce_webforms_supress_admin_errors', FALSE)
-          ? array('1') : array(),
+        $config->get('salesforce_webforms_supress_admin_errors'),
     ),
   );
-
+  $form['#submit'][] = 'salesforce_webforms_form_settings_form_submit';
   return system_settings_form($form);
 }
 
+function salesforce_webforms_form_settings_form_submit($form, &$form_state) {
+
+  $salesforce_webforms_supress_admin_errors = $form_state['values']['salesforce_webforms_supress_admin_errors'];
+  $salesforce_webforms_cron_min = $form_state['values']['salesforce_webforms_cron_min'];
+  $salesforce_webforms_all_picklists = $form_state['values']['salesforce_webforms_all_picklists'];
+  $salesforce_webforms_picklists = $form_state['values']['salesforce_webforms_picklists'];
+
+  $salesforce_webforms_all_objects = $form_state['values']['salesforce_webforms_all_objects'];
+  $salesforce_webforms_objects = $form_state['values']['salesforce_webforms_objects'];
+  $salesforce_webforms_limit_picklists = $form_state['values']['salesforce_webforms_limit_picklists'];
+  $salesforce_webforms_hide_large_lists = $form_state['values']['salesforce_webforms_hide_large_lists'];
+
+
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_supress_admin_errors', $salesforce_webforms_supress_admin_errors);
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_cron_min', $salesforce_webforms_cron_min);
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_all_picklists', $salesforce_webforms_all_picklists);
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_picklists', $salesforce_webforms_picklists);
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_all_objects', $salesforce_webforms_all_objects);
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_objects', $salesforce_webforms_objects);
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_limit_picklists', $salesforce_webforms_limit_picklists);
+  config_set('salesforce_webforms.settings', 'salesforce_webforms_hide_large_lists', $salesforce_webforms_hide_large_lists);
+
+}
 /**
  * Helper function to convert a Saleforce picklist into an options array.
  *

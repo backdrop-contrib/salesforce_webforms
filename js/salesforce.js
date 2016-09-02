@@ -58,28 +58,28 @@
    *   Adds handler to the forms to update all dependent picklists whenever
    *   a controlling picklist changes values.
    */
-  Drupal.behaviors.salesforce_webforms = Drupal.behaviors.salesforce_webforms || {};
+  Backdrop.behaviors.salesforce_webforms = Backdrop.behaviors.salesforce_webforms || {};
 
-  Drupal.behaviors.salesforce_webforms.attach = function(context, settings) {
+  Backdrop.behaviors.salesforce_webforms.attach = function(context, settings) {
     // Dependent picklist logic.
-    if (Drupal.settings.salesforce_webforms.salesforceMap) {
-      Drupal.salesforce_webforms.salesforce(context, Drupal.settings.salesforce_webforms);
+    if (Backdrop.settings.salesforce_webforms.salesforceMap) {
+      Backdrop.salesforce_webforms.salesforce(context, Backdrop.settings.salesforce_webforms);
     }
   };
 
-  Drupal.salesforce_webforms = Drupal.salesforce_webforms || {};
+  Backdrop.salesforce_webforms = Backdrop.salesforce_webforms || {};
 
   /**
    * Attaches our handler to each form on the page.
    */
-  Drupal.salesforce_webforms.salesforce = function(context, settings) {
+  Backdrop.salesforce_webforms.salesforce = function(context, settings) {
     // Add the bindings to each webform on the page.
     $.each(settings.salesforceMap, function(formId, settings) {
       var $form = $('#' + formId + ':not(.webform-salesforce-processed)');
       if ($form.length) {
         $form.addClass('webform-salesforce-processed');
 
-        $form.bind('change', { 'settings': settings }, Drupal.salesforce_webforms.salesforceCheck);
+        $form.bind('change', { 'settings': settings }, Backdrop.salesforce_webforms.salesforceCheck);
 
         // See if we have any dependent fields.
         for(var elementId in settings) {
@@ -117,14 +117,14 @@
    *
    * This event is bound to the entire form, not individual fields.
    */
-  Drupal.salesforce_webforms.salesforceCheck = function(e) {
+  Backdrop.salesforce_webforms.salesforceCheck = function(e) {
     var $div = $(e.target).parents('.sf-picklist-wrapper:first');
     if ($div.length > 0) {
       var formId = $div.attr('id');
       var settings = e.data.settings;
 
       for (var i = 0; i < settings[formId].children.length; i++) {
-        Drupal.salesforce_webforms.show_hide(settings[formId].children[i], settings);
+        Backdrop.salesforce_webforms.show_hide(settings[formId].children[i], settings);
       }
     }
   };
@@ -139,14 +139,14 @@
    * @param {object} settings
    *   The settings for this page.
    */
-  Drupal.salesforce_webforms.show_hide = function(idx, settings){
+  Backdrop.salesforce_webforms.show_hide = function(idx, settings){
     // Get current value.
     var $component = $('#' + idx);
     var $selectElement = $component.find("select");
 
     var curval = $selectElement.val();
 
-    var options = Drupal.salesforce_webforms.salesforceGetPickList(idx, settings);
+    var options = Backdrop.salesforce_webforms.salesforceGetPickList(idx, settings);
     var showComponent;
 
     if(Object.keys(options).length == 0) {
@@ -194,7 +194,7 @@
     // And process any children of the newly updated field.
     var children = settings[idx].children;
     for(var i = 0; i < children.length; i++) {
-      Drupal.salesforce_webforms.show_hide(children[i], settings);
+      Backdrop.salesforce_webforms.show_hide(children[i], settings);
     }
   }
 
@@ -209,7 +209,7 @@
    * @return
    *   The options array of currently valid choices.
    */
-  Drupal.salesforce_webforms.salesforceGetPickList = function(element, map) {
+  Backdrop.salesforce_webforms.salesforceGetPickList = function(element, map) {
     var options = {};
     var controlFieldName = map[element].control;
 
@@ -227,7 +227,7 @@
       return map[element].options;
     }
 
-    var controlIndex = Drupal.salesforce_webforms.salesforceGetSelectedIndex(controlFieldId, map);
+    var controlIndex = Backdrop.salesforce_webforms.salesforceGetSelectedIndex(controlFieldId, map);
 
     // And determine which of our options apply to that position.
     var optionmap = [];
@@ -261,7 +261,7 @@
    * @return
    *   The current value.
    */
-  Drupal.salesforce_webforms.salesforceGetSelectedIndex = function(el, map) {
+  Backdrop.salesforce_webforms.salesforceGetSelectedIndex = function(el, map) {
     // Get the controlling container.
     var $elem = $('#' + el);
 

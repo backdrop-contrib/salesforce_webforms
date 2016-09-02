@@ -1,4 +1,4 @@
-Version 7.x-1.x-dev
+Version 7.x-1.3
 -------------------
 Issue #2790725 by dbcollies: Filtered out unused fields on record update.
 Issue #2773089 by nathandentzau: Removed user warning about content module.
