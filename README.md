@@ -36,8 +36,8 @@ Current Maintainers
 Credits
 -------
 
-- Ported to Backdrop CMS by [Alejandro Madrigal](https://github.com/alemadlei).
 - Originally written for Drupal by [Dwayne Bailey](https://www.drupal.org/u/dbcollies).
+- Ported to Backdrop CMS by [Alejandro Madrigal](https://github.com/alemadlei).
 
 License
 -------
