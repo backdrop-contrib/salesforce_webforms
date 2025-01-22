@@ -7,6 +7,5 @@
     "salesforce_webforms_all_objects": 1,
     "salesforce_webforms_objects": [],
     "salesforce_webforms_limit_picklists": 20,
-    "salesforce_webforms_hide_large_lists": 1,
-    "salesforce_webforms_cron_last": 0
+    "salesforce_webforms_hide_large_lists": 1
 }

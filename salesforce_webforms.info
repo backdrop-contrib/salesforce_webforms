@@ -4,7 +4,6 @@ type = module
 description = Integrate Salesforce with Webforms to allow reading from and writing to Salesforce objects via webforms
 package = Salesforce
 configure = admin/config/salesforce/webforms
-dependencies[] = salesforce (>= 1.0)
+dependencies[] = salesforce
 dependencies[] = webform
 dependencies[] = behavior_weights
-

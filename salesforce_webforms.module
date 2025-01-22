@@ -1095,7 +1095,7 @@ function salesforce_webforms_cron() {
   $config = config('salesforce_webforms.settings');
 
   // See if enough time has passed since the last run.
-  $last = $config->get('salesforce_webforms_cron_last');
+  $last = state_get('salesforce_webforms_cron_last');
   $min = $config->get('salesforce_webforms_cron_min') * 60;
   $now = time();
 
@@ -1105,7 +1105,7 @@ function salesforce_webforms_cron() {
   }
 
   // Store the current time for the next interval check.
-  config_set('salesforce_webforms.settings', 'salesforce_webforms_cron_last', $now);
+  state_set('salesforce_webforms_cron_last', $now);
 
   // The list of possible picklists is big, so we
   // refresh the cache on a regular basis.

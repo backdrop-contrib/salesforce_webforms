@@ -227,97 +227,11 @@ function salesforce_webforms_update_1000() {
 }
 
 /**
- * Implements hook_install().
+ * Update timer from config to state
  */
-function salesforce_webforms_install() {
-  // Dynamically generated variable data was detected.
-}
-
-/**
- * Add the key storage table.
- */
-function salesforce_webforms_update_7000() {
-  // Add the key storage table.
-  $schemas = salesforce_webforms_schema();
-  $schema = $schemas['salesforce_webforms_key'];
-
-  db_create_table('salesforce_webforms_key', $schema);
-  return "Add the key storage table";
-}
-
-/**
- * Change the displayorder column to be signed to use the 'weight' type.
- */
-function salesforce_webforms_update_7001() {
-  $schemas = salesforce_webforms_schema();
-  $field = $schemas['salesforce_webforms_map']['displayorder'];
-
-  db_change_field(
-    'salesforce_webforms_map',
-    'displayorder',
-    'displayorder',
-    $field
-  );
-}
-
-/**
- * Add the new cache table.
- */
-function salesforce_webforms_update_7002() {
-  $schema = backdrop_get_schema_unprocessed('system', 'cache');
-
-  if (!db_table_exists('cache_salesforce_webforms')) {
-    db_create_table('cache_salesforce_webforms', $schema);
-  }
-}
-
-/**
- * Add a new table to store settings for mappings.
- */
-function salesforce_webforms_update_7003() {
-  $schema = array(
-    'description' => 'Stores Salesforce mapping settings',
-    'fields' => array(
-      'settingid' => array(
-        'type' => 'serial',
-        'description' => 'Unique identifier for a setting',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'nid' => array(
-        'type' => 'int',
-        'description' => 'The node ID',
-        'not null' => TRUE,
-      ),
-      'suppress_errors' => array(
-        'type' => 'int',
-        'size' => 'tiny',
-        'description' => 'Should error messages be suppressed?',
-        'default' => 0,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('settingid'),
-    'indexes' => array(
-      'nid' => array('nid'),
-    ),
-  );
-  if (!db_table_exists('salesforce_webforms_settings')) {
-    db_create_table('salesforce_webforms_settings', $schema);
-  }
-}
-
-/**
- * Add the 'filter' column to the field table.
- */
-function salesforce_webforms_update_7004() {
-  db_add_field(
-    'salesforce_webforms_field',
-    'filter',
-    array(
-      'type' => 'text',
-      'description' => 'A filter to be applied to the data',
-      'not null' => FALSE,
-    )
-  );
+function salesforce_webforms_update_1001() {
+  $last_value = config_get('salesforce_webforms.settings', 'salesforce_webforms_cron_last');
+  state_set('salesforce_webforms_cron_last', $last_value);
+  config_clear('salesforce_webforms.settings', 'salesforce_webforms_cron_last');
+  //when config_del() exists (it is labeled as "coming soon", we should delete this config)
 }
